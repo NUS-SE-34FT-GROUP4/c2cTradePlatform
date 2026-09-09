@@ -1,0 +1,90 @@
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: c2csectrade-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: trade
+      MYSQL_USER: tradeuser
+      MYSQL_PASSWORD: tradepass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - c2csectrade-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: c2csectrade-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - c2csectrade-network
+
+  # Backend Application (可以扩展多个实例)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: c2csectrade-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/trade?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&useServerPrepStmts=true&cachePrepStmts=true&rewriteBatchedStatements=true
+      SPRING_DATASOURCE_USERNAME: tradeuser
+      SPRING_DATASOURCE_PASSWORD: tradepass
+      SPRING_DATA_REDIS_HOST: redis
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - c2csectrade-network
+    restart: unless-stopped
+    # 可以通过scale扩展多个实例
+    # deploy:
+    #   replicas: 3
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: c2csectrade-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - c2csectrade-network
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  c2csectrade-network:
+    driver: bridge
+
