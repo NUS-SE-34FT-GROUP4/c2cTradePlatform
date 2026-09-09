@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sg.edu.nus.iss.c2csectrade.mapper.ProductMapper">
+    <resultMap id="ProductResultMap" type="sg.edu.nus.iss.c2csectrade.entity.Product">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <result property="conditionLevel" column="condition_level"/>
+        <result property="location" column="location"/>
+        <result property="category" column="category"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <select id="selectById" resultMap="ProductResultMap">
+        SELECT * FROM pms_product WHERE id = #{id}
+    </select>
+    <select id="selectAll" resultMap="ProductResultMap">
+        SELECT * FROM pms_product WHERE status = 1 AND stock > 0 ORDER BY created_at DESC
+    </select>
+    <select id="selectByUserId" resultMap="ProductResultMap">
+        SELECT * FROM pms_product WHERE user_id = #{userId} AND status = 1 ORDER BY created_at DESC
+    </select>
+    <select id="selectWithFilters" resultMap="ProductResultMap">
+        SELECT *,
+        <if test="keyword != null and keyword != ''">
+            <!-- 计算相关度分数：名称完全匹配 > 名称包含 > 描述包含 > 分类匹配 -->
+            (
+                CASE
+                    WHEN LOWER(name) = LOWER(#{keyword}) THEN 100
+                    WHEN LOWER(name) LIKE CONCAT(LOWER(#{keyword}), '%') THEN 80
+                    WHEN LOWER(name) LIKE CONCAT('%', LOWER(#{keyword}), '%') THEN 60
+                    ELSE 0
+                END +
+                CASE
+                    WHEN LOWER(description) LIKE CONCAT('%', LOWER(#{keyword}), '%') THEN 30
+                    ELSE 0
+                END +
+                CASE
+                    WHEN LOWER(category) LIKE CONCAT('%', LOWER(#{keyword}), '%') THEN 20
+                    ELSE 0
+                END
+            ) as relevance_score
+        </if>
+        <if test="keyword == null or keyword == ''">
+            0 as relevance_score
+        </if>
+        FROM pms_product
+        WHERE status = 1 AND stock > 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                <!-- 名称模糊搜索 -->
+                LOWER(name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                OR
+                <!-- 描述模糊搜索 -->
+                LOWER(description) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                OR
+                <!-- 分类模糊搜索 -->
+                LOWER(category) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+            )
+        </if>
+        <if test="minPrice != null">
+            AND price &gt;= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND price &lt;= #{maxPrice}
+        </if>
+        <if test="conditionLevel != null">
+            AND condition_level = #{conditionLevel}
+        </if>
+        <if test="location != null and location != ''">
+            AND location LIKE CONCAT('%', #{location}, '%')
+        </if>
+        <if test="category != null and category != ''">
+            AND FIND_IN_SET(category, #{category}) > 0
+        </if>
+        ORDER BY
+        <if test="keyword != null and keyword != ''">
+            relevance_score DESC,
+        </if>
+        created_at DESC
+    </select>
+    <insert id="insert" parameterType="sg.edu.nus.iss.c2csectrade.entity.Product" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pms_product (user_id, name, description, price, stock, condition_level, location, category, status, created_at, updated_at)
+        VALUES (#{userId}, #{name}, #{description}, #{price}, #{stock}, #{conditionLevel}, #{location}, #{category}, #{status}, #{createdAt}, #{updatedAt})
+    </insert>
+    <update id="update" parameterType="sg.edu.nus.iss.c2csectrade.entity.Product">
+        UPDATE pms_product
+        SET user_id=#{userId}, name=#{name}, description=#{description}, price=#{price}, stock=#{stock}, condition_level=#{conditionLevel}, location=#{location}, category=#{category}, status=#{status}, updated_at=#{updatedAt}
+        WHERE id=#{id}
+    </update>
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM pms_product WHERE id=#{id}
+    </delete>
+
+    <!-- For recommendation system -->
+    <select id="selectByIds" resultMap="ProductResultMap">
+        SELECT * FROM pms_product
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND status = 1
+        AND stock > 0
+    </select>
+
+    <select id="selectByCategory" resultMap="ProductResultMap">
+        SELECT * FROM pms_product
+        WHERE category = #{category}
+        AND status = 1
+        AND stock > 0
+        ORDER BY created_at DESC
+        LIMIT 20
+    </select>
+
+    <select id="selectRecentProducts" resultMap="ProductResultMap">
+        SELECT * FROM pms_product
+        WHERE status = 1
+        AND stock > 0
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectAllActive" resultMap="ProductResultMap">
+        SELECT * FROM pms_product
+        WHERE status = 1
+        AND stock > 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 使用行锁查询商品（防止超卖） -->
+    <select id="selectByIdForUpdate" resultMap="ProductResultMap">
+        SELECT * FROM pms_product WHERE id = #{id} FOR UPDATE
+    </select>
+
+    <!-- 减少库存（使用乐观锁，只有库存足够时才更新） -->
+    <update id="decreaseStock">
+        UPDATE pms_product
+        SET stock = stock - #{quantity},
+            updated_at = NOW()
+        WHERE id = #{id}
+        AND stock >= #{quantity}
+    </update>
+</mapper>
