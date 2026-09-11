@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class JwtTokenProviderTest {
 
-    private static final String TEST_SECRET = "c3ByaW50MS11bml0LXRlc3Qtc2lnbmluZy1rZXktZG8tbm90LXVzZS1pbi1wcm9kdWN0aW9uLTAxMjM0NTY3ODk=";
+    private static final String TEST_SECRET = "c3ByaW50MS11bml0LXRlc3Qtc2lnbmluZy1rZXktZG8tbm90LXVzZS1pbi1wcm9kdWN0aW9uLTAxMjM0NTY3ODk="; // gitleaks:allow — test-only signing key, never used outside unit tests
 
     private JwtTokenProvider jwtTokenProvider;
 
