@@ -1,5 +1,7 @@
 # C2C SecTrade
 
+[![CI](https://github.com/NUS-SE-34FT-GROUP4/c2cTradePlatform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NUS-SE-34FT-GROUP4/c2cTradePlatform/actions/workflows/ci.yml)
+
 A campus-oriented consumer-to-consumer marketplace for second-hand goods, built for the
 **SWE5006 Practice Module — Designing Modern Software Systems** (Team 4).
 
