@@ -67,13 +67,13 @@ jobs:
     # Advisory until Sprint 2: the JWT signing secret is still hard-coded in
     # application.properties and is scheduled to move to a GitHub Actions secret.
     # This job is switched to blocking once that migration is complete.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Run Gitleaks
+        continue-on-error: true
         run: |
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
             detect --source /repo --no-git --redact --verbose
@@ -81,12 +81,12 @@ jobs:
   dependency-scan:
     name: Dependency vulnerability scan (advisory)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
       - name: Run Trivy against the repository
-        uses: aquasecurity/trivy-action@0.28.0
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: fs
           scan-ref: .
@@ -109,7 +109,7 @@ jobs:
 
       - name: Scan backend image for vulnerabilities
         continue-on-error: true
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: c2c-sectrade-backend:${{ github.sha }}
           severity: HIGH,CRITICAL
