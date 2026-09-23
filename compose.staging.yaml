@@ -1,0 +1,95 @@
+# Staging. Same shape as compose.yaml, but it pulls published images instead of
+# building, and every credential comes from the environment rather than the file.
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: c2csectrade-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
+      MYSQL_DATABASE: trade
+      MYSQL_USER: tradeuser
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ c2csectrade-network ]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: c2csectrade-redis
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [ c2csectrade-network ]
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: c2csectrade-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio-data:/data
+    networks: [ c2csectrade-network ]
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/${IMAGE_OWNER:?set IMAGE_OWNER}/c2c-sectrade-backend:${IMAGE_TAG:-latest}
+    container_name: c2csectrade-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/trade?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci
+      SPRING_DATASOURCE_USERNAME: tradeuser
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      # The browser cannot resolve the Docker hostname, so this must be the
+      # server's public address, not localhost.
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:?set MINIO_PUBLIC_ENDPOINT}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks: [ c2csectrade-network ]
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/${IMAGE_OWNER:?set IMAGE_OWNER}/c2c-sectrade-frontend:${IMAGE_TAG:-latest}
+    container_name: c2csectrade-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks: [ c2csectrade-network ]
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  redis-data:
+  minio-data:
+
+networks:
+  c2csectrade-network:
+    driver: bridge
