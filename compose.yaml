@@ -73,7 +73,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: tradepass
       SPRING_DATA_REDIS_HOST: redis
       MINIO_ENDPOINT: http://minio:9000
-      MINIO_PUBLIC_ENDPOINT: http://localhost:9000
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
     ports:
       - "8080:8080"
     depends_on:
