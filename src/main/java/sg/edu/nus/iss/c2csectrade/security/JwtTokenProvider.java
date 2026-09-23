@@ -30,14 +30,22 @@ public class JwtTokenProvider {
 
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        return generateTokenForUsername(userPrincipal.getUsername());
+    }
+
+    /**
+     * Reissue for an already-authenticated caller. Used by the refresh endpoint,
+     * where the old token proved identity and no password is presented again.
+     */
+    public String generateTokenForUsername(String username) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+        Date expiry = new Date(now.getTime() + jwtExpirationMs);
         return Jwts.builder()
-               .setSubject(userPrincipal.getUsername())
-               .setIssuedAt(now)
-               .setExpiration(expiryDate)
-               .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-               .compact();
+                .setSubject(username)
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
     }
 
     public String getUsernameFromToken(String token) {

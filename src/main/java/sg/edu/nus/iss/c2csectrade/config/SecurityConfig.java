@@ -52,6 +52,8 @@ public class SecurityConfig {
                .requestMatchers("/api/products").permitAll() // 允许所有用户查看商品列表
                .requestMatchers("/api/products/*").permitAll() // 允许所有用户查看商品详情
                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+               // 管理后台只有 ROLE_ADMIN 能进；其余业务接口登录即可
+               .requestMatchers("/api/admin/**").hasRole("ADMIN")
                .anyRequest().authenticated()
             )
            .exceptionHandling(ex -> ex
