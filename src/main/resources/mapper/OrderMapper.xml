@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sg.edu.nus.iss.c2csectrade.mapper.OrderMapper">
+
+    <resultMap id="OrderResultMap" type="sg.edu.nus.iss.c2csectrade.entity.Order">
+        <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="buyerId" column="buyer_id"/>
+        <result property="sellerId" column="seller_id"/>
+        <result property="status" column="status"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="expireAt" column="expire_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="sellerName" column="seller_name"/>
+        <collection property="items" ofType="sg.edu.nus.iss.c2csectrade.entity.OrderItem"
+                    select="sg.edu.nus.iss.c2csectrade.mapper.OrderItemMapper.selectByOrderId"
+                    column="id"/>
+    </resultMap>
+
+    <sql id="withSeller">
+        o.*, u.display_name AS seller_name
+        FROM oms_order o LEFT JOIN users u ON u.id = o.seller_id
+    </sql>
+
+    <select id="selectById" resultMap="OrderResultMap">
+        SELECT <include refid="withSeller"/> WHERE o.id = #{id}
+    </select>
+
+    <select id="selectByBuyerId" resultMap="OrderResultMap">
+        SELECT <include refid="withSeller"/> WHERE o.buyer_id = #{buyerId} ORDER BY o.created_at DESC
+    </select>
+
+    <select id="selectBySellerId" resultMap="OrderResultMap">
+        SELECT <include refid="withSeller"/> WHERE o.seller_id = #{sellerId} ORDER BY o.created_at DESC
+    </select>
+
+    <select id="selectExpiredPending" resultMap="OrderResultMap">
+        SELECT <include refid="withSeller"/>
+        WHERE o.status = 'PENDING_PAYMENT' AND o.expire_at IS NOT NULL AND o.expire_at &lt; #{now}
+    </select>
+
+    <insert id="insert" parameterType="sg.edu.nus.iss.c2csectrade.entity.Order"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO oms_order (order_no, buyer_id, seller_id, status, total_amount, expire_at)
+        VALUES (#{orderNo}, #{buyerId}, #{sellerId}, #{status}, #{totalAmount}, #{expireAt})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE oms_order SET status = #{status} WHERE id = #{id}
+    </update>
+</mapper>

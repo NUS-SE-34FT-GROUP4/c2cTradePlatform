@@ -186,3 +186,68 @@ INSERT INTO `pms_product_media` (`product_id`, `url`, `media_type`, `sort_order`
 -- End of Script
 -- =================================================================
 SELECT 'Database structure and essential data seeded successfully.' AS status;
+
+-- =================================================================
+-- Sprint 2: cart and order domain (oms_*)
+-- =================================================================
+USE trade;
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `oms_order_item`;
+DROP TABLE IF EXISTS `oms_order`;
+DROP TABLE IF EXISTS `oms_cart_item`;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Reserved stock: available stock = stock - reserved_stock.
+-- Reserved on order creation, converted on payment, released on cancel or expiry.
+ALTER TABLE `pms_product`
+    ADD COLUMN `reserved_stock` INT NOT NULL DEFAULT 0 COMMENT 'Stock held by unpaid orders' AFTER `stock`;
+
+CREATE TABLE `oms_cart_item` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Cart item ID',
+    `user_id` BIGINT NOT NULL COMMENT 'Owner of the cart',
+    `product_id` BIGINT NOT NULL COMMENT 'Product ID',
+    `quantity` INT NOT NULL DEFAULT 1 COMMENT 'Quantity',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `uk_user_product` (`user_id`, `product_id`),
+    INDEX `idx_cart_user` (`user_id`),
+    CONSTRAINT `fk_cart_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_cart_product` FOREIGN KEY (`product_id`) REFERENCES `pms_product`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shopping cart. Deliberately stores no price - price is snapshotted at order creation.';
+
+CREATE TABLE `oms_order` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Order ID',
+    `order_no` VARCHAR(32) NOT NULL COMMENT 'Human readable order number',
+    `buyer_id` BIGINT NOT NULL COMMENT 'Buyer user ID',
+    `seller_id` BIGINT NOT NULL COMMENT 'Seller user ID - one order never spans two sellers',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING_PAYMENT' COMMENT 'PENDING_PAYMENT, PAID, SHIPPED, COMPLETED, CANCELLED, EXPIRED',
+    `total_amount` DECIMAL(12,2) NOT NULL COMMENT 'Sum of order item subtotals',
+    `expire_at` DATETIME NULL COMMENT 'Unpaid orders expire 15 minutes after creation',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `uk_order_no` (`order_no`),
+    INDEX `idx_order_buyer` (`buyer_id`),
+    INDEX `idx_order_seller` (`seller_id`),
+    INDEX `idx_order_status_expire` (`status`, `expire_at`),
+    CONSTRAINT `fk_order_buyer` FOREIGN KEY (`buyer_id`) REFERENCES `users`(`id`),
+    CONSTRAINT `fk_order_seller` FOREIGN KEY (`seller_id`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Order header. A checkout spanning N sellers produces N rows.';
+
+CREATE TABLE `oms_order_item` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Order item ID',
+    `order_id` BIGINT NOT NULL COMMENT 'Order ID',
+    `product_id` BIGINT NOT NULL COMMENT 'Product ID',
+    `product_name` VARCHAR(255) NOT NULL COMMENT 'Product name at the moment of ordering',
+    `quantity` INT NOT NULL COMMENT 'Quantity',
+    `unit_price_snapshot` DECIMAL(10,2) NOT NULL COMMENT 'Unit price frozen at order creation - later listing price changes do not affect it',
+    PRIMARY KEY (`id`),
+    INDEX `idx_item_order` (`order_id`),
+    INDEX `idx_item_product` (`product_id`),
+    CONSTRAINT `fk_item_order` FOREIGN KEY (`order_id`) REFERENCES `oms_order`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_item_product` FOREIGN KEY (`product_id`) REFERENCES `pms_product`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Order line with the price snapshot.';
+
+SELECT 'Sprint 2 cart and order tables created.' AS status;
