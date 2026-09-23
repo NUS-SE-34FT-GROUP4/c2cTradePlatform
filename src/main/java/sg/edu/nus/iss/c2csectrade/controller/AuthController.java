@@ -101,4 +101,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body("用户名或邮箱不匹配，请检查后重试");
         }
     }
+
+    /**
+     * Hand back a fresh token for a caller whose current one is still valid.
+     * The JWT filter has already authenticated the request, so identity is
+     * proven by the old token and no credentials are presented again.
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", "Not authenticated"));
+        }
+        String token = jwtTokenProvider.generateTokenForUsername(authentication.getName());
+        return ResponseEntity.ok(java.util.Map.of("token", token, "type", "Bearer"));
+    }
 }
