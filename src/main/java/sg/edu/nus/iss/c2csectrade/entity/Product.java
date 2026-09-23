@@ -18,8 +18,14 @@ public class Product implements Serializable {
     private String location; // 新增：位置
     private String category; // 新增：商品分类
     private int stock;
+    private int reservedStock;
     private int status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<ProductMedia> media;
+
+    /** What a buyer may actually order: total stock less what unpaid orders are holding. */
+    public int getAvailableStock() {
+        return stock - reservedStock;
+    }
 }

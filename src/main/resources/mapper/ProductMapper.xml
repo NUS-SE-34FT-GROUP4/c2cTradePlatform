@@ -8,6 +8,7 @@
         <result property="description" column="description"/>
         <result property="price" column="price"/>
         <result property="stock" column="stock"/>
+        <result property="reservedStock" column="reserved_stock"/>
         <result property="conditionLevel" column="condition_level"/>
         <result property="location" column="location"/>
         <result property="category" column="category"/>
@@ -91,6 +92,16 @@
         UPDATE pms_product
         SET user_id=#{userId}, name=#{name}, description=#{description}, price=#{price}, stock=#{stock}, condition_level=#{conditionLevel}, location=#{location}, category=#{category}, status=#{status}, updated_at=#{updatedAt}
         WHERE id=#{id}
+    </update>
+    <update id="reserveStock">
+        UPDATE pms_product
+        SET reserved_stock = reserved_stock + #{quantity}, updated_at = NOW()
+        WHERE id = #{id} AND stock - reserved_stock >= #{quantity}
+    </update>
+    <update id="releaseStock">
+        UPDATE pms_product
+        SET reserved_stock = GREATEST(reserved_stock - #{quantity}, 0), updated_at = NOW()
+        WHERE id = #{id}
     </update>
     <delete id="deleteById" parameterType="long">
         DELETE FROM pms_product WHERE id=#{id}

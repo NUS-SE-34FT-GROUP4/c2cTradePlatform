@@ -31,5 +31,14 @@ public interface ProductMapper {
 
     // 减少库存（返回影响的行数，如果为0说明库存不足）
     int decreaseStock(@Param("id") Long id, @Param("quantity") Integer quantity);
+
+    /**
+     * 预留库存。条件更新，stock - reserved_stock >= quantity 才会生效，
+     * 返回 0 表示可售库存不足，并发下单时靠它兜底。
+     */
+    int reserveStock(@Param("id") Long id, @Param("quantity") Integer quantity);
+
+    /** 释放预留（取消订单或 15 分钟超时）。 */
+    int releaseStock(@Param("id") Long id, @Param("quantity") Integer quantity);
 }
 
