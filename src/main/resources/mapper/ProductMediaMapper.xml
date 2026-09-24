@@ -27,4 +27,7 @@
     <delete id="deleteById" parameterType="long">
         DELETE FROM pms_product_media WHERE id=#{id}
     </delete>
+    <delete id="deleteByProductId">
+        DELETE FROM pms_product_media WHERE product_id = #{productId}
+    </delete>
 </mapper>
