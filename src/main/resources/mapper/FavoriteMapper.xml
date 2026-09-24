@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sg.edu.nus.iss.c2csectrade.mapper.FavoriteMapper">
+
+    <resultMap id="FavoriteResultMap" type="sg.edu.nus.iss.c2csectrade.entity.Favorite">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="createdAt" column="created_at"/>
+        <association property="product" javaType="sg.edu.nus.iss.c2csectrade.entity.Product">
+            <id property="id" column="p_id"/>
+            <result property="userId" column="p_user_id"/>
+            <result property="name" column="p_name"/>
+            <result property="price" column="p_price"/>
+            <result property="stock" column="p_stock"/>
+            <result property="status" column="p_status"/>
+            <result property="category" column="p_category"/>
+            <result property="location" column="p_location"/>
+            <result property="conditionLevel" column="p_condition_level"/>
+        </association>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="FavoriteResultMap">
+        SELECT f.id, f.user_id, f.product_id, f.created_at,
+               p.id AS p_id, p.user_id AS p_user_id, p.name AS p_name, p.price AS p_price,
+               p.stock AS p_stock, p.status AS p_status, p.category AS p_category,
+               p.location AS p_location, p.condition_level AS p_condition_level
+        FROM pms_favorite f JOIN pms_product p ON p.id = f.product_id
+        WHERE f.user_id = #{userId}
+        ORDER BY f.created_at DESC
+    </select>
+
+    <select id="selectByUserAndProduct" resultType="sg.edu.nus.iss.c2csectrade.entity.Favorite">
+        SELECT id, user_id AS userId, product_id AS productId, created_at AS createdAt
+        FROM pms_favorite WHERE user_id = #{userId} AND product_id = #{productId}
+    </select>
+
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM pms_favorite WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="sg.edu.nus.iss.c2csectrade.entity.Favorite"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT IGNORE INTO pms_favorite (user_id, product_id) VALUES (#{userId}, #{productId})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM pms_favorite WHERE user_id = #{userId} AND product_id = #{productId}
+    </delete>
+</mapper>

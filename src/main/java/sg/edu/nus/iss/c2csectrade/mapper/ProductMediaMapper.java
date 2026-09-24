@@ -12,5 +12,7 @@ public interface ProductMediaMapper {
     int insert(ProductMedia media);
     int update(ProductMedia media);
     int deleteById(@Param("id") Long id);
+    /** Media is replaced wholesale on edit so the seller's ordering is authoritative. */
+    int deleteByProductId(@Param("productId") Long productId);
 }
 

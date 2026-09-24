@@ -251,3 +251,18 @@ CREATE TABLE `oms_order_item` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Order line with the price snapshot.';
 
 SELECT 'Sprint 2 cart and order tables created.' AS status;
+
+-- Sprint 2: favourites (WP2)
+USE trade;
+DROP TABLE IF EXISTS `pms_favorite`;
+CREATE TABLE `pms_favorite` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT NOT NULL,
+    `product_id` BIGINT NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `uk_fav_user_product` (`user_id`, `product_id`),
+    INDEX `idx_fav_user` (`user_id`),
+    CONSTRAINT `fk_fav_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_fav_product` FOREIGN KEY (`product_id`) REFERENCES `pms_product`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='User favourites';
