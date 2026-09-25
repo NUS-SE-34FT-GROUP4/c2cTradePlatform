@@ -1,0 +1,547 @@
+From 52b9561774d7bf8ee49835385640e217602a412d Mon Sep 17 00:00:00 2001
+From: ZHOU YUXIN <zhou.yuxin@u.nus.edu>
+Date: Wed, 23 Sep 2026 20:10:07 +0800
+Subject: [PATCH 5/8] Add acceptance tests for publish, cart, checkout and
+ search
+
+Sprint 2, WP5. 22 new tests, 35 in total.
+
+The Sprint 1 retrospective agreed that the acceptance test for a story ships in
+the same sprint as the story, so these cover every Sprint 2 rule that a
+reviewer would otherwise have to take on trust:
+
+- a cart spanning two sellers produces two orders, and the seller's own lines
+  stay together in one of them
+- the order line keeps its price after the seller raises the listing price
+- checkout fails with 409 rather than overselling when the reservation cannot
+  be taken, and the cart is left intact
+- cancellation and expiry each release exactly what was reserved
+- a buyer cannot order their own listing, and cannot touch another user's
+  cart lines
+- publishing strips script markup out of a description
+- media keeps the order the seller arranged
+- editing or delisting someone else's listing is refused, and delisting keeps
+  the row
+- highlighting treats the keyword as literal text, so a search for 'C++' does
+  not blow up the regex
+
+Sprint 1 noted that the suite mocks its collaborators and never starts the
+Spring context, which is how two defects got through. That is still true here;
+the Testcontainers work is scheduled for Sprint 3.
+---
+ .../c2csectrade/service/CartServiceTest.java  | 109 ++++++++++
+ .../c2csectrade/service/OrderServiceTest.java | 198 ++++++++++++++++++
+ .../service/ProductPublishServiceTest.java    | 123 +++++++++++
+ .../service/SearchServiceTest.java            |  49 +++++
+ 4 files changed, 479 insertions(+)
+ create mode 100644 src/test/java/sg/edu/nus/iss/c2csectrade/service/CartServiceTest.java
+ create mode 100644 src/test/java/sg/edu/nus/iss/c2csectrade/service/OrderServiceTest.java
+ create mode 100644 src/test/java/sg/edu/nus/iss/c2csectrade/service/ProductPublishServiceTest.java
+ create mode 100644 src/test/java/sg/edu/nus/iss/c2csectrade/service/SearchServiceTest.java
+
+diff --git a/src/test/java/sg/edu/nus/iss/c2csectrade/service/CartServiceTest.java b/src/test/java/sg/edu/nus/iss/c2csectrade/service/CartServiceTest.java
+new file mode 100644
+index 0000000..5f4831c
+--- /dev/null
++++ b/src/test/java/sg/edu/nus/iss/c2csectrade/service/CartServiceTest.java
+@@ -0,0 +1,109 @@
++package sg.edu.nus.iss.c2csectrade.service;
++
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import sg.edu.nus.iss.c2csectrade.entity.CartItem;
++import sg.edu.nus.iss.c2csectrade.entity.Product;
++import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
++import sg.edu.nus.iss.c2csectrade.mapper.CartItemMapper;
++import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
++
++import java.math.BigDecimal;
++
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++
++@ExtendWith(MockitoExtension.class)
++class CartServiceTest {
++
++    @Mock private CartItemMapper cartItemMapper;
++    @Mock private ProductMapper productMapper;
++    @InjectMocks private CartService cartService;
++
++    private Product listing(int stock, int reserved) {
++        Product product = new Product();
++        product.setId(101L);
++        product.setUserId(20L);
++        product.setName("Textbook");
++        product.setPrice(new BigDecimal("30.00"));
++        product.setStock(stock);
++        product.setReservedStock(reserved);
++        product.setStatus(1);
++        return product;
++    }
++
++    @Test
++    @DisplayName("Adding a product already in the cart raises its quantity instead of duplicating the line")
++    void addMergesIntoExistingLine() {
++        when(productMapper.selectById(101L)).thenReturn(listing(10, 0));
++        CartItem existing = new CartItem();
++        existing.setId(7L);
++        existing.setUserId(1L);
++        existing.setProductId(101L);
++        existing.setQuantity(2);
++        when(cartItemMapper.selectByUserAndProduct(1L, 101L)).thenReturn(existing);
++
++        cartService.add(1L, 101L, 3);
++
++        verify(cartItemMapper).updateQuantity(7L, 5);
++        verify(cartItemMapper, never()).insert(any());
++    }
++
++    @Test
++    @DisplayName("Availability is total stock less what unpaid orders hold")
++    void addRespectsReservedStock() {
++        // 5 in stock but 4 already held by unpaid orders, so only 1 is buyable.
++        when(productMapper.selectById(101L)).thenReturn(listing(5, 4));
++        when(cartItemMapper.selectByUserAndProduct(1L, 101L)).thenReturn(null);
++
++        InsufficientStockException error =
++                assertThrows(InsufficientStockException.class, () -> cartService.add(1L, 101L, 2));
++        assertTrue(error.getMessage().contains("Only 1 left"));
++    }
++
++    @Test
++    @DisplayName("A seller cannot add their own listing to their cart")
++    void rejectsOwnListing() {
++        when(productMapper.selectById(101L)).thenReturn(listing(5, 0));
++        assertThrows(IllegalArgumentException.class, () -> cartService.add(20L, 101L, 1));
++    }
++
++    @Test
++    @DisplayName("A delisted product cannot be added")
++    void rejectsDelistedListing() {
++        Product delisted = listing(5, 0);
++        delisted.setStatus(0);
++        when(productMapper.selectById(101L)).thenReturn(delisted);
++        assertThrows(IllegalArgumentException.class, () -> cartService.add(1L, 101L, 1));
++    }
++
++    @Test
++    @DisplayName("Setting a quantity of zero removes the line rather than storing zero")
++    void zeroQuantityRemovesLine() {
++        CartItem item = new CartItem();
++        item.setId(7L);
++        item.setUserId(1L);
++        item.setProductId(101L);
++        when(cartItemMapper.selectById(7L)).thenReturn(item);
++
++        assertNull(cartService.updateQuantity(1L, 7L, 0));
++        verify(cartItemMapper).deleteById(7L);
++    }
++
++    @Test
++    @DisplayName("A cart line belonging to someone else cannot be touched")
++    void rejectsOtherUsersLine() {
++        CartItem item = new CartItem();
++        item.setId(7L);
++        item.setUserId(999L);
++        when(cartItemMapper.selectById(7L)).thenReturn(item);
++
++        assertThrows(IllegalArgumentException.class, () -> cartService.remove(1L, 7L));
++        verify(cartItemMapper, never()).deleteById(anyLong());
++    }
++}
+diff --git a/src/test/java/sg/edu/nus/iss/c2csectrade/service/OrderServiceTest.java b/src/test/java/sg/edu/nus/iss/c2csectrade/service/OrderServiceTest.java
+new file mode 100644
+index 0000000..ec18970
+--- /dev/null
++++ b/src/test/java/sg/edu/nus/iss/c2csectrade/service/OrderServiceTest.java
+@@ -0,0 +1,198 @@
++package sg.edu.nus.iss.c2csectrade.service;
++
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.ArgumentCaptor;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.springframework.test.util.ReflectionTestUtils;
++import sg.edu.nus.iss.c2csectrade.entity.*;
++import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
++import sg.edu.nus.iss.c2csectrade.mapper.*;
++
++import java.math.BigDecimal;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++
++/**
++ * Sprint 2 acceptance checks for checkout: the per-seller split, the price
++ * snapshot, and what happens when stock runs out mid-checkout.
++ */
++@ExtendWith(MockitoExtension.class)
++class OrderServiceTest {
++
++    @Mock private OrderMapper orderMapper;
++    @Mock private OrderItemMapper orderItemMapper;
++    @Mock private CartItemMapper cartItemMapper;
++    @Mock private ProductMapper productMapper;
++
++    @InjectMocks private OrderService orderService;
++
++    private static final Long BUYER = 10L;
++    private static final Long SELLER_A = 20L;
++    private static final Long SELLER_B = 30L;
++
++    @BeforeEach
++    void setUp() {
++        ReflectionTestUtils.setField(orderService, "paymentWindowMinutes", 15);
++        // Give every inserted order an id, as the database would.
++        lenient().when(orderMapper.insert(any(Order.class))).thenAnswer(invocation -> {
++            Order order = invocation.getArgument(0);
++            order.setId(System.nanoTime());
++            return 1;
++        });
++        lenient().when(productMapper.reserveStock(anyLong(), anyInt())).thenReturn(1);
++    }
++
++    private Product product(Long id, Long sellerId, String name, String price, int stock) {
++        Product product = new Product();
++        product.setId(id);
++        product.setUserId(sellerId);
++        product.setName(name);
++        product.setPrice(new BigDecimal(price));
++        product.setStock(stock);
++        product.setStatus(1);
++        return product;
++    }
++
++    private CartItem cartLine(Long id, Product product, int quantity) {
++        CartItem item = new CartItem();
++        item.setId(id);
++        item.setUserId(BUYER);
++        item.setProductId(product.getId());
++        item.setQuantity(quantity);
++        item.setProduct(product);
++        return item;
++    }
++
++    @Test
++    @DisplayName("A cart spanning two sellers produces one order per seller")
++    void splitsCartBySeller() {
++        List<CartItem> cart = List.of(
++                cartLine(1L, product(101L, SELLER_A, "Textbook", "30.00", 5), 1),
++                cartLine(2L, product(102L, SELLER_A, "Lamp", "20.00", 5), 2),
++                cartLine(3L, product(103L, SELLER_B, "Headphones", "80.00", 5), 1));
++        when(cartItemMapper.selectByIds(anyList())).thenReturn(cart);
++
++        List<Order> orders = orderService.checkoutFromCart(BUYER, List.of(1L, 2L, 3L));
++
++        assertEquals(2, orders.size(), "two sellers means two orders");
++        Order sellerAOrder = orders.stream().filter(o -> SELLER_A.equals(o.getSellerId())).findFirst().orElseThrow();
++        Order sellerBOrder = orders.stream().filter(o -> SELLER_B.equals(o.getSellerId())).findFirst().orElseThrow();
++
++        assertEquals(2, sellerAOrder.getItems().size(), "seller A's two lines stay in one order");
++        assertEquals(new BigDecimal("70.00"), sellerAOrder.getTotalAmount(), "30.00 + 2 x 20.00");
++        assertEquals(1, sellerBOrder.getItems().size());
++        assertEquals(new BigDecimal("80.00"), sellerBOrder.getTotalAmount());
++        assertTrue(orders.stream().allMatch(o -> OrderStatus.PENDING_PAYMENT.name().equals(o.getStatus())));
++    }
++
++    @Test
++    @DisplayName("The order line keeps the price it was created with when the listing price changes later")
++    void snapshotsUnitPrice() {
++        Product listing = product(101L, SELLER_A, "Textbook", "30.00", 5);
++        when(cartItemMapper.selectByIds(anyList())).thenReturn(List.of(cartLine(1L, listing, 1)));
++
++        Order order = orderService.checkoutFromCart(BUYER, List.of(1L)).get(0);
++
++        // The seller raises the price after the order exists.
++        listing.setPrice(new BigDecimal("99.00"));
++
++        assertEquals(new BigDecimal("30.00"), order.getItems().get(0).getUnitPriceSnapshot());
++        assertEquals(new BigDecimal("30.00"), order.getTotalAmount());
++        assertEquals("Textbook", order.getItems().get(0).getProductName());
++    }
++
++    @Test
++    @DisplayName("Checkout is rejected when the reservation cannot be taken")
++    void rejectsWhenStockCannotBeReserved() {
++        Product listing = product(101L, SELLER_A, "Last one", "30.00", 1);
++        when(cartItemMapper.selectByIds(anyList())).thenReturn(List.of(cartLine(1L, listing, 1)));
++        // Someone else's checkout got there first, so the conditional update changes no row.
++        when(productMapper.reserveStock(101L, 1)).thenReturn(0);
++
++        assertThrows(InsufficientStockException.class,
++                () -> orderService.checkoutFromCart(BUYER, List.of(1L)));
++        verify(cartItemMapper, never()).deleteByIds(anyList());
++    }
++
++    @Test
++    @DisplayName("A buyer cannot order their own listing")
++    void rejectsSelfPurchase() {
++        Product own = product(101L, BUYER, "My own thing", "30.00", 5);
++        when(cartItemMapper.selectByIds(anyList())).thenReturn(List.of(cartLine(1L, own, 1)));
++
++        assertThrows(IllegalArgumentException.class,
++                () -> orderService.checkoutFromCart(BUYER, List.of(1L)));
++    }
++
++    @Test
++    @DisplayName("Cancelling an unpaid order releases exactly what it reserved")
++    void cancelReleasesReservedStock() {
++        Order order = new Order();
++        order.setId(500L);
++        order.setBuyerId(BUYER);
++        order.setSellerId(SELLER_A);
++        order.setStatus(OrderStatus.PENDING_PAYMENT.name());
++        when(orderMapper.selectById(500L)).thenReturn(order);
++
++        OrderItem item = new OrderItem();
++        item.setProductId(101L);
++        item.setQuantity(3);
++        when(orderItemMapper.selectByOrderId(500L)).thenReturn(List.of(item));
++
++        orderService.cancel(BUYER, 500L);
++
++        verify(productMapper).releaseStock(101L, 3);
++        verify(orderMapper).updateStatus(500L, OrderStatus.CANCELLED.name());
++    }
++
++    @Test
++    @DisplayName("Expiring overdue orders releases their stock and marks them EXPIRED")
++    void expiryReleasesStock() {
++        Order overdue = new Order();
++        overdue.setId(600L);
++        overdue.setStatus(OrderStatus.PENDING_PAYMENT.name());
++        when(orderMapper.selectExpiredPending(any())).thenReturn(List.of(overdue));
++
++        OrderItem item = new OrderItem();
++        item.setProductId(202L);
++        item.setQuantity(1);
++        when(orderItemMapper.selectByOrderId(600L)).thenReturn(List.of(item));
++
++        assertEquals(1, orderService.expireOverdueOrders());
++        verify(productMapper).releaseStock(202L, 1);
++        verify(orderMapper).updateStatus(600L, OrderStatus.EXPIRED.name());
++    }
++
++    @Test
++    @DisplayName("Cart lines belonging to another user are refused")
++    void refusesOtherPeoplesCartLines() {
++        CartItem someoneElses = cartLine(1L, product(101L, SELLER_A, "Textbook", "30.00", 5), 1);
++        someoneElses.setUserId(999L);
++        when(cartItemMapper.selectByIds(anyList())).thenReturn(List.of(someoneElses));
++
++        assertThrows(IllegalArgumentException.class,
++                () -> orderService.checkoutFromCart(BUYER, List.of(1L)));
++    }
++
++    @Test
++    @DisplayName("Successful checkout clears only the cart lines that were bought")
++    void clearsOnlyCheckedOutLines() {
++        when(cartItemMapper.selectByIds(anyList()))
++                .thenReturn(List.of(cartLine(1L, product(101L, SELLER_A, "Textbook", "30.00", 5), 1)));
++
++        orderService.checkoutFromCart(BUYER, List.of(1L));
++
++        ArgumentCaptor<List<Long>> captor = ArgumentCaptor.forClass(List.class);
++        verify(cartItemMapper).deleteByIds(captor.capture());
++        assertEquals(List.of(1L), captor.getValue());
++        verify(cartItemMapper, never()).deleteByUserId(anyLong());
++    }
++}
+diff --git a/src/test/java/sg/edu/nus/iss/c2csectrade/service/ProductPublishServiceTest.java b/src/test/java/sg/edu/nus/iss/c2csectrade/service/ProductPublishServiceTest.java
+new file mode 100644
+index 0000000..d3d94e1
+--- /dev/null
++++ b/src/test/java/sg/edu/nus/iss/c2csectrade/service/ProductPublishServiceTest.java
+@@ -0,0 +1,123 @@
++package sg.edu.nus.iss.c2csectrade.service;
++
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.ArgumentCaptor;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import sg.edu.nus.iss.c2csectrade.dto.ProductPublishRequest;
++import sg.edu.nus.iss.c2csectrade.entity.Product;
++import sg.edu.nus.iss.c2csectrade.entity.ProductMedia;
++import sg.edu.nus.iss.c2csectrade.exception.ProductAccessDeniedException;
++import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
++import sg.edu.nus.iss.c2csectrade.mapper.ProductMediaMapper;
++import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
++
++import java.math.BigDecimal;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++
++/** Sprint 2 acceptance checks for publishing, editing and delisting. */
++@ExtendWith(MockitoExtension.class)
++class ProductPublishServiceTest {
++
++    @Mock private ProductMapper productMapper;
++    @Mock private ProductMediaMapper productMediaMapper;
++    @Mock private UserMapper userMapper;
++    @InjectMocks private ProductService productService;
++
++    private ProductPublishRequest request(String name, String price) {
++        ProductPublishRequest request = new ProductPublishRequest();
++        request.setName(name);
++        request.setPrice(price == null ? null : new BigDecimal(price));
++        request.setStock(1);
++        request.setConditionLevel(9);
++        request.setCategory("books");
++        return request;
++    }
++
++    @Test
++    @DisplayName("Publishing strips markup out of the description")
++    void sanitisesDescription() {
++        ProductPublishRequest request = request("Textbook", "30.00");
++        request.setDescription("Good condition <script>alert('x')</script><b>really</b>");
++        when(productMapper.insert(any(Product.class))).thenAnswer(invocation -> {
++            invocation.<Product>getArgument(0).setId(1L);
++            return 1;
++        });
++
++        productService.publish(request, 20L);
++
++        ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
++        verify(productMapper).insert(captor.capture());
++        String stored = captor.getValue().getDescription();
++        assertFalse(stored.contains("<script>"));
++        assertFalse(stored.contains("alert"));
++        assertTrue(stored.contains("really"));
++    }
++
++    @Test
++    @DisplayName("Media order in the payload becomes sort order")
++    void mediaKeepsSellerOrdering() {
++        ProductPublishRequest request = request("Textbook", "30.00");
++        ProductPublishRequest.MediaRef first = new ProductPublishRequest.MediaRef();
++        first.setUrl("https://example.test/a.jpg");
++        ProductPublishRequest.MediaRef second = new ProductPublishRequest.MediaRef();
++        second.setUrl("https://example.test/b.jpg");
++        request.setMedia(List.of(first, second));
++        when(productMapper.insert(any(Product.class))).thenAnswer(invocation -> {
++            invocation.<Product>getArgument(0).setId(1L);
++            return 1;
++        });
++
++        productService.publish(request, 20L);
++
++        ArgumentCaptor<ProductMedia> captor = ArgumentCaptor.forClass(ProductMedia.class);
++        verify(productMediaMapper, times(2)).insert(captor.capture());
++        assertEquals(0, captor.getAllValues().get(0).getSortOrder());
++        assertEquals("https://example.test/a.jpg", captor.getAllValues().get(0).getUrl());
++        assertEquals(1, captor.getAllValues().get(1).getSortOrder());
++    }
++
++    @Test
++    @DisplayName("A seller cannot edit someone else's listing")
++    void rejectsEditingOthersListing() {
++        Product other = new Product();
++        other.setId(101L);
++        other.setUserId(999L);
++        when(productMapper.selectById(101L)).thenReturn(other);
++
++        assertThrows(ProductAccessDeniedException.class,
++                () -> productService.update(101L, request("Renamed", "10.00"), 20L));
++        verify(productMapper, never()).update(any());
++    }
++
++    @Test
++    @DisplayName("Delisting sets the status and keeps the row, so existing orders still resolve")
++    void delistKeepsRow() {
++        Product own = new Product();
++        own.setId(101L);
++        own.setUserId(20L);
++        own.setStatus(1);
++        when(productMapper.selectById(101L)).thenReturn(own);
++
++        productService.delist(101L, 20L);
++
++        ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
++        verify(productMapper).update(captor.capture());
++        assertEquals(0, captor.getValue().getStatus());
++        verify(productMapper, never()).deleteById(anyLong());
++    }
++
++    @Test
++    @DisplayName("A listing priced at zero or below is refused")
++    void rejectsNonPositivePrice() {
++        assertThrows(IllegalArgumentException.class, () -> productService.publish(request("Free", "0"), 20L));
++        assertThrows(IllegalArgumentException.class, () -> productService.publish(request("Blank", null), 20L));
++    }
++}
+diff --git a/src/test/java/sg/edu/nus/iss/c2csectrade/service/SearchServiceTest.java b/src/test/java/sg/edu/nus/iss/c2csectrade/service/SearchServiceTest.java
+new file mode 100644
+index 0000000..38e583f
+--- /dev/null
++++ b/src/test/java/sg/edu/nus/iss/c2csectrade/service/SearchServiceTest.java
+@@ -0,0 +1,49 @@
++package sg.edu.nus.iss.c2csectrade.service;
++
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import sg.edu.nus.iss.c2csectrade.dto.ProductDTO;
++
++import java.util.ArrayList;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class SearchServiceTest {
++
++    private final SearchService searchService = new SearchService();
++
++    private ProductDTO dto(String name, String description) {
++        ProductDTO dto = new ProductDTO();
++        dto.setName(name);
++        dto.setDescription(description);
++        return dto;
++    }
++
++    @Test
++    @DisplayName("Matched terms are marked, case-insensitively")
++    void marksMatches() {
++        List<ProductDTO> results = new ArrayList<>(List.of(dto("Algorithm Textbook", "An algorithm reference")));
++
++        searchService.highlight(results, "algorithm");
++
++        assertEquals("<mark>Algorithm</mark> Textbook", results.get(0).getHighlightedName());
++        assertTrue(results.get(0).getHighlightedDescription().contains("<mark>algorithm</mark>"));
++    }
++
++    @Test
++    @DisplayName("A blank keyword leaves the results untouched")
++    void blankKeywordIsANoOp() {
++        List<ProductDTO> results = new ArrayList<>(List.of(dto("Textbook", "Description")));
++        searchService.highlight(results, "  ");
++        assertNull(results.get(0).getHighlightedName());
++    }
++
++    @Test
++    @DisplayName("Regex characters in the keyword are treated as literal text")
++    void keywordIsNotTreatedAsRegex() {
++        List<ProductDTO> results = new ArrayList<>(List.of(dto("C++ Primer", "About C++")));
++        assertDoesNotThrow(() -> searchService.highlight(results, "C++"));
++        assertEquals("<mark>C++</mark> Primer", results.get(0).getHighlightedName());
++    }
++}
+-- 
+2.55.0
+
