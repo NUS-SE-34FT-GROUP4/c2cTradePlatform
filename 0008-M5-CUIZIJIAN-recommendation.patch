@@ -1,0 +1,463 @@
+From 877146a1508e2661738eff5273efeb10145a9c92 Mon Sep 17 00:00:00 2001
+From: ZHOU YUXIN <zhou.yuxin@u.nus.edu>
+Date: Wed, 23 Sep 2026 21:21:40 +0800
+Subject: [PATCH 8/8] Add related-items recommendation and the browse history
+ behind it
+
+Sprint 2, WP5.
+
+The Sprint 1 frontend already calls /api/recommendations/products/{id}/similar,
+/api/recommendations/for-you and /api/history/view. None of those endpoints
+existed. All three calls are wrapped in a catch that only writes to the
+console, so the sections simply rendered empty and nothing reported a fault.
+This adds the backend they were written against.
+
+Three rules decide what gets shown, each because breaking it is visible on the
+page:
+
+- the item being viewed is never in its own related list, which would be a
+  link back to itself
+- delisted items and items whose stock is entirely held by unpaid orders are
+  filtered out, so the strip cannot advertise something unbuyable
+- a category with nothing left falls back to recent listings rather than
+  leaving an empty strip under a heading that promised content
+
+/for-you is deliberately shallow this sprint: the categories the user has
+browsed, and recent listings for anyone without history. The cold-start
+branching and the personalised algorithm are Sprint 5 - this just stops the
+home feed calling an endpoint that is not there.
+
+6 more tests, 41 in total.
+---
+ init.sql                                      |  14 +++
+ .../c2csectrade/config/SecurityConfig.java    |   1 +
+ .../controller/HistoryController.java         |  40 +++++++
+ .../controller/RecommendationController.java  |  50 ++++++++
+ .../c2csectrade/mapper/ViewHistoryMapper.java |  16 +++
+ .../service/RecommendationService.java        | 103 +++++++++++++++++
+ .../resources/mapper/ViewHistoryMapper.xml    |  26 +++++
+ .../service/RecommendationServiceTest.java    | 108 ++++++++++++++++++
+ 8 files changed, 358 insertions(+)
+ create mode 100644 src/main/java/sg/edu/nus/iss/c2csectrade/controller/HistoryController.java
+ create mode 100644 src/main/java/sg/edu/nus/iss/c2csectrade/controller/RecommendationController.java
+ create mode 100644 src/main/java/sg/edu/nus/iss/c2csectrade/mapper/ViewHistoryMapper.java
+ create mode 100644 src/main/java/sg/edu/nus/iss/c2csectrade/service/RecommendationService.java
+ create mode 100644 src/main/resources/mapper/ViewHistoryMapper.xml
+ create mode 100644 src/test/java/sg/edu/nus/iss/c2csectrade/service/RecommendationServiceTest.java
+
+diff --git a/init.sql b/init.sql
+index a4dc083..a1b1c1e 100644
+--- a/init.sql
++++ b/init.sql
+@@ -285,3 +285,17 @@ CREATE TABLE `chat_message` (
+     CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+     CONSTRAINT `fk_chat_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Persisted buyer-seller messages';
++
++-- Sprint 2: browse history, the input for recommendation (WP5)
++USE trade;
++DROP TABLE IF EXISTS `pms_view_history`;
++CREATE TABLE `pms_view_history` (
++    `id` BIGINT NOT NULL AUTO_INCREMENT,
++    `user_id` BIGINT NOT NULL,
++    `product_id` BIGINT NOT NULL,
++    `viewed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
++    PRIMARY KEY (`id`),
++    INDEX `idx_history_user` (`user_id`, `viewed_at`),
++    CONSTRAINT `fk_history_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
++    CONSTRAINT `fk_history_product` FOREIGN KEY (`product_id`) REFERENCES `pms_product`(`id`) ON DELETE CASCADE
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='What each user looked at';
+diff --git a/src/main/java/sg/edu/nus/iss/c2csectrade/config/SecurityConfig.java b/src/main/java/sg/edu/nus/iss/c2csectrade/config/SecurityConfig.java
+index 96b1fab..9e7e411 100644
+--- a/src/main/java/sg/edu/nus/iss/c2csectrade/config/SecurityConfig.java
++++ b/src/main/java/sg/edu/nus/iss/c2csectrade/config/SecurityConfig.java
+@@ -54,6 +54,7 @@ public class SecurityConfig {
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                // 管理后台只有 ROLE_ADMIN 能进；其余业务接口登录即可
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
++               .requestMatchers("/api/recommendations/**").permitAll() // 详情页同类商品对游客可见
+                .requestMatchers("/ws/**").permitAll() // STOMP 握手，消息层再鉴权
+                .anyRequest().authenticated()
+             )
+diff --git a/src/main/java/sg/edu/nus/iss/c2csectrade/controller/HistoryController.java b/src/main/java/sg/edu/nus/iss/c2csectrade/controller/HistoryController.java
+new file mode 100644
+index 0000000..aea38c4
+--- /dev/null
++++ b/src/main/java/sg/edu/nus/iss/c2csectrade/controller/HistoryController.java
+@@ -0,0 +1,40 @@
++package sg.edu.nus.iss.c2csectrade.controller;
++
++import org.springframework.http.ResponseEntity;
++import org.springframework.security.core.Authentication;
++import org.springframework.web.bind.annotation.*;
++import sg.edu.nus.iss.c2csectrade.entity.User;
++import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
++import sg.edu.nus.iss.c2csectrade.service.RecommendationService;
++
++import java.util.Map;
++
++@RestController
++@RequestMapping("/api/history")
++public class HistoryController {
++
++    private final RecommendationService recommendationService;
++    private final UserMapper userMapper;
++
++    public HistoryController(RecommendationService recommendationService, UserMapper userMapper) {
++        this.recommendationService = recommendationService;
++        this.userMapper = userMapper;
++    }
++
++    /**
++     * Records that the caller looked at a listing. The frontend fires this and
++     * ignores the outcome, so it always answers 200: a failed view record must
++     * never surface as an error on the product page.
++     */
++    @PostMapping("/view")
++    public ResponseEntity<?> recordView(@RequestBody Map<String, Object> body, Authentication authentication) {
++        if (authentication != null && authentication.getName() != null) {
++            User user = userMapper.selectByUsername(authentication.getName());
++            if (user != null && body.get("productId") != null) {
++                recommendationService.recordView(user.getId(),
++                        Long.valueOf(String.valueOf(body.get("productId"))));
++            }
++        }
++        return ResponseEntity.ok(Map.of("recorded", true));
++    }
++}
+diff --git a/src/main/java/sg/edu/nus/iss/c2csectrade/controller/RecommendationController.java b/src/main/java/sg/edu/nus/iss/c2csectrade/controller/RecommendationController.java
+new file mode 100644
+index 0000000..2bf3acd
+--- /dev/null
++++ b/src/main/java/sg/edu/nus/iss/c2csectrade/controller/RecommendationController.java
+@@ -0,0 +1,50 @@
++package sg.edu.nus.iss.c2csectrade.controller;
++
++import org.springframework.http.ResponseEntity;
++import org.springframework.security.core.Authentication;
++import org.springframework.web.bind.annotation.*;
++import sg.edu.nus.iss.c2csectrade.entity.User;
++import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
++import sg.edu.nus.iss.c2csectrade.service.ProductService;
++import sg.edu.nus.iss.c2csectrade.service.RecommendationService;
++
++@RestController
++@RequestMapping("/api/recommendations")
++public class RecommendationController {
++
++    private final RecommendationService recommendationService;
++    private final ProductService productService;
++    private final UserMapper userMapper;
++
++    public RecommendationController(RecommendationService recommendationService,
++                                    ProductService productService,
++                                    UserMapper userMapper) {
++        this.recommendationService = recommendationService;
++        this.productService = productService;
++        this.userMapper = userMapper;
++    }
++
++    /** Related items on the detail page. Open to anonymous visitors. */
++    @GetMapping("/products/{productId}/similar")
++    public ResponseEntity<?> similar(@PathVariable Long productId,
++                                     @RequestParam(defaultValue = "8") int limit) {
++        return ResponseEntity.ok(productService.convertToDTOList(
++                recommendationService.similarTo(productId, Math.min(limit, 24))));
++    }
++
++    /** The home feed's suggestions; falls back to recent listings without history. */
++    @GetMapping("/for-you")
++    public ResponseEntity<?> forYou(@RequestParam(defaultValue = "8") int limit,
++                                    Authentication authentication) {
++        return ResponseEntity.ok(productService.convertToDTOList(
++                recommendationService.forUser(currentUserId(authentication), Math.min(limit, 24))));
++    }
++
++    private Long currentUserId(Authentication authentication) {
++        if (authentication == null || authentication.getName() == null) {
++            return null;
++        }
++        User user = userMapper.selectByUsername(authentication.getName());
++        return user == null ? null : user.getId();
++    }
++}
+diff --git a/src/main/java/sg/edu/nus/iss/c2csectrade/mapper/ViewHistoryMapper.java b/src/main/java/sg/edu/nus/iss/c2csectrade/mapper/ViewHistoryMapper.java
+new file mode 100644
+index 0000000..8b06c32
+--- /dev/null
++++ b/src/main/java/sg/edu/nus/iss/c2csectrade/mapper/ViewHistoryMapper.java
+@@ -0,0 +1,16 @@
++package sg.edu.nus.iss.c2csectrade.mapper;
++
++import org.apache.ibatis.annotations.Mapper;
++import org.apache.ibatis.annotations.Param;
++
++import java.util.List;
++
++@Mapper
++public interface ViewHistoryMapper {
++    int record(@Param("userId") Long userId, @Param("productId") Long productId);
++
++    /** Categories the user looked at most recently, most viewed first. */
++    List<String> recentCategories(@Param("userId") Long userId, @Param("limit") int limit);
++
++    List<Long> recentProductIds(@Param("userId") Long userId, @Param("limit") int limit);
++}
+diff --git a/src/main/java/sg/edu/nus/iss/c2csectrade/service/RecommendationService.java b/src/main/java/sg/edu/nus/iss/c2csectrade/service/RecommendationService.java
+new file mode 100644
+index 0000000..b7437e5
+--- /dev/null
++++ b/src/main/java/sg/edu/nus/iss/c2csectrade/service/RecommendationService.java
+@@ -0,0 +1,103 @@
++package sg.edu.nus.iss.c2csectrade.service;
++
++import org.springframework.stereotype.Service;
++import sg.edu.nus.iss.c2csectrade.entity.Product;
++import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
++import sg.edu.nus.iss.c2csectrade.mapper.ViewHistoryMapper;
++
++import java.util.ArrayList;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Map;
++
++/**
++ * Category-based related items.
++ *
++ * Three rules decide what a buyer may be shown, and all three exist because
++ * breaking them produces something visibly wrong on the page:
++ *
++ *  - never the item being viewed, which would be a link back to itself
++ *  - never something that cannot be bought (delisted, or nothing available)
++ *  - never an empty strip where a section header already promised content, so
++ *    a category with nothing left falls back to recent listings
++ */
++@Service
++public class RecommendationService {
++
++    private final ProductMapper productMapper;
++    private final ViewHistoryMapper viewHistoryMapper;
++
++    public RecommendationService(ProductMapper productMapper, ViewHistoryMapper viewHistoryMapper) {
++        this.productMapper = productMapper;
++        this.viewHistoryMapper = viewHistoryMapper;
++    }
++
++    public void recordView(Long userId, Long productId) {
++        if (userId != null && productId != null) {
++            viewHistoryMapper.record(userId, productId);
++        }
++    }
++
++    /** Items in the same category as the one being viewed. */
++    public List<Product> similarTo(Long productId, int limit) {
++        Product current = productMapper.selectById(productId);
++        if (current == null) {
++            return List.of();
++        }
++        List<Product> candidates = current.getCategory() == null
++                ? List.of()
++                : productMapper.selectByCategory(current.getCategory());
++
++        List<Product> picked = filter(candidates, productId, limit);
++        if (picked.isEmpty()) {
++            // Nothing left in this category; show something rather than a gap.
++            picked = filter(productMapper.selectRecentProducts(limit * 3), productId, limit);
++        }
++        return picked;
++    }
++
++    /**
++     * Sprint 2 keeps this deliberately simple: the categories the user has
++     * browsed, and recent listings for anyone with no history. The cold-start
++     * branching and the personalised algorithm are Sprint 5.
++     */
++    public List<Product> forUser(Long userId, int limit) {
++        List<String> categories = userId == null
++                ? List.of()
++                : viewHistoryMapper.recentCategories(userId, 3);
++
++        Map<Long, Product> picked = new LinkedHashMap<>();
++        for (String category : categories) {
++            for (Product product : filter(productMapper.selectByCategory(category), null, limit)) {
++                picked.putIfAbsent(product.getId(), product);
++                if (picked.size() >= limit) {
++                    return new ArrayList<>(picked.values());
++                }
++            }
++        }
++        for (Product product : filter(productMapper.selectRecentProducts(limit * 3), null, limit)) {
++            picked.putIfAbsent(product.getId(), product);
++            if (picked.size() >= limit) {
++                break;
++            }
++        }
++        return new ArrayList<>(picked.values());
++    }
++
++    private List<Product> filter(List<Product> candidates, Long excludeId, int limit) {
++        List<Product> result = new ArrayList<>();
++        for (Product product : candidates) {
++            if (excludeId != null && excludeId.equals(product.getId())) {
++                continue;
++            }
++            if (product.getStatus() != 1 || product.getAvailableStock() <= 0) {
++                continue;
++            }
++            result.add(product);
++            if (result.size() >= limit) {
++                break;
++            }
++        }
++        return result;
++    }
++}
+diff --git a/src/main/resources/mapper/ViewHistoryMapper.xml b/src/main/resources/mapper/ViewHistoryMapper.xml
+new file mode 100644
+index 0000000..69c2d56
+--- /dev/null
++++ b/src/main/resources/mapper/ViewHistoryMapper.xml
+@@ -0,0 +1,26 @@
++<?xml version="1.0" encoding="UTF-8" ?>
++<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
++<mapper namespace="sg.edu.nus.iss.c2csectrade.mapper.ViewHistoryMapper">
++
++    <insert id="record">
++        INSERT INTO pms_view_history (user_id, product_id) VALUES (#{userId}, #{productId})
++    </insert>
++
++    <select id="recentCategories" resultType="string">
++        SELECT p.category
++        FROM pms_view_history h JOIN pms_product p ON p.id = h.product_id
++        WHERE h.user_id = #{userId} AND p.category IS NOT NULL
++        GROUP BY p.category
++        ORDER BY COUNT(*) DESC, MAX(h.viewed_at) DESC
++        LIMIT #{limit}
++    </select>
++
++    <select id="recentProductIds" resultType="long">
++        SELECT h.product_id
++        FROM pms_view_history h
++        WHERE h.user_id = #{userId}
++        GROUP BY h.product_id
++        ORDER BY MAX(h.viewed_at) DESC
++        LIMIT #{limit}
++    </select>
++</mapper>
+diff --git a/src/test/java/sg/edu/nus/iss/c2csectrade/service/RecommendationServiceTest.java b/src/test/java/sg/edu/nus/iss/c2csectrade/service/RecommendationServiceTest.java
+new file mode 100644
+index 0000000..d35668a
+--- /dev/null
++++ b/src/test/java/sg/edu/nus/iss/c2csectrade/service/RecommendationServiceTest.java
+@@ -0,0 +1,108 @@
++package sg.edu.nus.iss.c2csectrade.service;
++
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import sg.edu.nus.iss.c2csectrade.entity.Product;
++import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
++import sg.edu.nus.iss.c2csectrade.mapper.ViewHistoryMapper;
++
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++
++/** Sprint 2 acceptance checks for the related-items rules. */
++@ExtendWith(MockitoExtension.class)
++class RecommendationServiceTest {
++
++    @Mock private ProductMapper productMapper;
++    @Mock private ViewHistoryMapper viewHistoryMapper;
++    @InjectMocks private RecommendationService recommendationService;
++
++    private Product product(Long id, int status, int stock, int reserved) {
++        Product product = new Product();
++        product.setId(id);
++        product.setCategory("books");
++        product.setStatus(status);
++        product.setStock(stock);
++        product.setReservedStock(reserved);
++        return product;
++    }
++
++    @Test
++    @DisplayName("The item being viewed never appears among its own related items")
++    void excludesTheCurrentProduct() {
++        when(productMapper.selectById(1L)).thenReturn(product(1L, 1, 5, 0));
++        when(productMapper.selectByCategory("books"))
++                .thenReturn(List.of(product(1L, 1, 5, 0), product(2L, 1, 5, 0)));
++
++        List<Product> result = recommendationService.similarTo(1L, 8);
++
++        assertEquals(1, result.size());
++        assertEquals(2L, result.get(0).getId());
++    }
++
++    @Test
++    @DisplayName("Delisted items and items with nothing available are filtered out")
++    void excludesUnbuyableProducts() {
++        when(productMapper.selectById(1L)).thenReturn(product(1L, 1, 5, 0));
++        when(productMapper.selectByCategory("books")).thenReturn(List.of(
++                product(2L, 0, 5, 0),   // delisted
++                product(3L, 1, 2, 2),   // every unit held by unpaid orders
++                product(4L, 1, 5, 1))); // buyable
++
++        List<Product> result = recommendationService.similarTo(1L, 8);
++
++        assertEquals(1, result.size());
++        assertEquals(4L, result.get(0).getId());
++    }
++
++    @Test
++    @DisplayName("An empty category falls back to recent listings rather than an empty strip")
++    void fallsBackWhenCategoryIsExhausted() {
++        when(productMapper.selectById(1L)).thenReturn(product(1L, 1, 5, 0));
++        when(productMapper.selectByCategory("books")).thenReturn(List.of(product(1L, 1, 5, 0)));
++        when(productMapper.selectRecentProducts(anyInt())).thenReturn(List.of(product(9L, 1, 5, 0)));
++
++        List<Product> result = recommendationService.similarTo(1L, 8);
++
++        assertEquals(1, result.size());
++        assertEquals(9L, result.get(0).getId());
++    }
++
++    @Test
++    @DisplayName("A missing product yields no recommendations instead of an error")
++    void unknownProductIsEmpty() {
++        when(productMapper.selectById(99L)).thenReturn(null);
++        assertTrue(recommendationService.similarTo(99L, 8).isEmpty());
++    }
++
++    @Test
++    @DisplayName("A signed-out visitor gets recent listings")
++    void anonymousGetsRecent() {
++        when(productMapper.selectRecentProducts(anyInt())).thenReturn(List.of(product(5L, 1, 3, 0)));
++
++        List<Product> result = recommendationService.forUser(null, 8);
++
++        assertEquals(1, result.size());
++        verifyNoInteractions(viewHistoryMapper);
++    }
++
++    @Test
++    @DisplayName("Suggestions follow the categories the user has browsed, without duplicates")
++    void usesBrowsedCategories() {
++        when(viewHistoryMapper.recentCategories(7L, 3)).thenReturn(List.of("books", "electronics"));
++        when(productMapper.selectByCategory("books")).thenReturn(List.of(product(2L, 1, 5, 0)));
++        when(productMapper.selectByCategory("electronics")).thenReturn(List.of(product(2L, 1, 5, 0), product(3L, 1, 5, 0)));
++        when(productMapper.selectRecentProducts(anyInt())).thenReturn(List.of());
++
++        List<Product> result = recommendationService.forUser(7L, 8);
++
++        assertEquals(List.of(2L, 3L), result.stream().map(Product::getId).toList());
++    }
++}
+-- 
+2.55.0
+
