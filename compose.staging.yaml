@@ -34,7 +34,10 @@ services:
     restart: unless-stopped
 
   minio:
-    image: minio/minio:latest
+    # minio/minio was pulled from Docker Hub; MinIO now gates it behind a paid
+    # license (quay.io/minio/aistor/minio). This is the community rebuild that
+    # still runs unlicensed with the same server entrypoint and CLI args.
+    image: cgr.dev/chainguard/minio:latest
     container_name: c2csectrade-minio
     command: server /data --console-address ":9001"
     environment:
