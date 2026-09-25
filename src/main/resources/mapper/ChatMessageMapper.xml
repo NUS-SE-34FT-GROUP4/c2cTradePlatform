@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sg.edu.nus.iss.c2csectrade.mapper.ChatMessageMapper">
+
+    <resultMap id="ChatMessageResultMap" type="sg.edu.nus.iss.c2csectrade.entity.ChatMessage">
+        <id property="id" column="id"/>
+        <result property="conversationId" column="conversation_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="content" column="content"/>
+        <result property="readFlag" column="read_flag"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="senderName" column="sender_name"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="sg.edu.nus.iss.c2csectrade.entity.ChatMessage"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_message (conversation_id, sender_id, receiver_id, product_id, content, read_flag)
+        VALUES (#{conversationId}, #{senderId}, #{receiverId}, #{productId}, #{content}, 0)
+    </insert>
+
+    <select id="selectByConversation" resultMap="ChatMessageResultMap">
+        SELECT m.*, u.display_name AS sender_name
+        FROM chat_message m LEFT JOIN users u ON u.id = m.sender_id
+        WHERE m.conversation_id = #{conversationId}
+        ORDER BY m.created_at
+    </select>
+
+    <select id="selectConversationsForUser" resultMap="ChatMessageResultMap">
+        SELECT m.*, u.display_name AS sender_name
+        FROM chat_message m
+        JOIN (
+            SELECT conversation_id, MAX(id) AS last_id
+            FROM chat_message
+            WHERE sender_id = #{userId} OR receiver_id = #{userId}
+            GROUP BY conversation_id
+        ) latest ON latest.last_id = m.id
+        LEFT JOIN users u ON u.id = m.sender_id
+        ORDER BY m.created_at DESC
+    </select>
+
+    <update id="markRead">
+        UPDATE chat_message SET read_flag = 1
+        WHERE conversation_id = #{conversationId} AND receiver_id = #{receiverId} AND read_flag = 0
+    </update>
+
+    <select id="countUnread" resultType="int">
+        SELECT COUNT(*) FROM chat_message WHERE receiver_id = #{userId} AND read_flag = 0
+    </select>
+</mapper>

@@ -1014,10 +1014,16 @@ h1 {
 }
 
 .product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
+  /* Masonry browse feed: cards keep their natural height instead of being
+     stretched to a row, so portrait and landscape photos both read well. */
+  column-width: 280px;
+  column-gap: 25px;
   margin-top: 20px;
+}
+
+.product-grid > * {
+  break-inside: avoid;
+  margin-bottom: 25px;
 }
 
 .product-card {
@@ -1139,8 +1145,12 @@ h1 {
   }
 
   .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
+    column-width: 200px;
+    column-gap: 15px;
+  }
+
+  .product-grid > * {
+    margin-bottom: 15px;
   }
 
 
