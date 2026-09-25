@@ -62,7 +62,6 @@ services:
       # server's public address, not localhost.
       MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:?set MINIO_PUBLIC_ENDPOINT}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
     ports:
       - "8080:8080"
     depends_on:
