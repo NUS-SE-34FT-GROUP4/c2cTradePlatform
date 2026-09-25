@@ -54,6 +54,7 @@ public class SecurityConfig {
                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                // 管理后台只有 ROLE_ADMIN 能进；其余业务接口登录即可
                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+               .requestMatchers("/ws/**").permitAll() // STOMP handshake is open; messages are authenticated at the STOMP layer
                .anyRequest().authenticated()
             )
            .exceptionHandling(ex -> ex

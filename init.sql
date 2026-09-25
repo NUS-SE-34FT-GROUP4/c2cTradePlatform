@@ -266,3 +266,22 @@ CREATE TABLE `pms_favorite` (
     CONSTRAINT `fk_fav_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_fav_product` FOREIGN KEY (`product_id`) REFERENCES `pms_product`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='User favourites';
+
+-- Sprint 2: buyer-seller chat (WP4)
+USE trade;
+DROP TABLE IF EXISTS `chat_message`;
+CREATE TABLE `chat_message` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `conversation_id` VARCHAR(64) NOT NULL COMMENT 'Deterministic pair key: smallerUserId:largerUserId:productId',
+    `sender_id` BIGINT NOT NULL,
+    `receiver_id` BIGINT NOT NULL,
+    `product_id` BIGINT NULL COMMENT 'Conversation is usually about one listing',
+    `content` VARCHAR(2000) NOT NULL,
+    `read_flag` TINYINT NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_chat_conversation` (`conversation_id`, `created_at`),
+    INDEX `idx_chat_receiver` (`receiver_id`, `read_flag`),
+    CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_chat_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Persisted buyer-seller messages';

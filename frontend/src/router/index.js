@@ -6,6 +6,11 @@ import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import ForgotPasswordView from '../views/ForgotPasswordView.vue';
 import ProductDetail from '../views/ProductDetail.vue';
+import ProductCreate from '../views/ProductCreate.vue';
+import CartView from '../views/CartView.vue';
+import OrderHistory from '../views/OrderHistory.vue';
+import FavoritesView from '../views/FavoritesView.vue';
+import ChatView from '../views/ChatView.vue';
 
 // ===== Define route rules =====
 const routes = [
@@ -37,6 +42,42 @@ const routes = [
     path: '/products/:id',
     name: 'product-detail',
     component: ProductDetail,
+  },
+  {
+    path: '/publish',
+    name: 'product-create',
+    component: ProductCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/products/:id/edit',
+    name: 'product-edit',
+    component: ProductCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/cart',
+    name: 'cart',
+    component: CartView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/orders',
+    name: 'orders',
+    component: OrderHistory,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/favorites',
+    name: 'favorites',
+    component: FavoritesView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/chat',
+    name: 'chat',
+    component: ChatView,
+    meta: { requiresAuth: true },
   },
 ];
 
