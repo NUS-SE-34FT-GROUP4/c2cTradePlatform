@@ -285,3 +285,17 @@ CREATE TABLE `chat_message` (
     CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_chat_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Persisted buyer-seller messages';
+
+-- Sprint 2: browse history, the input for recommendation (WP5)
+USE trade;
+DROP TABLE IF EXISTS `pms_view_history`;
+CREATE TABLE `pms_view_history` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT NOT NULL,
+    `product_id` BIGINT NOT NULL,
+    `viewed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_history_user` (`user_id`, `viewed_at`),
+    CONSTRAINT `fk_history_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_history_product` FOREIGN KEY (`product_id`) REFERENCES `pms_product`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='What each user looked at';
