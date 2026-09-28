@@ -77,6 +77,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       MINIO_ENDPOINT: http://minio:9000
       MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      # Read from .env next to this file; see .env.example for how to generate one.
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env - see .env.example}
     ports:
       - "8080:8080"
     depends_on:

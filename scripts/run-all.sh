@@ -22,6 +22,12 @@ else
   exit 1
 fi
 
+# The backend has no built-in JWT key (NFR 6.2), so give a fresh checkout its own.
+if [ ! -f .env ]; then
+  echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" > .env
+  echo "Created .env with a new local JWT_SECRET."
+fi
+
 echo "[3/4] Building docker images..."
 docker compose build
 

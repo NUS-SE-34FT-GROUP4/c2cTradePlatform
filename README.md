@@ -36,9 +36,16 @@ payment, bargaining, real-time chat, reviews, credit scoring and recommendation.
 
 Requires Docker and Docker Compose.
 
+The backend has no built-in JWT signing key, so create a local `.env` once
+(it is git-ignored; `make up` does this for you if it is missing):
+
 ```bash
+echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" > .env
 docker compose up -d --build
 ```
+
+Running the backend outside Docker (e.g. from the IDE) needs the same
+`JWT_SECRET` environment variable.
 
 | Service | URL |
 |---|---|
