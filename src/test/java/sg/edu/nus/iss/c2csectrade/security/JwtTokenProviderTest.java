@@ -86,4 +86,37 @@ class JwtTokenProviderTest {
 
         assertFalse(jwtTokenProvider.validateToken(expired));
     }
+
+    @Test
+    @DisplayName("A 64-byte Base64 secret passes the startup check")
+    void strongSecretPassesStartupCheck() {
+        assertDoesNotThrow(() -> jwtTokenProvider.validateSecret());
+    }
+
+    @Test
+    @DisplayName("Startup fails when JWT_SECRET is not set")
+    void missingSecretFailsStartup() {
+        ReflectionTestUtils.setField(jwtTokenProvider, "jwtSecret", "");
+
+        IllegalStateException error = assertThrows(IllegalStateException.class, jwtTokenProvider::validateSecret);
+        assertTrue(error.getMessage().contains("JWT_SECRET is not set"));
+    }
+
+    @Test
+    @DisplayName("Startup fails when the secret is too short for HS512")
+    void shortSecretFailsStartup() {
+        // 32 bytes: enough for HS256, too short for the HS512 this provider signs with
+        ReflectionTestUtils.setField(jwtTokenProvider, "jwtSecret", "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=");
+
+        IllegalStateException error = assertThrows(IllegalStateException.class, jwtTokenProvider::validateSecret);
+        assertTrue(error.getMessage().contains("at least 64 bytes"));
+    }
+
+    @Test
+    @DisplayName("Startup fails when the secret is not Base64")
+    void nonBase64SecretFailsStartup() {
+        ReflectionTestUtils.setField(jwtTokenProvider, "jwtSecret", "not base64 at all!!");
+
+        assertThrows(IllegalStateException.class, jwtTokenProvider::validateSecret);
+    }
 }

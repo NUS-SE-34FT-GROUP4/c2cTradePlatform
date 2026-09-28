@@ -215,6 +215,7 @@ jobs:
             export MYSQL_PASSWORD='${{ secrets.STAGING_DB_PASSWORD }}'
             export MINIO_ROOT_PASSWORD='${{ secrets.STAGING_MINIO_PASSWORD }}'
             export MINIO_PUBLIC_ENDPOINT='${{ secrets.STAGING_MINIO_PUBLIC_ENDPOINT }}'
+            export JWT_SECRET='${{ secrets.STAGING_JWT_SECRET }}'
             docker compose -f compose.staging.yaml pull
             docker compose -f compose.staging.yaml up -d
 
