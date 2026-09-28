@@ -41,6 +41,26 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
+    // Order payment (M3) lets these propagate from WalletService.pay, so the
+    // buyer sees why the payment failed instead of a generic server error.
+    @ExceptionHandler(PaymentPasswordException.class)
+    @ResponseBody
+    public ResponseEntity<?> handlePaymentPassword(PaymentPasswordException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "支付密码错误");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    @ResponseBody
+    public ResponseEntity<?> handleInsufficientBalance(InsufficientBalanceException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "余额不足");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<?> handleGeneric(Exception ex) {
