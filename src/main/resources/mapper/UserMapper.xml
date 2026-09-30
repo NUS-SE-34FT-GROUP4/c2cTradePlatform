@@ -46,12 +46,13 @@
     <update id="updatePaymentPasswordHash">
         UPDATE users SET payment_password_hash=#{hash} WHERE id=#{id}
     </update>
-    <!-- Check and deduct in one statement: two concurrent payments cannot both pass the check. -->
-    <update id="debitBalance">
-        UPDATE users SET balance = balance - #{amount} WHERE id=#{id} AND balance &gt;= #{amount}
-    </update>
-    <update id="creditBalance">
-        UPDATE users SET balance = balance + #{amount} WHERE id=#{id}
+    <!-- Row lock for balance changes: a second transaction on the same user waits
+         here until the first commits, so it reads the balance after that change. -->
+    <select id="selectByIdForUpdate" resultMap="UserResultMap">
+        SELECT * FROM users WHERE id = #{id} FOR UPDATE
+    </select>
+    <update id="updateBalance">
+        UPDATE users SET balance = #{balance} WHERE id=#{id}
     </update>
     <delete id="deleteById" parameterType="long">
         DELETE FROM users WHERE id=#{id}
