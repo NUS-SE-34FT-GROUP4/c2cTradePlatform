@@ -29,6 +29,7 @@ payment, bargaining, real-time chat, reviews, credit scoring and recommendation.
 | Frontend | Vue 3, Vue Router, Pinia, Axios |
 | Database | MySQL 8.0 |
 | Cache | Redis 7 (captcha store) |
+| Search | Elasticsearch 8.10 (catalogue index; MySQL remains authoritative) |
 | Auth | JWT (jjwt) + BCrypt |
 | Packaging | Docker, Docker Compose, Nginx |
 
@@ -52,6 +53,7 @@ Running the backend outside Docker (e.g. from the IDE) needs the same
 | Frontend | http://localhost |
 | Backend API | http://localhost:8080 |
 | Health check | http://localhost:8080/actuator/health |
+| Elasticsearch | http://localhost:9200 |
 
 The database schema and seed data in `init.sql` are applied automatically on first start. To reset:
 
