@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +45,7 @@ class WalletServiceTest {
         user.setPasswordHash(encoder.encode("login-pass"));
         user.setBalance(new BigDecimal("100.00"));
         lenient().when(userMapper.selectById(USER_ID)).thenReturn(user);
+        lenient().when(userMapper.selectByIdForUpdate(USER_ID)).thenReturn(user);
         lenient().when(clock.instant()).thenReturn(T0);
     }
 
@@ -122,14 +124,25 @@ class WalletServiceTest {
     }
 
     @Test
-    @DisplayName("Paying with the right password deducts the amount")
+    @DisplayName("Paying with the right password deducts the amount from the locked row")
     void payDeductsBalance() {
         withPaymentPassword("123456");
-        when(userMapper.debitBalance(USER_ID, new BigDecimal("30.00"))).thenReturn(1);
 
-        walletService.pay(USER_ID, "123456", new BigDecimal("30.00"));
+        BigDecimal after = walletService.pay(USER_ID, "123456", new BigDecimal("30.00"));
 
-        verify(userMapper).debitBalance(USER_ID, new BigDecimal("30.00"));
+        assertEquals(new BigDecimal("70.00"), after);
+        // the balance is read with FOR UPDATE before it is written
+        InOrder order = inOrder(userMapper);
+        order.verify(userMapper).selectByIdForUpdate(USER_ID);
+        order.verify(userMapper).updateBalance(USER_ID, new BigDecimal("70.00"));
+    }
+
+    @Test
+    @DisplayName("Paying the exact balance leaves zero")
+    void payExactBalance() {
+        withPaymentPassword("123456");
+
+        assertEquals(0, walletService.pay(USER_ID, "123456", new BigDecimal("100.00")).signum());
     }
 
     @Test
@@ -139,7 +152,7 @@ class WalletServiceTest {
                 () -> walletService.pay(USER_ID, "123456", new BigDecimal("10")));
 
         assertTrue(error.getMessage().contains("Set a payment password"));
-        verify(userMapper, never()).debitBalance(any(), any());
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
@@ -151,17 +164,19 @@ class WalletServiceTest {
                 () -> walletService.pay(USER_ID, "000000", new BigDecimal("10")));
 
         assertTrue(error.getMessage().contains("4 attempt(s) left"));
-        verify(userMapper, never()).debitBalance(any(), any());
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
-    @DisplayName("When the balance is too low the payment fails with InsufficientBalanceException")
+    @DisplayName("A payment the balance cannot cover fails and leaves the balance unchanged")
     void insufficientBalance() {
         withPaymentPassword("123456");
-        when(userMapper.debitBalance(eq(USER_ID), any())).thenReturn(0);
 
-        assertThrows(InsufficientBalanceException.class,
-                () -> walletService.pay(USER_ID, "123456", new BigDecimal("500.00")));
+        InsufficientBalanceException error = assertThrows(InsufficientBalanceException.class,
+                () -> walletService.pay(USER_ID, "123456", new BigDecimal("100.01")));
+
+        assertTrue(error.getMessage().contains("100.00 available"));
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
@@ -225,26 +240,35 @@ class WalletServiceTest {
                     () -> walletService.pay(USER_ID, "123456", new BigDecimal(bad)), "accepted: " + bad);
         }
         assertThrows(IllegalArgumentException.class, () -> walletService.pay(USER_ID, "123456", null));
-        verify(userMapper, never()).debitBalance(any(), any());
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
-    @DisplayName("Top-up credits the account and is capped per transaction")
+    @DisplayName("Top-up increases the balance under the row lock and is capped per transaction")
     void topUp() {
-        when(userMapper.creditBalance(USER_ID, new BigDecimal("50"))).thenReturn(1);
+        BigDecimal after = walletService.topUp(USER_ID, new BigDecimal("50"));
 
-        walletService.topUp(USER_ID, new BigDecimal("50"));
-        verify(userMapper).creditBalance(USER_ID, new BigDecimal("50"));
+        assertEquals(new BigDecimal("150.00"), after);
+        InOrder order = inOrder(userMapper);
+        order.verify(userMapper).selectByIdForUpdate(USER_ID);
+        order.verify(userMapper).updateBalance(USER_ID, new BigDecimal("150.00"));
 
         assertThrows(IllegalArgumentException.class,
                 () -> walletService.topUp(USER_ID, new BigDecimal("10000.01")));
     }
 
     @Test
+    @DisplayName("A credit that would overflow the balance column is refused")
+    void creditCannotOverflow() {
+        user.setBalance(WalletService.MAX_BALANCE);
+
+        assertThrows(IllegalArgumentException.class, () -> walletService.credit(USER_ID, new BigDecimal("0.01")));
+        verify(userMapper, never()).updateBalance(any(), any());
+    }
+
+    @Test
     @DisplayName("Crediting an unknown user fails")
     void creditUnknownUser() {
-        when(userMapper.creditBalance(eq(99L), any())).thenReturn(0);
-
         assertThrows(IllegalArgumentException.class, () -> walletService.credit(99L, BigDecimal.TEN));
     }
 
