@@ -21,4 +21,14 @@ public interface OrderMapper {
     int insert(Order order);
 
     int updateStatus(@Param("id") Long id, @Param("status") String status);
+
+    /**
+     * Move an order from one state to the next, stamping the matching column.
+     * Returns 0 when the order is no longer in {@code fromStatus}, which is how
+     * a concurrent transition is rejected rather than silently overwritten.
+     */
+    int transition(@Param("id") Long id,
+                   @Param("fromStatus") String fromStatus,
+                   @Param("toStatus") String toStatus,
+                   @Param("paymentMethod") String paymentMethod);
 }
