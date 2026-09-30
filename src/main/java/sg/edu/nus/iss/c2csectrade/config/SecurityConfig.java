@@ -47,6 +47,7 @@ public class SecurityConfig {
            .csrf(csrf -> csrf.disable())
            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
            .authorizeHttpRequests(auth -> auth
+               .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/product/*").permitAll()
                .requestMatchers("/api/auth/**").permitAll()
                .requestMatchers("/api/captcha/**").permitAll()
                .requestMatchers("/api/products").permitAll() // 允许所有用户查看商品列表
