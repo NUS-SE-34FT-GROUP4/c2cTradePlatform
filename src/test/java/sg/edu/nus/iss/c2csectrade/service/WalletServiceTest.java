@@ -54,19 +54,32 @@ class WalletServiceTest {
     @Test
     @DisplayName("The payment password is stored as its own BCrypt hash, never in plain text")
     void setPaymentPasswordStoresHash() {
-        walletService.setPaymentPassword(USER_ID, "login-pass", "123456");
+        walletService.setPaymentPassword(USER_ID, "123456", "123456");
 
         verify(userMapper).updatePaymentPasswordHash(eq(USER_ID), argThat(hash ->
-                !hash.equals("123456") && encoder.matches("123456", hash)));
+                !hash.equals("123456") && encoder.matches("123456", hash)
+                        && !hash.equals(user.getPasswordHash())));
     }
 
     @Test
-    @DisplayName("Setting the payment password requires the correct login password")
-    void setPaymentPasswordChecksLoginPassword() {
-        PaymentPasswordException error = assertThrows(PaymentPasswordException.class,
-                () -> walletService.setPaymentPassword(USER_ID, "wrong", "123456"));
+    @DisplayName("Set only works the first time; an existing payment password cannot be overwritten")
+    void setRefusedWhenAlreadySet() {
+        withPaymentPassword("123456");
 
-        assertTrue(error.getMessage().contains("Login password"));
+        PaymentPasswordException error = assertThrows(PaymentPasswordException.class,
+                () -> walletService.setPaymentPassword(USER_ID, "654321", "654321"));
+
+        assertTrue(error.getMessage().contains("already set"));
+        verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+    }
+
+    @Test
+    @DisplayName("The confirmation must match")
+    void setRequiresMatchingConfirmation() {
+        PaymentPasswordException error = assertThrows(PaymentPasswordException.class,
+                () -> walletService.setPaymentPassword(USER_ID, "123456", "123465"));
+
+        assertTrue(error.getMessage().contains("do not match"));
         verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
     }
 
@@ -75,9 +88,29 @@ class WalletServiceTest {
     void paymentPasswordMustBeSixDigits() {
         for (String bad : new String[]{null, "12345", "1234567", "12345a", "      "}) {
             assertThrows(PaymentPasswordException.class,
-                    () -> walletService.setPaymentPassword(USER_ID, "login-pass", bad), "accepted: " + bad);
+                    () -> walletService.setPaymentPassword(USER_ID, bad, bad), "accepted: " + bad);
         }
         verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+    }
+
+    @Test
+    @DisplayName("Changing the payment password requires the old one")
+    void changeRequiresOldPassword() {
+        withPaymentPassword("123456");
+
+        assertThrows(PaymentPasswordException.class,
+                () -> walletService.changePaymentPassword(USER_ID, "000000", "654321", "654321"));
+        verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+
+        walletService.changePaymentPassword(USER_ID, "123456", "654321", "654321");
+        verify(userMapper).updatePaymentPasswordHash(eq(USER_ID), argThat(hash -> encoder.matches("654321", hash)));
+    }
+
+    @Test
+    @DisplayName("Changing is refused when no payment password has been set")
+    void changeRequiresExistingPassword() {
+        assertThrows(PaymentPasswordException.class,
+                () -> walletService.changePaymentPassword(USER_ID, "123456", "654321", "654321"));
     }
 
     @Test
@@ -162,17 +195,25 @@ class WalletServiceTest {
     }
 
     @Test
-    @DisplayName("Resetting the payment password clears a lockout")
-    void resetClearsLockout() {
+    @DisplayName("Guessing the old password on change counts towards the same lockout")
+    void changeCannotBypassLockout() {
         withPaymentPassword("123456");
         for (int i = 0; i < WalletService.MAX_ATTEMPTS; i++) {
-            assertThrows(PaymentPasswordException.class, () -> walletService.verifyPaymentPassword(USER_ID, "000000"));
+            assertThrows(PaymentPasswordException.class,
+                    () -> walletService.changePaymentPassword(USER_ID, "000000", "654321", "654321"));
         }
 
-        walletService.setPaymentPassword(USER_ID, "login-pass", "654321");
-        withPaymentPassword("654321");
+        PaymentPasswordException locked = assertThrows(PaymentPasswordException.class,
+                () -> walletService.pay(USER_ID, "123456", BigDecimal.ONE));
+        assertTrue(locked.getMessage().contains("Try again in"));
+        verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+    }
 
-        assertDoesNotThrow(() -> walletService.verifyPaymentPassword(USER_ID, "654321"));
+    @Test
+    @DisplayName("A blank stored hash counts as not set")
+    void blankHashIsNotSet() {
+        user.setPaymentPasswordHash("  ");
+        assertFalse(walletService.hasPaymentPassword(USER_ID));
     }
 
     @Test
