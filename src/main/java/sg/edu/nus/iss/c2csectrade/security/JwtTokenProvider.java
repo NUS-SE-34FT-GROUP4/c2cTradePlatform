@@ -3,6 +3,7 @@ package sg.edu.nus.iss.c2csectrade.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.io.Decoders;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,27 @@ public class JwtTokenProvider {
 
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
+
+    /**
+     * Fail at startup rather than on the first login: a missing or weak key
+     * would otherwise only surface as every request being rejected.
+     */
+    @PostConstruct
+    void validateSecret() {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET is not set. Generate one with: openssl rand -base64 64");
+        }
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(jwtSecret);
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("JWT_SECRET must be Base64 encoded", e);
+        }
+        // HS512 needs a key at least as long as its 512-bit output.
+        if (keyBytes.length < 64) {
+            throw new IllegalStateException("JWT_SECRET must decode to at least 64 bytes for HS512, got " + keyBytes.length);
+        }
+    }
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);

@@ -38,8 +38,20 @@
         INSERT INTO users (username, display_name, password_hash, email, avatar_url, created_at, updated_at)
         VALUES (#{username}, #{displayName}, #{passwordHash}, #{email}, #{avatarUrl}, #{createdAt}, #{updatedAt})
     </insert>
+    <!-- Profile fields only. Balance and payment password have their own statements
+         below, so a stale User written back by a profile edit cannot undo a payment. -->
     <update id="update" parameterType="sg.edu.nus.iss.c2csectrade.entity.User">
-        UPDATE users SET username=#{username}, display_name=#{displayName}, password_hash=#{passwordHash}, payment_password_hash=#{paymentPasswordHash}, email=#{email}, avatar_url=#{avatarUrl}, balance=#{balance}, updated_at=#{updatedAt} WHERE id=#{id}
+        UPDATE users SET username=#{username}, display_name=#{displayName}, password_hash=#{passwordHash}, email=#{email}, avatar_url=#{avatarUrl}, updated_at=#{updatedAt} WHERE id=#{id}
+    </update>
+    <update id="updatePaymentPasswordHash">
+        UPDATE users SET payment_password_hash=#{hash} WHERE id=#{id}
+    </update>
+    <!-- Check and deduct in one statement: two concurrent payments cannot both pass the check. -->
+    <update id="debitBalance">
+        UPDATE users SET balance = balance - #{amount} WHERE id=#{id} AND balance &gt;= #{amount}
+    </update>
+    <update id="creditBalance">
+        UPDATE users SET balance = balance + #{amount} WHERE id=#{id}
     </update>
     <delete id="deleteById" parameterType="long">
         DELETE FROM users WHERE id=#{id}
