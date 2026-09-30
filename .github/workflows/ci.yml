@@ -117,6 +117,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Validate Docker Compose topology
+        env:
+          JWT_SECRET: ci-validation-secret-ci-validation-secret-ci-validation-secret-ci-validation-secret
+          MYSQL_PASSWORD: ci-validation-only
+          MINIO_ROOT_PASSWORD: ci-validation-only
+          MINIO_PUBLIC_ENDPOINT: http://localhost:9000
+          IMAGE_OWNER: nus-se-34ft-group4
+        run: |
+          docker compose config --quiet
+          docker compose -f compose.staging.yaml config --quiet
+
       - name: Build backend image
         run: docker build -t c2c-sectrade-backend:${{ github.sha }} .
 
