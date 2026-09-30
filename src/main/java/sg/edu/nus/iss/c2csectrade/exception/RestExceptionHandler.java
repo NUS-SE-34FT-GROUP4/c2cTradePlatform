@@ -18,7 +18,7 @@ public class RestExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "访问被拒绝");
+        body.put("error", "Access denied");
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
@@ -27,7 +27,7 @@ public class RestExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "认证失败");
+        body.put("error", "Authentication failed");
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
@@ -36,7 +36,7 @@ public class RestExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handleUserExists(UserAlreadyExistsException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "用户已存在");
+        body.put("error", "User already exists");
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
@@ -47,7 +47,7 @@ public class RestExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handlePaymentPassword(PaymentPasswordException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "支付密码错误");
+        body.put("error", "Payment password rejected");
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
@@ -56,7 +56,7 @@ public class RestExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handleInsufficientBalance(InsufficientBalanceException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "余额不足");
+        body.put("error", "Insufficient balance");
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
@@ -65,7 +65,7 @@ public class RestExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handleGeneric(Exception ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "服务器错误");
+        body.put("error", "Server error");
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }

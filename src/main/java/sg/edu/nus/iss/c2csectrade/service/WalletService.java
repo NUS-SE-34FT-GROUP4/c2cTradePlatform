@@ -60,30 +60,37 @@ public class WalletService {
     }
 
     public boolean hasPaymentPassword(Long userId) {
-        return load(userId).getPaymentPasswordHash() != null;
+        return isSet(load(userId));
     }
 
     /**
-     * Sets or resets the payment password. Re-entering the login password is
-     * what authorises it, so a forgotten payment password can be reset without
-     * knowing the old one, but an unattended logged-in browser cannot.
+     * First-time setup only. Once a payment password exists it can only be
+     * replaced through {@link #changePaymentPassword}, which needs the old one,
+     * so someone holding the session cannot overwrite it and then pay.
      */
-    public void setPaymentPassword(Long userId, String loginPassword, String paymentPassword) {
-        if (paymentPassword == null || !SIX_DIGITS.matcher(paymentPassword).matches()) {
-            throw new PaymentPasswordException("Payment password must be exactly 6 digits");
+    public void setPaymentPassword(Long userId, String password, String confirmPassword) {
+        if (isSet(load(userId))) {
+            throw new PaymentPasswordException("A payment password is already set; change it instead");
         }
-        User user = load(userId);
-        if (loginPassword == null || !passwordEncoder.matches(loginPassword, user.getPasswordHash())) {
-            throw new PaymentPasswordException("Login password is incorrect");
-        }
-        userMapper.updatePaymentPasswordHash(userId, passwordEncoder.encode(paymentPassword));
+        requireNewPassword(password, confirmPassword);
+        userMapper.updatePaymentPasswordHash(userId, passwordEncoder.encode(password));
         failures.remove(userId);
+    }
+
+    /**
+     * The old password goes through the same check as a payment, so guessing
+     * it here counts towards the same lockout.
+     */
+    public void changePaymentPassword(Long userId, String oldPassword, String newPassword, String confirmPassword) {
+        verifyPaymentPassword(userId, oldPassword);
+        requireNewPassword(newPassword, confirmPassword);
+        userMapper.updatePaymentPasswordHash(userId, passwordEncoder.encode(newPassword));
     }
 
     /** Throws unless the payment password is right and the account is not locked out. */
     public void verifyPaymentPassword(Long userId, String paymentPassword) {
         User user = load(userId);
-        if (user.getPaymentPasswordHash() == null) {
+        if (!isSet(user)) {
             throw new PaymentPasswordException("Set a payment password before paying");
         }
         Instant now = clock.instant();
@@ -154,6 +161,19 @@ public class WalletService {
             return next;
         });
         return Math.max(0, MAX_ATTEMPTS - attempts.count);
+    }
+
+    private void requireNewPassword(String password, String confirmPassword) {
+        if (password == null || !SIX_DIGITS.matcher(password).matches()) {
+            throw new PaymentPasswordException("Payment password must be exactly 6 digits");
+        }
+        if (!password.equals(confirmPassword)) {
+            throw new PaymentPasswordException("The two passwords do not match");
+        }
+    }
+
+    private boolean isSet(User user) {
+        return user.getPaymentPasswordHash() != null && !user.getPaymentPasswordHash().isBlank();
     }
 
     private void requireValidAmount(BigDecimal amount) {
