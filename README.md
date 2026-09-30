@@ -103,3 +103,13 @@ frontend/src/
 ├── api/             # Axios service layer
 └── router/          # Vue Router with auth guard
 ```
+
+## Database integration tests
+
+Run `mvn test` for unit tests, or `mvn verify` with Docker running for the full suite.
+`CheckoutIT` starts MySQL 8 through Testcontainers and loads the actual root `init.sql`
+(no duplicated test schema). It exercises JWT-protected checkout through Spring MVC,
+real MyBatis XML, price snapshots, seller splitting and transaction rollback. Only file
+storage is mocked; repositories and transaction management are real. A temporary JWT
+key is generated per test JVM. Docker is required and missing Docker fails the suite.
+CI runs `mvn -B verify` and publishes both Surefire and Failsafe reports.

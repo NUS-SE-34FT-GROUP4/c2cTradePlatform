@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   backend-test:
-    name: Backend build and unit tests
+    name: Backend unit and MySQL integration tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -29,8 +29,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run unit tests with coverage
-        run: mvn -B test
+      - name: Run unit and Testcontainers integration tests
+        run: mvn -B verify
 
       - name: Upload JaCoCo coverage report
         if: always()
@@ -45,7 +45,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: surefire-test-results
-          path: target/surefire-reports/
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
           if-no-files-found: warn
 
   frontend-build:
