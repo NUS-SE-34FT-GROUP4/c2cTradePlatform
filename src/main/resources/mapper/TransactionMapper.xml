@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sg.edu.nus.iss.c2csectrade.mapper.TransactionMapper">
+
+    <resultMap id="TransactionResultMap" type="sg.edu.nus.iss.c2csectrade.entity.Transaction">
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="amount" column="amount"/>
+        <result property="paymentMethod" column="payment_method"/>
+        <result property="transactionType" column="transaction_type"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="sg.edu.nus.iss.c2csectrade.entity.Transaction"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO oms_transaction
+            (order_id, amount, payment_method, transaction_type, status)
+        VALUES
+            (#{orderId}, #{amount}, #{paymentMethod}, #{transactionType}, #{status})
+    </insert>
+
+    <select id="selectByOrderId" resultMap="TransactionResultMap">
+        SELECT * FROM oms_transaction WHERE order_id = #{orderId} ORDER BY created_at
+    </select>
+
+    <select id="selectSuccessfulPayment" resultMap="TransactionResultMap">
+        SELECT * FROM oms_transaction
+        WHERE order_id = #{orderId} AND transaction_type = 'PAYMENT' AND status = 'SUCCESS'
+        ORDER BY created_at DESC LIMIT 1
+    </select>
+</mapper>
