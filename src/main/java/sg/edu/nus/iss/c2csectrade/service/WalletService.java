@@ -33,6 +33,8 @@ public class WalletService {
     static final int MAX_ATTEMPTS = 5;
     static final Duration LOCKOUT = Duration.ofMinutes(15);
     static final BigDecimal MAX_TOP_UP = new BigDecimal("10000.00");
+    // users.balance is DECIMAL(15, 2)
+    static final BigDecimal MAX_BALANCE = new BigDecimal("9999999999999.99");
     private static final Pattern SIX_DIGITS = Pattern.compile("\\d{6}");
 
     private final UserMapper userMapper;
@@ -113,7 +115,9 @@ public class WalletService {
     }
 
     /**
-     * Verifies the payment password, then deducts the amount.
+     * Verifies the payment password, then deducts the amount under a row lock.
+     * Called inside the order payment transaction, a later failure there rolls
+     * the deduction back with it, so a failed payment leaves the balance as it was.
      *
      * @return the balance after payment
      */
@@ -121,24 +125,44 @@ public class WalletService {
     public BigDecimal pay(Long userId, String paymentPassword, BigDecimal amount) {
         requireValidAmount(amount);
         verifyPaymentPassword(userId, paymentPassword);
-        if (userMapper.debitBalance(userId, amount) == 0) {
-            throw new InsufficientBalanceException("Insufficient balance");
+        BigDecimal current = lockBalance(userId);
+        if (current.compareTo(amount) < 0) {
+            throw new InsufficientBalanceException(
+                    "Insufficient balance: " + current.toPlainString() + " available, " + amount.toPlainString() + " needed");
         }
-        return getBalance(userId);
+        BigDecimal updated = current.subtract(amount);
+        userMapper.updateBalance(userId, updated);
+        return updated;
     }
 
     /**
-     * Adds money to an account: refunds, and seller payout once a buyer confirms receipt.
+     * Adds money to an account: top-ups, refunds, and seller payout once a
+     * buyer confirms receipt.
      *
      * @return the balance after the credit
      */
     @Transactional
     public BigDecimal credit(Long userId, BigDecimal amount) {
         requireValidAmount(amount);
-        if (userMapper.creditBalance(userId, amount) == 0) {
+        BigDecimal updated = lockBalance(userId).add(amount);
+        if (updated.compareTo(MAX_BALANCE) > 0) {
+            throw new IllegalArgumentException("Balance cannot exceed " + MAX_BALANCE.toPlainString());
+        }
+        userMapper.updateBalance(userId, updated);
+        return updated;
+    }
+
+    /**
+     * Reads the balance with SELECT ... FOR UPDATE. A concurrent payment or
+     * top-up on the same user waits until this transaction commits, so neither
+     * works from a stale balance and overwrites the other's change.
+     */
+    private BigDecimal lockBalance(Long userId) {
+        User user = userMapper.selectByIdForUpdate(userId);
+        if (user == null) {
             throw new IllegalArgumentException("User not found");
         }
-        return getBalance(userId);
+        return user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
     }
 
     /** Simulated top-up; no real payment gateway is involved (Proposal, out of scope). */
