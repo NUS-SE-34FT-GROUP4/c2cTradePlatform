@@ -208,8 +208,9 @@ jobs:
             cd ~/c2c-sectrade
             OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            # Record what is running now, so a failed smoke test can go back to it.
-            docker compose -f compose.staging.yaml images --quiet backend > .previous-backend || true
+            # Record the tag running now, so a failed smoke test can go back to it.
+            # Read it from the container: compose would need every secret just to answer.
+            docker inspect --format '{{.Config.Image}}' c2csectrade-backend 2>/dev/null | sed 's/.*://' > .previous-backend || true
             export IMAGE_OWNER="$OWNER"
             export IMAGE_TAG="${{ github.sha }}"
             export MYSQL_PASSWORD='${{ secrets.STAGING_DB_PASSWORD }}'
@@ -240,8 +241,16 @@ jobs:
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
+            set -e
             cd ~/c2c-sectrade
             export IMAGE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-            export IMAGE_TAG=$(cat .previous-backend 2>/dev/null || echo latest)
+            export IMAGE_TAG=$(cat .previous-backend 2>/dev/null)
+            export IMAGE_TAG=${IMAGE_TAG:-latest}
+            # compose.staging.yaml requires these, so a rollback without them fails
+            # before it touches a container.
+            export MYSQL_PASSWORD='${{ secrets.STAGING_DB_PASSWORD }}'
+            export MINIO_ROOT_PASSWORD='${{ secrets.STAGING_MINIO_PASSWORD }}'
+            export MINIO_PUBLIC_ENDPOINT='${{ secrets.STAGING_MINIO_PUBLIC_ENDPOINT }}'
+            export JWT_SECRET='${{ secrets.STAGING_JWT_SECRET }}'
             docker compose -f compose.staging.yaml up -d
             echo "Rolled back to $IMAGE_TAG"
