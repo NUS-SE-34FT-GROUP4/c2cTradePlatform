@@ -10,6 +10,7 @@
         <result property="status" column="status"/>
         <result property="totalAmount" column="total_amount"/>
         <result property="expireAt" column="expire_at"/>
+        <result property="paymentMethod" column="payment_method"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="sellerName" column="seller_name"/>
@@ -48,5 +49,18 @@
 
     <update id="updateStatus">
         UPDATE oms_order SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <!--
+      The WHERE clause names the state being left, so two concurrent attempts to
+      pay or ship the same order cannot both succeed: only the one that matches
+      the current status changes a row. Same conditional-update approach that
+      stock reservation uses, and what the State pattern sits on top of.
+    -->
+    <update id="transition">
+        UPDATE oms_order
+        SET status = #{toStatus}
+        <if test="paymentMethod != null">, payment_method = #{paymentMethod}</if>
+        WHERE id = #{id} AND status = #{fromStatus}
     </update>
 </mapper>
