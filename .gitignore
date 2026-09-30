@@ -34,6 +34,9 @@ build/
 ### VS Code ###
 .vscode/
 
+### Local secrets ###
+.env
+
 ### Mac OS ###
 .DS_Store
 # IDE configuration files
