@@ -18,8 +18,8 @@ public interface UserMapper {
     int insert(User user);
     int update(User user);
     int updatePaymentPasswordHash(@Param("id") Long id, @Param("hash") String hash);
-    /** @return 0 when the balance is lower than amount; nothing is deducted then */
-    int debitBalance(@Param("id") Long id, @Param("amount") BigDecimal amount);
-    int creditBalance(@Param("id") Long id, @Param("amount") BigDecimal amount);
+    /** Locks the row until the surrounding transaction ends; only call inside one. */
+    User selectByIdForUpdate(@Param("id") Long id);
+    int updateBalance(@Param("id") Long id, @Param("balance") BigDecimal balance);
     int deleteById(@Param("id") Long id);
 }
