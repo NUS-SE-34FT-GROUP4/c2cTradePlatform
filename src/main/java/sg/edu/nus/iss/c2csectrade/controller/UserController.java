@@ -1,7 +1,10 @@
 package sg.edu.nus.iss.c2csectrade.controller;
 
+import sg.edu.nus.iss.c2csectrade.dto.SetPaymentPasswordRequest;
 import sg.edu.nus.iss.c2csectrade.entity.User;
+import sg.edu.nus.iss.c2csectrade.exception.PaymentPasswordException;
 import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
+import sg.edu.nus.iss.c2csectrade.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -10,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/api/users")
@@ -19,8 +22,12 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private WalletService walletService;
+
     /**
-     * 根据用户名获取用户信息（仍返回完整信息，如需可改为 DTO）
+     * Look up a user by username. Password hashes are write-only on the entity,
+     * so they never appear in the response.
      */
     @GetMapping("/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
@@ -33,7 +40,7 @@ public class UserController {
 
 
     /**
-     * 修改用户显示名称
+     * Change the caller's display name.
      */
     @PutMapping("/display-name")
     public ResponseEntity<?> updateDisplayName(@RequestBody Map<String, String> request, Authentication authentication) {
@@ -42,48 +49,44 @@ public class UserController {
             String newDisplayName = request.get("displayName");
 
             if (newDisplayName == null || newDisplayName.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("message", "显示名称不能为空"));
+                return ResponseEntity.badRequest().body(Map.of("message", "Display name cannot be empty"));
             }
 
             newDisplayName = newDisplayName.trim();
 
-            // 验证长度
             if (newDisplayName.length() < 2 || newDisplayName.length() > 20) {
-                return ResponseEntity.badRequest().body(Map.of("message", "用户名长度必须在2-20个字符之间"));
+                return ResponseEntity.badRequest().body(Map.of("message", "Display name must be 2 to 20 characters"));
             }
 
-            // 敏感词检查
             if (containsSensitiveWords(newDisplayName)) {
-                return ResponseEntity.badRequest().body(Map.of("message", "用户名包含敏感词汇，请重新输入"));
+                return ResponseEntity.badRequest().body(Map.of("message", "Display name contains a reserved or offensive word"));
             }
 
-            // 检查是否与其他用户重复
             if (isDisplayNameExists(newDisplayName, username)) {
-                return ResponseEntity.badRequest().body(Map.of("message", "该用户名已被使用，请选择其他名称"));
+                return ResponseEntity.badRequest().body(Map.of("message", "This display name is already taken"));
             }
 
             User user = userMapper.selectByUsername(username);
             if (user == null) {
-                return ResponseEntity.status(404).body(Map.of("message", "用户不存在"));
+                return ResponseEntity.status(404).body(Map.of("message", "User not found"));
             }
             user.setUpdatedAt(java.time.Instant.now());
-
-            // 更新用户显示名称
             user.setDisplayName(newDisplayName);
             userMapper.update(user);
 
             Map<String, String> response = new HashMap<>();
-            response.put("message", "用户名修改成功");
+            response.put("message", "Display name updated");
             response.put("displayName", newDisplayName);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("message", "修改失败: " + e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("message", "Update failed: " + e.getMessage()));
         }
     }
 
     /**
-     * 检查敏感词
+     * Reserved and offensive words. The Chinese entries are data, not text to
+     * translate: users can type Chinese display names, so they must stay.
      */
     private boolean containsSensitiveWords(String name) {
         String[] sensitiveWords = {
@@ -102,7 +105,7 @@ public class UserController {
     }
 
     /**
-     * 检查显示名称是否已存在（排除当前用户）
+     * Whether another user already has this display name.
      */
     private boolean isDisplayNameExists(String displayName, String currentUsername) {
         List<User> allUsers = userMapper.selectAll();
@@ -112,7 +115,7 @@ public class UserController {
     }
 
     /**
-     * 获取当前用户信息（包括余额）
+     * The caller's own profile, including balance.
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
@@ -121,7 +124,7 @@ public class UserController {
             User user = userMapper.selectByUsername(username);
 
             if (user == null) {
-                return ResponseEntity.status(404).body(Map.of("message", "用户不存在"));
+                return ResponseEntity.status(404).body(Map.of("message", "User not found"));
             }
 
             Map<String, Object> userInfo = new HashMap<>();
@@ -134,8 +137,57 @@ public class UserController {
 
             return ResponseEntity.ok(userInfo);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("message", "获取用户信息失败: " + e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("message", "Failed to load user: " + e.getMessage()));
         }
     }
 
+    /**
+     * Whether the caller has set a payment password. The payment page uses
+     * this to send first-time buyers to the setup page before they pay.
+     */
+    @GetMapping("/payment-password/check")
+    public ResponseEntity<?> checkPaymentPassword(Authentication authentication) {
+        return asUser(authentication, userId ->
+                ResponseEntity.ok(Map.of("hasPaymentPassword", walletService.hasPaymentPassword(userId))));
+    }
+
+    /**
+     * First-time setup. Refused once a payment password exists; use update.
+     */
+    @PostMapping("/payment-password/set")
+    public ResponseEntity<?> setPaymentPassword(@RequestBody SetPaymentPasswordRequest request,
+                                                Authentication authentication) {
+        return asUser(authentication, userId -> {
+            walletService.setPaymentPassword(userId, request.getPassword(), request.getConfirmPassword());
+            return ResponseEntity.ok(Map.of("message", "Payment password set"));
+        });
+    }
+
+    /**
+     * Change the payment password; the old one is required.
+     */
+    @PutMapping("/payment-password/update")
+    public ResponseEntity<?> updatePaymentPassword(@RequestBody Map<String, String> request,
+                                                   Authentication authentication) {
+        return asUser(authentication, userId -> {
+            walletService.changePaymentPassword(userId,
+                    request.get("oldPassword"), request.get("newPassword"), request.get("confirmPassword"));
+            return ResponseEntity.ok(Map.of("message", "Payment password changed"));
+        });
+    }
+
+    private ResponseEntity<?> asUser(Authentication authentication, Function<Long, ResponseEntity<?>> action) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Not authenticated"));
+        }
+        User user = userMapper.selectByUsername(authentication.getName());
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("message", "User not found"));
+        }
+        try {
+            return action.apply(user.getId());
+        } catch (PaymentPasswordException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }
