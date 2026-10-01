@@ -104,6 +104,9 @@
           <p>{{ product.description || 'No description available' }}</p>
         </div>
 
+        <p v-if="reviewError" role="alert">{{ reviewError }}</p>
+        <ProductReviews v-else :reviews="productReviews" :average-rating="averageRating" :total-reviews="productReviews.length" />
+
         <!-- Action buttons -->
         <div class="action-buttons">
           <button class="btn btn-home" @click="goHome">🏠 Back to Home</button>
@@ -128,12 +131,31 @@ import { useRoute, useRouter } from 'vue-router';
 import { getCategoryLabel } from '@/utils/categoryData';
 import productService from '@/api/productService';
 import axios from 'axios';
+import ProductReviews from '@/components/ProductReviews.vue';
+import { reviews } from '@/api/marketplaceService';
 
 const route = useRoute();
 const router = useRouter();
 const product = ref(null);
 const currentMediaIndex = ref(0);
 const similarProducts = ref([]);
+const productReviews = ref([]);
+const averageRating = ref(0);
+const reviewError = ref('');
+const fetchReviews = async () => {
+  const id = route.params.id;
+  productReviews.value = [];
+  averageRating.value = 0;
+  reviewError.value = '';
+  try {
+    const { data } = await reviews.forProduct(id);
+    if (id !== route.params.id) return;
+    productReviews.value = data.reviews;
+    averageRating.value = data.averageRating;
+  } catch (e) {
+    if (id === route.params.id) reviewError.value = 'Reviews could not be loaded.';
+  }
+};
 
 const currentMedia = computed(() => {
   if (!product.value?.media || product.value.media.length === 0) return null;
@@ -223,6 +245,7 @@ const fetchSimilarProducts = async () => {
 
 onMounted(() => {
   fetchProduct();
+  fetchReviews();
   // Track product view for recommendation system
   trackProductView();
   // Fetch similar products
@@ -238,6 +261,7 @@ watch(
   (newId) => {
     if (newId) {
       fetchProduct();
+      fetchReviews();
       trackProductView();
       fetchSimilarProducts();
       // Scroll to top

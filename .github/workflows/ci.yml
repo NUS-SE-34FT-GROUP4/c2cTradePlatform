@@ -29,8 +29,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run unit tests with coverage
-        run: mvn -B test
+      - name: Run unit and Testcontainers integration tests
+        run: mvn -B verify
 
       - name: Upload JaCoCo coverage report
         if: always()
@@ -45,7 +45,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: surefire-test-results
-          path: target/surefire-reports/
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
           if-no-files-found: warn
 
   frontend-build:
@@ -193,7 +195,7 @@ jobs:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
-          source: "compose.staging.yaml,init.sql"
+          source: "compose.staging.yaml,init.sql,scripts/migrations/003_reviews.sql"
           target: "~/c2c-sectrade"
 
       - name: Pull and restart
@@ -218,6 +220,17 @@ jobs:
             export MINIO_PUBLIC_ENDPOINT='${{ secrets.STAGING_MINIO_PUBLIC_ENDPOINT }}'
             export JWT_SECRET='${{ secrets.STAGING_JWT_SECRET }}'
             docker compose -f compose.staging.yaml pull
+            # Existing MySQL volumes do not rerun init.sql. Apply the additive review migration
+            # before starting the application version that queries the new table.
+            docker compose -f compose.staging.yaml up -d mysql redis minio
+            for attempt in $(seq 1 30); do
+              if docker compose -f compose.staging.yaml exec -T mysql sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade -e "SELECT 1"' >/dev/null 2>&1; then
+                break
+              fi
+              if [ "$attempt" = 30 ]; then echo "MySQL did not become ready"; exit 1; fi
+              sleep 2
+            done
+            docker compose -f compose.staging.yaml exec -T mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' < scripts/migrations/003_reviews.sql
             docker compose -f compose.staging.yaml up -d
 
       - name: Smoke test

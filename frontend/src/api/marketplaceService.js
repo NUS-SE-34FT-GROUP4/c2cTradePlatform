@@ -54,3 +54,14 @@ export const chat = {
 };
 
 export default { listings, cart, orders, favorites, chat };
+
+export const reviews = {
+  create: (payload) => client.post('/reviews', payload),
+  check: (orderId) => client.get(`/reviews/check/${orderId}`),
+  forProduct: (productId) => client.get(`/reviews/product/${productId}`),
+  upload: (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    return client.post('/reviews/images', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+};
