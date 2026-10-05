@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +45,7 @@ class WalletServiceTest {
         user.setPasswordHash(encoder.encode("login-pass"));
         user.setBalance(new BigDecimal("100.00"));
         lenient().when(userMapper.selectById(USER_ID)).thenReturn(user);
+        lenient().when(userMapper.selectByIdForUpdate(USER_ID)).thenReturn(user);
         lenient().when(clock.instant()).thenReturn(T0);
     }
 
@@ -54,19 +56,32 @@ class WalletServiceTest {
     @Test
     @DisplayName("The payment password is stored as its own BCrypt hash, never in plain text")
     void setPaymentPasswordStoresHash() {
-        walletService.setPaymentPassword(USER_ID, "login-pass", "123456");
+        walletService.setPaymentPassword(USER_ID, "123456", "123456");
 
         verify(userMapper).updatePaymentPasswordHash(eq(USER_ID), argThat(hash ->
-                !hash.equals("123456") && encoder.matches("123456", hash)));
+                !hash.equals("123456") && encoder.matches("123456", hash)
+                        && !hash.equals(user.getPasswordHash())));
     }
 
     @Test
-    @DisplayName("Setting the payment password requires the correct login password")
-    void setPaymentPasswordChecksLoginPassword() {
-        PaymentPasswordException error = assertThrows(PaymentPasswordException.class,
-                () -> walletService.setPaymentPassword(USER_ID, "wrong", "123456"));
+    @DisplayName("Set only works the first time; an existing payment password cannot be overwritten")
+    void setRefusedWhenAlreadySet() {
+        withPaymentPassword("123456");
 
-        assertTrue(error.getMessage().contains("Login password"));
+        PaymentPasswordException error = assertThrows(PaymentPasswordException.class,
+                () -> walletService.setPaymentPassword(USER_ID, "654321", "654321"));
+
+        assertTrue(error.getMessage().contains("already set"));
+        verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+    }
+
+    @Test
+    @DisplayName("The confirmation must match")
+    void setRequiresMatchingConfirmation() {
+        PaymentPasswordException error = assertThrows(PaymentPasswordException.class,
+                () -> walletService.setPaymentPassword(USER_ID, "123456", "123465"));
+
+        assertTrue(error.getMessage().contains("do not match"));
         verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
     }
 
@@ -75,9 +90,29 @@ class WalletServiceTest {
     void paymentPasswordMustBeSixDigits() {
         for (String bad : new String[]{null, "12345", "1234567", "12345a", "      "}) {
             assertThrows(PaymentPasswordException.class,
-                    () -> walletService.setPaymentPassword(USER_ID, "login-pass", bad), "accepted: " + bad);
+                    () -> walletService.setPaymentPassword(USER_ID, bad, bad), "accepted: " + bad);
         }
         verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+    }
+
+    @Test
+    @DisplayName("Changing the payment password requires the old one")
+    void changeRequiresOldPassword() {
+        withPaymentPassword("123456");
+
+        assertThrows(PaymentPasswordException.class,
+                () -> walletService.changePaymentPassword(USER_ID, "000000", "654321", "654321"));
+        verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+
+        walletService.changePaymentPassword(USER_ID, "123456", "654321", "654321");
+        verify(userMapper).updatePaymentPasswordHash(eq(USER_ID), argThat(hash -> encoder.matches("654321", hash)));
+    }
+
+    @Test
+    @DisplayName("Changing is refused when no payment password has been set")
+    void changeRequiresExistingPassword() {
+        assertThrows(PaymentPasswordException.class,
+                () -> walletService.changePaymentPassword(USER_ID, "123456", "654321", "654321"));
     }
 
     @Test
@@ -89,14 +124,25 @@ class WalletServiceTest {
     }
 
     @Test
-    @DisplayName("Paying with the right password deducts the amount")
+    @DisplayName("Paying with the right password deducts the amount from the locked row")
     void payDeductsBalance() {
         withPaymentPassword("123456");
-        when(userMapper.debitBalance(USER_ID, new BigDecimal("30.00"))).thenReturn(1);
 
-        walletService.pay(USER_ID, "123456", new BigDecimal("30.00"));
+        BigDecimal after = walletService.pay(USER_ID, "123456", new BigDecimal("30.00"));
 
-        verify(userMapper).debitBalance(USER_ID, new BigDecimal("30.00"));
+        assertEquals(new BigDecimal("70.00"), after);
+        // the balance is read with FOR UPDATE before it is written
+        InOrder order = inOrder(userMapper);
+        order.verify(userMapper).selectByIdForUpdate(USER_ID);
+        order.verify(userMapper).updateBalance(USER_ID, new BigDecimal("70.00"));
+    }
+
+    @Test
+    @DisplayName("Paying the exact balance leaves zero")
+    void payExactBalance() {
+        withPaymentPassword("123456");
+
+        assertEquals(0, walletService.pay(USER_ID, "123456", new BigDecimal("100.00")).signum());
     }
 
     @Test
@@ -106,7 +152,7 @@ class WalletServiceTest {
                 () -> walletService.pay(USER_ID, "123456", new BigDecimal("10")));
 
         assertTrue(error.getMessage().contains("Set a payment password"));
-        verify(userMapper, never()).debitBalance(any(), any());
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
@@ -118,17 +164,19 @@ class WalletServiceTest {
                 () -> walletService.pay(USER_ID, "000000", new BigDecimal("10")));
 
         assertTrue(error.getMessage().contains("4 attempt(s) left"));
-        verify(userMapper, never()).debitBalance(any(), any());
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
-    @DisplayName("When the balance is too low the payment fails with InsufficientBalanceException")
+    @DisplayName("A payment the balance cannot cover fails and leaves the balance unchanged")
     void insufficientBalance() {
         withPaymentPassword("123456");
-        when(userMapper.debitBalance(eq(USER_ID), any())).thenReturn(0);
 
-        assertThrows(InsufficientBalanceException.class,
-                () -> walletService.pay(USER_ID, "123456", new BigDecimal("500.00")));
+        InsufficientBalanceException error = assertThrows(InsufficientBalanceException.class,
+                () -> walletService.pay(USER_ID, "123456", new BigDecimal("100.01")));
+
+        assertTrue(error.getMessage().contains("100.00 available"));
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
@@ -162,17 +210,25 @@ class WalletServiceTest {
     }
 
     @Test
-    @DisplayName("Resetting the payment password clears a lockout")
-    void resetClearsLockout() {
+    @DisplayName("Guessing the old password on change counts towards the same lockout")
+    void changeCannotBypassLockout() {
         withPaymentPassword("123456");
         for (int i = 0; i < WalletService.MAX_ATTEMPTS; i++) {
-            assertThrows(PaymentPasswordException.class, () -> walletService.verifyPaymentPassword(USER_ID, "000000"));
+            assertThrows(PaymentPasswordException.class,
+                    () -> walletService.changePaymentPassword(USER_ID, "000000", "654321", "654321"));
         }
 
-        walletService.setPaymentPassword(USER_ID, "login-pass", "654321");
-        withPaymentPassword("654321");
+        PaymentPasswordException locked = assertThrows(PaymentPasswordException.class,
+                () -> walletService.pay(USER_ID, "123456", BigDecimal.ONE));
+        assertTrue(locked.getMessage().contains("Try again in"));
+        verify(userMapper, never()).updatePaymentPasswordHash(any(), any());
+    }
 
-        assertDoesNotThrow(() -> walletService.verifyPaymentPassword(USER_ID, "654321"));
+    @Test
+    @DisplayName("A blank stored hash counts as not set")
+    void blankHashIsNotSet() {
+        user.setPaymentPasswordHash("  ");
+        assertFalse(walletService.hasPaymentPassword(USER_ID));
     }
 
     @Test
@@ -184,26 +240,35 @@ class WalletServiceTest {
                     () -> walletService.pay(USER_ID, "123456", new BigDecimal(bad)), "accepted: " + bad);
         }
         assertThrows(IllegalArgumentException.class, () -> walletService.pay(USER_ID, "123456", null));
-        verify(userMapper, never()).debitBalance(any(), any());
+        verify(userMapper, never()).updateBalance(any(), any());
     }
 
     @Test
-    @DisplayName("Top-up credits the account and is capped per transaction")
+    @DisplayName("Top-up increases the balance under the row lock and is capped per transaction")
     void topUp() {
-        when(userMapper.creditBalance(USER_ID, new BigDecimal("50"))).thenReturn(1);
+        BigDecimal after = walletService.topUp(USER_ID, new BigDecimal("50"));
 
-        walletService.topUp(USER_ID, new BigDecimal("50"));
-        verify(userMapper).creditBalance(USER_ID, new BigDecimal("50"));
+        assertEquals(new BigDecimal("150.00"), after);
+        InOrder order = inOrder(userMapper);
+        order.verify(userMapper).selectByIdForUpdate(USER_ID);
+        order.verify(userMapper).updateBalance(USER_ID, new BigDecimal("150.00"));
 
         assertThrows(IllegalArgumentException.class,
                 () -> walletService.topUp(USER_ID, new BigDecimal("10000.01")));
     }
 
     @Test
+    @DisplayName("A credit that would overflow the balance column is refused")
+    void creditCannotOverflow() {
+        user.setBalance(WalletService.MAX_BALANCE);
+
+        assertThrows(IllegalArgumentException.class, () -> walletService.credit(USER_ID, new BigDecimal("0.01")));
+        verify(userMapper, never()).updateBalance(any(), any());
+    }
+
+    @Test
     @DisplayName("Crediting an unknown user fails")
     void creditUnknownUser() {
-        when(userMapper.creditBalance(eq(99L), any())).thenReturn(0);
-
         assertThrows(IllegalArgumentException.class, () -> walletService.credit(99L, BigDecimal.TEN));
     }
 

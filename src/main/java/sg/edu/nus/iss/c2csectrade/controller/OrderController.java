@@ -9,6 +9,7 @@ import sg.edu.nus.iss.c2csectrade.entity.User;
 import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
 import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
 import sg.edu.nus.iss.c2csectrade.service.OrderService;
+import sg.edu.nus.iss.c2csectrade.service.PaymentService;
 
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,14 @@ import java.util.function.Function;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PaymentService paymentService;
     private final UserMapper userMapper;
 
-    public OrderController(OrderService orderService, UserMapper userMapper) {
+    public OrderController(OrderService orderService,
+                           PaymentService paymentService,
+                           UserMapper userMapper) {
         this.orderService = orderService;
+        this.paymentService = paymentService;
         this.userMapper = userMapper;
     }
 
@@ -78,6 +83,17 @@ public class OrderController {
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<?> cancel(@PathVariable Long orderId, Authentication authentication) {
         return asUser(authentication, buyerId -> ResponseEntity.ok(orderService.cancel(buyerId, orderId)));
+    }
+
+    @PostMapping("/{orderId}/pay")
+    public ResponseEntity<?> pay(@PathVariable Long orderId,
+                                 @RequestBody Map<String, Object> body,
+                                 Authentication authentication) {
+        return asUser(authentication, buyerId -> ResponseEntity.ok(paymentService.pay(
+                buyerId,
+                orderId,
+                String.valueOf(body.get("paymentMethod")),
+                body.get("paymentPassword") == null ? null : String.valueOf(body.get("paymentPassword")))));
     }
 
     private ResponseEntity<?> asUser(Authentication authentication, Function<Long, ResponseEntity<?>> action) {

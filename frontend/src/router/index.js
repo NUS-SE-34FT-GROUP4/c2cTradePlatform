@@ -15,6 +15,12 @@ import ChatView from '../views/ChatView.vue';
 // ===== Define route rules =====
 const routes = [
   {
+    path: '/orders/:orderId/review',
+    name: 'review',
+    component: () => import('../views/ReviewView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/',
     name: 'home',
     component: HomeView,

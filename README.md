@@ -105,3 +105,36 @@ frontend/src/
 ├── api/             # Axios service layer
 └── router/          # Vue Router with auth guard
 ```
+
+## Database integration tests
+
+Run `mvn test` for unit tests, or `mvn verify` with Docker running for the full suite.
+`CheckoutIT` starts MySQL 8 through Testcontainers and loads the actual root `init.sql`
+(no duplicated test schema). It exercises JWT-protected checkout through Spring MVC,
+real MyBatis XML, price snapshots, seller splitting and transaction rollback. Only file
+storage is mocked; repositories and transaction management are real. A temporary JWT
+key is generated per test JVM. Docker is required and missing Docker fails the suite.
+CI runs `mvn -B verify` and publishes both Surefire and Failsafe reports.
+
+## Post-transaction reviews (#42)
+
+Ported from the supplied `c2csectrade-main.zip`: review DTOs/entity, the buyer/completed-order
+checks in `ReviewServiceImpl`, review persistence, and `ProductReviews.vue`. Adapted to this
+repository's Long IDs, `oms_order` schema, JWT client and shared file storage. Credit scoring
+and recommendation side effects remain out of scope for Sprint 3.
+
+An order can be reviewed once. For a multi-item order the buyer chooses which purchased
+item to rate; it is never silently assigned to the first line. Only COMPLETED orders qualify.
+Item and seller ratings are independent (1–5), comments use `HtmlSanitizer.clean`, and up to
+five HTTP(S) image URLs are stored as JSON. Uploads use `/api/reviews/images` (images only,
+5MB each). Anonymous responses omit buyer ID, avatar and order ID as well as the name.
+
+The buyer's completed order offers **Write a review**; reviews appear on the chosen product's
+page. The database's unique order key rejects duplicate concurrent submissions.
+
+For an existing database, apply `scripts/migrations/003_reviews.sql` before deploying the
+new application, e.g. `docker compose exec -T mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' < scripts/migrations/003_reviews.sql`.
+The staging workflow applies this additive migration automatically before starting the new backend.
+Do not rerun the destructive `init.sql` on an existing database. Fresh installations already
+include the review table in `init.sql`. Run `mvn verify` to exercise review endpoints and
+constraints against MySQL; payment and fulfilment implementation remain separate issues.
