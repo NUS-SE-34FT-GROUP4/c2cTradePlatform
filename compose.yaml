@@ -39,6 +39,27 @@ services:
     networks:
       - c2csectrade-network
 
+  # Search index. MySQL remains the source of truth; the backend keeps this
+  # index in sync after listing transactions commit.
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
+    container_name: c2csectrade-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - c2csectrade-network
+
   # Backend Application (可以扩展多个实例)
 
   minio:
@@ -75,6 +96,7 @@ services:
       SPRING_DATASOURCE_USERNAME: tradeuser
       SPRING_DATASOURCE_PASSWORD: tradepass
       SPRING_DATA_REDIS_HOST: redis
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
       MINIO_ENDPOINT: http://minio:9000
       MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       # Read from .env next to this file; see .env.example for how to generate one.
@@ -86,6 +108,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      elasticsearch:
+        # Elasticsearch is optional at runtime: start it first, but never block
+        # the backend on index health because SQL remains the fallback.
+        condition: service_started
       minio:
         condition: service_started
     networks:
@@ -115,8 +141,9 @@ volumes:
     driver: local
   minio-data:
     driver: local
+  elasticsearch-data:
+    driver: local
 
 networks:
   c2csectrade-network:
     driver: bridge
-
