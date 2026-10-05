@@ -20,6 +20,7 @@ public class Order implements Serializable {
     private Long sellerId;
     private String status;
     private BigDecimal totalAmount;
+    private String paymentMethod;
     private LocalDateTime expireAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

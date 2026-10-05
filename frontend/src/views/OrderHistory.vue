@@ -36,6 +36,9 @@
         <span v-if="order.status === 'PENDING_PAYMENT'" class="countdown">
           {{ remaining(order) }}
         </span>
+        <router-link v-if="role === 'buyer' && order.status === 'COMPLETED' && reviewStatus[order.id] === false"
+          :to="`/orders/${order.id}/review`">Write a review</router-link>
+        <span v-if="role === 'buyer' && reviewStatus[order.id] === true">Reviewed</span>
         <span class="total">Total {{ money(order.totalAmount) }}</span>
         <button
           v-if="role === 'buyer' && order.status === 'PENDING_PAYMENT'"
@@ -48,12 +51,12 @@
 </template>
 
 <script>
-import { orders } from '@/api/marketplaceService';
+import { orders, reviews } from '@/api/marketplaceService';
 
 export default {
   name: 'OrderHistory',
   data() {
-    return { list: [], role: 'buyer', now: Date.now(), timer: null };
+    return { reviewStatus: {}, list: [], role: 'buyer', now: Date.now(), timer: null };
   },
   computed: {
     justPlaced() {
@@ -96,6 +99,15 @@ export default {
     async load() {
       const { data } = await orders.list(this.role);
       this.list = data;
+      this.reviewStatus = {};
+      if (this.role === 'buyer') {
+        await Promise.all(data.filter(o => o.status === 'COMPLETED').map(async o => {
+          try {
+            const result = await reviews.check(o.id);
+            this.reviewStatus[o.id] = result.data.hasReviewed;
+          } catch (e) { /* Do not offer a duplicate review when status cannot be checked. */ }
+        }));
+      }
     },
     async cancel(order) {
       await orders.cancel(order.id);

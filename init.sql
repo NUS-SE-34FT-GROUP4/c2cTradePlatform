@@ -19,6 +19,7 @@ USE trade;
 
 -- Disable foreign key checks to allow clean drop
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `review`;
 
 -- Drop tables in reverse order of dependency to avoid foreign key errors
 DROP TABLE IF EXISTS `pms_product_media`;
@@ -299,3 +300,62 @@ CREATE TABLE `pms_view_history` (
     CONSTRAINT `fk_history_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_history_product` FOREIGN KEY (`product_id`) REFERENCES `pms_product`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='What each user looked at';
+
+-- =================================================================
+-- Sprint 3: payment and order fulfilment (WP3)
+-- =================================================================
+USE trade;
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `oms_transaction`;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- How the order was settled, so the order reads on its own without joining
+-- the ledger. Values match the tokens the payment page sends.
+ALTER TABLE `oms_order`
+    ADD COLUMN `payment_method` VARCHAR(20) NULL
+        COMMENT 'balance, alipay, wechat, bank' AFTER `total_amount`;
+
+-- Money movements. A payment and its refund are separate rows rather than one
+-- mutable record, so the ledger is append-only and a refunded order still
+-- shows what was originally paid.
+CREATE TABLE `oms_transaction` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `order_id` BIGINT NOT NULL,
+    `amount` DECIMAL(12,2) NOT NULL COMMENT 'Always positive; direction is given by transaction_type',
+    `payment_method` VARCHAR(20) NULL COMMENT 'balance, alipay, wechat, bank',
+    `transaction_type` VARCHAR(20) NOT NULL COMMENT 'PAYMENT, REFUND',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'SUCCESS' COMMENT 'SUCCESS, FAILED',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_txn_order` (`order_id`),
+    CONSTRAINT `fk_txn_order` FOREIGN KEY (`order_id`) REFERENCES `oms_order`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Append-only ledger of payments and refunds.';
+
+SELECT 'Sprint 3 payment tables created.' AS status;
+
+-- Sprint 3 reviews
+-- Additive migration: safe for an existing Sprint 2 database. Do not rerun init.sql on live data.
+CREATE TABLE IF NOT EXISTS review (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    buyer_id BIGINT NOT NULL,
+    seller_id BIGINT NOT NULL,
+    product_rating TINYINT NOT NULL,
+    seller_rating TINYINT NOT NULL,
+    comment TEXT NULL,
+    review_images JSON NULL,
+    is_anonymous BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_review_order (order_id),
+    INDEX idx_review_product (product_id, created_at),
+    CONSTRAINT fk_review_order FOREIGN KEY (order_id) REFERENCES oms_order(id),
+    CONSTRAINT fk_review_product FOREIGN KEY (product_id) REFERENCES pms_product(id),
+    CONSTRAINT fk_review_buyer FOREIGN KEY (buyer_id) REFERENCES users(id),
+    CONSTRAINT fk_review_seller FOREIGN KEY (seller_id) REFERENCES users(id),
+    CONSTRAINT ck_review_product_rating CHECK (product_rating BETWEEN 1 AND 5),
+    CONSTRAINT ck_review_seller_rating CHECK (seller_rating BETWEEN 1 AND 5)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

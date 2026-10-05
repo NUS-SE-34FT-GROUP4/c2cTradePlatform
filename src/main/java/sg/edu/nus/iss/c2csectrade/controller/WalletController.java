@@ -14,8 +14,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * The caller's own balance and payment password. Paying is not exposed here:
- * it happens inside the order payment flow, which calls WalletService.pay.
+ * The caller's own balance. The payment password lives under
+ * /api/users/payment-password, where the payment pages already call it.
+ * Paying is not exposed here: it happens inside the order payment flow,
+ * which calls WalletService.pay.
  */
 @RestController
 @RequestMapping("/api/wallet")
@@ -34,14 +36,6 @@ public class WalletController {
         return asUser(authentication, userId -> ResponseEntity.ok(Map.of(
                 "balance", walletService.getBalance(userId),
                 "hasPaymentPassword", walletService.hasPaymentPassword(userId))));
-    }
-
-    @PutMapping("/payment-password")
-    public ResponseEntity<?> setPaymentPassword(@RequestBody Map<String, String> body, Authentication authentication) {
-        return asUser(authentication, userId -> {
-            walletService.setPaymentPassword(userId, body.get("loginPassword"), body.get("paymentPassword"));
-            return ResponseEntity.ok(Map.of("message", "Payment password saved"));
-        });
     }
 
     @PostMapping("/top-up")
