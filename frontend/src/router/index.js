@@ -97,6 +97,12 @@ const routes = [
     component: ChatView,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/payment-password/setup',
+    name: 'payment-password-setup',
+    component: () => import('../views/PaymentPasswordSetup.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 // ===== Create router instance =====
