@@ -359,3 +359,18 @@ CREATE TABLE IF NOT EXISTS review (
     CONSTRAINT ck_review_product_rating CHECK (product_rating BETWEEN 1 AND 5),
     CONSTRAINT ck_review_seller_rating CHECK (seller_rating BETWEEN 1 AND 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sprint 3: system notifications (WP4). Raised by the order-state Observer,
+-- one row per recipient, so a user who was offline still sees what happened.
+-- Additive migration: safe for an existing Sprint 3 database.
+CREATE TABLE IF NOT EXISTS system_notification (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    order_id BIGINT NULL,
+    content VARCHAR(500) NOT NULL,
+    read_flag TINYINT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_notif_user (user_id, read_flag, created_at),
+    CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notif_order FOREIGN KEY (order_id) REFERENCES oms_order(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Persisted system notifications, one row per recipient.';
