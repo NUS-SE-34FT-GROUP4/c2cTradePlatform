@@ -1,8 +1,10 @@
 package sg.edu.nus.iss.c2csectrade.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sg.edu.nus.iss.c2csectrade.entity.*;
+import sg.edu.nus.iss.c2csectrade.event.OrderStateChangedEvent;
 import sg.edu.nus.iss.c2csectrade.mapper.*;
 import sg.edu.nus.iss.c2csectrade.service.payment.PaymentStrategy;
 
@@ -26,17 +28,20 @@ public class PaymentService {
     private final OrderItemMapper orderItemMapper;
     private final ProductMapper productMapper;
     private final TransactionMapper transactionMapper;
+    private final ApplicationEventPublisher events;
     private final Map<PaymentMethod, PaymentStrategy> strategies;
 
     public PaymentService(OrderMapper orderMapper,
                           OrderItemMapper orderItemMapper,
                           ProductMapper productMapper,
                           TransactionMapper transactionMapper,
+                          ApplicationEventPublisher events,
                           List<PaymentStrategy> strategies) {
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
         this.productMapper = productMapper;
         this.transactionMapper = transactionMapper;
+        this.events = events;
         // Spring injects every implementation; indexing them here means a new
         // method is picked up by adding a @Component, with nothing to register.
         this.strategies = strategies.stream()
@@ -72,6 +77,11 @@ public class PaymentService {
         strategy.settle(order, buyerId, paymentPassword);
         recordTransaction(order, method, TransactionType.PAYMENT);
         convertReservationToDeduction(orderId);
+
+        // Observers pick this up after the commit, not inside it.
+        events.publishEvent(new OrderStateChangedEvent(order.getId(), order.getOrderNo(),
+                order.getBuyerId(), order.getSellerId(),
+                OrderStatus.PENDING_PAYMENT.name(), OrderStatus.PAID.name(), order.getTotalAmount()));
 
         return orderMapper.selectById(orderId);
     }
