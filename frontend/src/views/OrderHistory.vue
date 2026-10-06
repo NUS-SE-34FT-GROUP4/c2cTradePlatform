@@ -36,6 +36,9 @@
         <span v-if="order.status === 'PENDING_PAYMENT'" class="countdown">
           {{ remaining(order) }}
         </span>
+        <router-link v-if="role === 'buyer' && order.status === 'PENDING_PAYMENT'"
+          :to="`/orders/${order.id}/pay`">Pay now</router-link>
+        <router-link :to="`/orders/${order.id}`">Details</router-link>
         <router-link v-if="role === 'buyer' && order.status === 'COMPLETED' && reviewStatus[order.id] === false"
           :to="`/orders/${order.id}/review`">Write a review</router-link>
         <span v-if="role === 'buyer' && reviewStatus[order.id] === true">Reviewed</span>
