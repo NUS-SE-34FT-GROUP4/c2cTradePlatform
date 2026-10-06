@@ -163,18 +163,6 @@ public class OrderService {
         }
     }
 
-    @Transactional
-    public Order cancel(Long buyerId, Long orderId) {
-        Order order = orderMapper.selectById(orderId);
-        if (order == null || !order.getBuyerId().equals(buyerId)) {
-            throw new IllegalArgumentException("Order not found");
-        }
-        if (!OrderStatus.PENDING_PAYMENT.name().equals(order.getStatus())) {
-            throw new IllegalStateException("Only an unpaid order can be cancelled");
-        }
-        releaseAndMark(order, OrderStatus.CANCELLED);
-        return orderMapper.selectById(orderId);
-    }
 
     /**
      * Expire orders whose payment window has passed and hand their held stock

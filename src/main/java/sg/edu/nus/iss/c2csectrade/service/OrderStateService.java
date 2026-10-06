@@ -1,11 +1,13 @@
 package sg.edu.nus.iss.c2csectrade.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sg.edu.nus.iss.c2csectrade.entity.*;
 import sg.edu.nus.iss.c2csectrade.mapper.OrderItemMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.OrderMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
+import sg.edu.nus.iss.c2csectrade.event.OrderStateChangedEvent;
 
 /**
  * Moving an order through its lifecycle.
@@ -22,13 +24,16 @@ public class OrderStateService {
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
     private final ProductMapper productMapper;
+    private final ApplicationEventPublisher events;
 
     public OrderStateService(OrderMapper orderMapper,
                              OrderItemMapper orderItemMapper,
-                             ProductMapper productMapper) {
+                             ProductMapper productMapper,
+                             ApplicationEventPublisher events) {
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
         this.productMapper = productMapper;
+        this.events = events;
     }
 
     @Transactional
@@ -56,6 +61,15 @@ public class OrderStateService {
         if (current.holdsReservation() && next.isTerminal()) {
             releaseReservation(orderId);
         }
+
+        // Every transition announces itself once, from the one place that
+        // performs them. Observers pick this up after the commit, so a failing
+        // notification cannot roll back the state change that caused it.
+        events.publishEvent(new OrderStateChangedEvent(
+                order.getId(), order.getOrderNo(),
+                order.getBuyerId(), order.getSellerId(),
+                current.name(), next.name(), order.getTotalAmount()));
+
         return orderMapper.selectById(orderId);
     }
 
