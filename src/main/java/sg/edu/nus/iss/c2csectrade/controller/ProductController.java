@@ -1,7 +1,6 @@
 package sg.edu.nus.iss.c2csectrade.controller;
 
 import sg.edu.nus.iss.c2csectrade.dto.ProductDTO;
-import sg.edu.nus.iss.c2csectrade.entity.Product;
 import sg.edu.nus.iss.c2csectrade.dto.ProductPublishRequest;
 import sg.edu.nus.iss.c2csectrade.entity.User;
 import sg.edu.nus.iss.c2csectrade.exception.ProductAccessDeniedException;
@@ -38,10 +37,8 @@ public class ProductController {
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String categories) {
         try {
-            List<Product> products = productService.listProductsWithFilters(keyword, minPrice, maxPrice,
-                    conditionLevel, location, categories);
-            List<ProductDTO> productDTOs = productService.convertToDTOList(products);
-            return ResponseEntity.ok(searchService.highlight(productDTOs, keyword));
+            return ResponseEntity.ok(searchService.search(keyword, minPrice, maxPrice,
+                    conditionLevel, location, categories));
         } catch (Exception e) {
             System.err.println("获取商品列表失败: " + e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
