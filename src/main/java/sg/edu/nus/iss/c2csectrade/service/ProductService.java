@@ -10,8 +10,10 @@ import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.ProductMediaMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sg.edu.nus.iss.c2csectrade.service.search.ProductIndexEvent;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ public class ProductService {
     private ProductMediaMapper productMediaMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     public Product getProductById(Long id) {
         Product product = productMapper.selectById(id);
@@ -178,7 +182,9 @@ public class ProductService {
         product.setUpdatedAt(LocalDateTime.now());
         productMapper.insert(product);
         replaceMedia(product.getId(), request);
-        return getProductById(product.getId());
+        Product published = getProductById(product.getId());
+        eventPublisher.publishEvent(ProductIndexEvent.upsert(product.getId()));
+        return published;
     }
 
     @Transactional
@@ -191,7 +197,9 @@ public class ProductService {
         if (request.getMedia() != null) {
             replaceMedia(productId, request);
         }
-        return getProductById(productId);
+        Product updated = getProductById(productId);
+        eventPublisher.publishEvent(ProductIndexEvent.upsert(productId));
+        return updated;
     }
 
     /**
@@ -204,6 +212,7 @@ public class ProductService {
         existing.setStatus(0);
         existing.setUpdatedAt(LocalDateTime.now());
         productMapper.update(existing);
+        eventPublisher.publishEvent(ProductIndexEvent.delete(productId));
     }
 
     private Product requireOwned(Long productId, Long sellerId) {
