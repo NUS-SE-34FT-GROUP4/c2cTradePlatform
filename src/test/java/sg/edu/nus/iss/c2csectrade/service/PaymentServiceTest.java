@@ -40,7 +40,7 @@ class PaymentServiceTest {
     void setUp() {
         PaymentStrategy balance = new BalancePaymentStrategy(walletService);
         paymentService = new PaymentService(orderMapper, orderItemMapper, productMapper,
-                transactionMapper, List.of(balance));
+                transactionMapper, event -> { }, List.of(balance));
     }
 
     private Order pendingOrder() {

@@ -42,8 +42,7 @@
 <script>
 import { chat } from '@/api/marketplaceService';
 import { useAuthStore } from '@/store/auth';
-import SockJS from 'sockjs-client';
-import { Client } from '@stomp/stompjs';
+import realtime from '@/utils/realtime';
 
 export default {
   name: 'ChatView',
@@ -56,6 +55,7 @@ export default {
       productId: null,
       draft: '',
       stomp: null,
+      subscription: null,
     };
   },
   computed: {
@@ -76,7 +76,11 @@ export default {
     this.connect();
   },
   beforeUnmount() {
-    if (this.stomp) this.stomp.deactivate();
+    // The client is app-scoped (shared with the notification toasts), so it
+    // is not deactivated here — only this thread's subscription goes away.
+    if (this.subscription) this.subscription.unsubscribe();
+    this.subscription = null;
+    this.stomp = null;
   },
   methods: {
     time(value) {
@@ -106,23 +110,18 @@ export default {
       this.$nextTick(this.scrollToEnd);
     },
     connect() {
-      const token = localStorage.getItem('jwt_token');
-      this.stomp = new Client({
-        webSocketFactory: () => new SockJS(`${process.env.VUE_APP_WS_URL || ''}/ws`),
-        connectHeaders: { Authorization: `Bearer ${token}` },
-        reconnectDelay: 5000,
-        onConnect: () => {
-          this.stomp.subscribe('/user/queue/messages', (frame) => {
-            const message = JSON.parse(frame.body);
-            if (message.conversationId === this.activeId) {
-              this.messages.push(message);
-              this.$nextTick(this.scrollToEnd);
-            }
-            this.loadConversations();
-          });
-        },
+      // The shared client also feeds the notification toasts in App.vue.
+      this.stomp = realtime.ensure();
+      realtime.whenConnected((client) => {
+        this.subscription = client.subscribe('/user/queue/messages', (frame) => {
+          const message = JSON.parse(frame.body);
+          if (message.conversationId === this.activeId) {
+            this.messages.push(message);
+            this.$nextTick(this.scrollToEnd);
+          }
+          this.loadConversations();
+        });
       });
-      this.stomp.activate();
     },
     scrollToEnd() {
       const el = this.$refs.scroller;
