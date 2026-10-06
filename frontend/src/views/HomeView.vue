@@ -491,7 +491,7 @@ const goToProduct = (productId) => {
 };
 
 const goToOrderHistory = () => {
-  router.push('/order-history');
+  router.push('/orders');
 };
 
 const goToPaymentPasswordSetup = () => {
