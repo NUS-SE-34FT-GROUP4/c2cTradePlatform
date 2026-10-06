@@ -125,15 +125,25 @@
         </div>
       </div>
     </div>
+
+    <!-- System notification toasts (order state changes, admin messages) -->
+    <div class="system-toasts">
+      <div v-for="notification in systemNotifications" :key="notification.id" class="system-toast">
+        <span class="system-toast-icon">🔔</span>
+        <p class="system-toast-message">{{ notification.message }}</p>
+        <button class="system-toast-close" @click="removeNotification(notification.id)">×</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import emitter from '@/eventBus';
+import realtime from '@/utils/realtime';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -358,6 +368,10 @@ const addSystemNotification = (message) => {
   });
 };
 
+const removeNotification = (id) => {
+  systemNotifications.value = systemNotifications.value.filter(n => n.id !== id);
+};
+
 // Listen for system messages
 const handleSystemMessage = (message) => {
   console.log('[App] Message received:', message);
@@ -416,18 +430,46 @@ const checkUnreadSystemMessages = async () => {
 
     if (newMessages.length > 0) {
       console.log(`[App] Showing ${newMessages.length} new unread system messages`);
+      // Mark what was just shown as read, so it is not offered again on the
+      // next mount (localStorage only dedups on this device).
+      const shownIds = newMessages.map(msg => msg.id).filter(Boolean);
+      if (shownIds.length) {
+        await axios.post('/api/chat/history/system/read',
+          { ids: shownIds },
+          { headers: { 'Authorization': `Bearer ${token}` } });
+      }
     }
   } catch (error) {
     console.error('[App] Failed to check unread system messages:', error);
   }
 };
 
+// Live system notifications ride the shared WebSocket connection. The
+// 'chat-message' bus event carries both chat and system messages; the
+// handler above filters by the system flag.
+const connectRealtime = () => {
+  if (isLoggedIn.value) {
+    realtime.ensure();
+  }
+};
+
+watch(isLoggedIn, (loggedIn) => {
+  if (loggedIn) {
+    connectRealtime();
+    checkUnreadSystemMessages();
+  } else {
+    realtime.disconnect();
+    systemNotifications.value = [];
+  }
+});
+
 onMounted(() => {
   // Listen for global system message events
   emitter.on('chat-message', handleSystemMessage);
 
-  // If user is logged in, check unread system messages
+  // If user is logged in, connect and check unread system messages
   if (isLoggedIn.value) {
+    connectRealtime();
     checkUnreadSystemMessages();
   }
 });
@@ -452,6 +494,42 @@ onUnmounted(() => {
   min-height: 100vh;
   background-color: #f5f5f5;
 }
+
+.system-toasts {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 340px;
+}
+
+.system-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #2f5d7c;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 12px 14px;
+}
+
+.system-toast-icon { font-size: 18px; line-height: 1.4; }
+.system-toast-message { margin: 0; font-size: 13px; color: #333; flex: 1; }
+.system-toast-close {
+  border: 0;
+  background: none;
+  font-size: 16px;
+  color: #9aa1ab;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+}
+.system-toast-close:hover { color: #333; }
 
 .navbar {
   background: white;
