@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import sg.edu.nus.iss.c2csectrade.entity.*;
 import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
@@ -31,6 +32,7 @@ class OrderServiceTest {
     @Mock private OrderItemMapper orderItemMapper;
     @Mock private CartItemMapper cartItemMapper;
     @Mock private ProductMapper productMapper;
+    @Mock private ApplicationEventPublisher events;
 
     @InjectMocks private OrderService orderService;
 

@@ -9,7 +9,9 @@ import sg.edu.nus.iss.c2csectrade.entity.ChatMessage;
 import sg.edu.nus.iss.c2csectrade.entity.User;
 import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
 import sg.edu.nus.iss.c2csectrade.service.ChatService;
+import sg.edu.nus.iss.c2csectrade.service.NotificationService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,13 +21,16 @@ public class ChatController {
     private final ChatService chatService;
     private final UserMapper userMapper;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     public ChatController(ChatService chatService,
                           UserMapper userMapper,
-                          SimpMessagingTemplate messagingTemplate) {
+                          SimpMessagingTemplate messagingTemplate,
+                          NotificationService notificationService) {
         this.chatService = chatService;
         this.userMapper = userMapper;
         this.messagingTemplate = messagingTemplate;
+        this.notificationService = notificationService;
     }
 
     @PostMapping("/messages")
@@ -73,6 +78,38 @@ public class ChatController {
         return ResponseEntity.ok(Map.of(
                 "conversations", chatService.conversations(caller.getId()),
                 "unread", chatService.unreadCount(caller.getId())));
+    }
+
+    /**
+     * Persisted system notifications for the caller, newest first. The toast
+     * scaffolding in App.vue reads this on mount, which is how someone who was
+     * offline when the order moved still finds out.
+     */
+    @GetMapping("/history/system")
+    public ResponseEntity<?> systemHistory(@RequestParam(defaultValue = "10") int limit,
+                                           Authentication authentication) {
+        User caller = currentUser(authentication);
+        if (caller == null) {
+            return unauthenticated();
+        }
+        List<Map<String, Object>> items = notificationService.history(caller.getId(), limit);
+        return ResponseEntity.ok(items);
+    }
+
+    /** Mark the given system notifications as read for the caller. */
+    @PostMapping("/history/system/read")
+    public ResponseEntity<?> markSystemRead(@RequestBody Map<String, Object> body,
+                                            Authentication authentication) {
+        User caller = currentUser(authentication);
+        if (caller == null) {
+            return unauthenticated();
+        }
+        @SuppressWarnings("unchecked")
+        List<Number> raw = (List<Number>) body.get("ids");
+        List<Long> ids = raw == null ? List.of()
+                : raw.stream().map(Number::longValue).toList();
+        notificationService.markRead(caller.getId(), ids);
+        return ResponseEntity.ok(Map.of("marked", ids.size()));
     }
 
     private User currentUser(Authentication authentication) {
