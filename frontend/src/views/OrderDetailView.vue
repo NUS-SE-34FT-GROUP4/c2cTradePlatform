@@ -31,12 +31,12 @@
       <router-link v-if="isBuyer && order.status === 'PENDING_PAYMENT'"
         class="primary" :to="`/orders/${order.id}/pay`">Pay now</router-link>
       <button v-if="isBuyer && order.status === 'PENDING_PAYMENT'" class="secondary" @click="cancel">Cancel order</button>
-      <button v-if="!isBuyer && order.status === 'PAID'" class="primary" @click="dispatch">Dispatch</button>
-      <button v-if="isBuyer && order.status === 'SHIPPED'" class="primary" @click="confirmReceipt">Confirm receipt</button>
+      <button v-if="!isBuyer && order.status === 'PAID'" class="primary" :disabled="busy" @click="dispatch">Dispatch</button>
+      <button v-if="isBuyer && order.status === 'SHIPPED'" class="primary" :disabled="busy" @click="confirmReceipt">Confirm receipt</button>
       <router-link class="ghost" to="/orders">Back to orders</router-link>
     </section>
 
-    <p v-if="stubNotice" class="stub">{{ stubNotice }}</p>
+    <p v-if="actionError" class="error-banner">{{ actionError }}</p>
 
     <section class="card">
       <h2>Items</h2>
@@ -82,7 +82,8 @@ export default {
     return {
       order: null,
       error: '',
-      stubNotice: '',
+      actionError: '',
+      busy: false,
       now: Date.now(),
       timer: null,
     };
@@ -149,18 +150,35 @@ export default {
     async cancel() {
       try {
         await orders.cancel(this.order.id);
+        this.actionError = '';
         await this.load();
       } catch (e) {
-        this.stubNotice = e.response?.data?.message || 'Could not cancel this order.';
+        this.actionError = e.response?.data?.message || 'Could not cancel this order.';
       }
     },
-    // Ship/receive endpoints do not exist yet; the order-state service lands
-    // separately in Sprint 3. Until then the buttons say so instead of 404-ing.
-    dispatch() {
-      this.stubNotice = 'Dispatch is not wired up yet — the order-state service ships separately in Sprint 3.';
+    async dispatch() {
+      this.busy = true;
+      try {
+        await orders.ship(this.order.id);
+        this.actionError = '';
+        await this.load();
+      } catch (e) {
+        this.actionError = e.response?.data?.message || 'Could not dispatch this order.';
+      } finally {
+        this.busy = false;
+      }
     },
-    confirmReceipt() {
-      this.stubNotice = 'Confirm receipt is not wired up yet — the order-state service ships separately in Sprint 3.';
+    async confirmReceipt() {
+      this.busy = true;
+      try {
+        await orders.confirmReceipt(this.order.id);
+        this.actionError = '';
+        await this.load();
+      } catch (e) {
+        this.actionError = e.response?.data?.message || 'Could not confirm receipt.';
+      } finally {
+        this.busy = false;
+      }
     },
   },
 };
@@ -192,7 +210,8 @@ h1 { font-size: 22px; margin: 0 0 4px; font-family: ui-monospace, Menlo, monospa
   color: #2f5d7c; text-decoration: none; font-size: 14px;
   border: 1px solid #d5d9e0; border-radius: 6px; padding: 9px 18px;
 }
-.stub { background: #f6eeda; color: #9a6b23; border-radius: 6px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; }
+.error-banner { background: #f7e6e5; color: #96393c; border-radius: 6px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; }
+.primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .card { border: 1px solid #e3e6ec; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
 .card h2 { font-size: 15px; margin: 0 0 8px; }
 .card ul { list-style: none; margin: 0; padding: 0; }
