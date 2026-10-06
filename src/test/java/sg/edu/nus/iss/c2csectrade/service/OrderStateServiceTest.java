@@ -3,6 +3,8 @@ package sg.edu.nus.iss.c2csectrade.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.context.ApplicationEventPublisher;
+import sg.edu.nus.iss.c2csectrade.event.OrderStateChangedEvent;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -10,6 +12,8 @@ import sg.edu.nus.iss.c2csectrade.entity.*;
 import sg.edu.nus.iss.c2csectrade.mapper.OrderItemMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.OrderMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
+
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
@@ -24,9 +28,17 @@ class OrderStateServiceTest {
     @Mock private OrderMapper orderMapper;
     @Mock private OrderItemMapper orderItemMapper;
     @Mock private ProductMapper productMapper;
+    @Mock private ApplicationEventPublisher events;
     @InjectMocks private OrderStateService orderStateService;
 
     private static final Long BUYER = 10L, SELLER = 20L, ORDER = 500L;
+
+    private OrderStateChangedEvent published() {
+        ArgumentCaptor<OrderStateChangedEvent> captor =
+                ArgumentCaptor.forClass(OrderStateChangedEvent.class);
+        verify(events).publishEvent(captor.capture());
+        return captor.getValue();
+    }
 
     private Order order(OrderStatus status) {
         Order o = new Order();
@@ -118,6 +130,35 @@ class OrderStateServiceTest {
         stub(OrderStatus.SHIPPED);
         orderStateService.apply(BUYER, ORDER, OrderAction.CONFIRM_RECEIPT);
         verifyNoInteractions(productMapper);
+    }
+
+    @Test
+    @DisplayName("Every transition announces itself once, with the states it moved between")
+    void transitionPublishesEvent() {
+        Order o = order(OrderStatus.PAID);
+        o.setOrderNo("20261006000001");
+        o.setTotalAmount(new java.math.BigDecimal("30.00"));
+        when(orderMapper.selectById(ORDER)).thenReturn(o);
+        when(orderMapper.transition(eq(ORDER), anyString(), anyString(), isNull())).thenReturn(1);
+
+        orderStateService.apply(SELLER, ORDER, OrderAction.SHIP);
+
+        OrderStateChangedEvent e = published();
+        assertEquals("PAID", e.from());
+        assertEquals("SHIPPED", e.to());
+        assertEquals(BUYER, e.buyerId());
+        assertEquals(SELLER, e.sellerId());
+    }
+
+    @Test
+    @DisplayName("A refused transition announces nothing")
+    void refusedTransitionPublishesNothing() {
+        when(orderMapper.selectById(ORDER)).thenReturn(order(OrderStatus.PENDING_PAYMENT));
+
+        assertThrows(IllegalStateException.class,
+                () -> orderStateService.apply(SELLER, ORDER, OrderAction.SHIP));
+
+        verifyNoInteractions(events);
     }
 
     @Test

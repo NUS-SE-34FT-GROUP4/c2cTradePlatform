@@ -135,27 +135,6 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Cancelling an unpaid order releases exactly what it reserved")
-    void cancelReleasesReservedStock() {
-        Order order = new Order();
-        order.setId(500L);
-        order.setBuyerId(BUYER);
-        order.setSellerId(SELLER_A);
-        order.setStatus(OrderStatus.PENDING_PAYMENT.name());
-        when(orderMapper.selectById(500L)).thenReturn(order);
-
-        OrderItem item = new OrderItem();
-        item.setProductId(101L);
-        item.setQuantity(3);
-        when(orderItemMapper.selectByOrderId(500L)).thenReturn(List.of(item));
-
-        orderService.cancel(BUYER, 500L);
-
-        verify(productMapper).releaseStock(101L, 3);
-        verify(orderMapper).updateStatus(500L, OrderStatus.CANCELLED.name());
-    }
-
-    @Test
     @DisplayName("Expiring overdue orders releases their stock and marks them EXPIRED")
     void expiryReleasesStock() {
         Order overdue = new Order();
