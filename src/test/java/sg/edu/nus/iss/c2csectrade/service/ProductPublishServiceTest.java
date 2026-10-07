@@ -140,4 +140,19 @@ class ProductPublishServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.publish(request("Free", "0"), 20L));
         assertThrows(IllegalArgumentException.class, () -> productService.publish(request("Blank", null), 20L));
     }
+
+    @Test
+    @DisplayName("MySQL hydration preserves Elasticsearch relevance order")
+    void hydratesSearchHitsInRankedOrder() {
+        Product lowerRanked = new Product();
+        lowerRanked.setId(1L);
+        Product higherRanked = new Product();
+        higherRanked.setId(2L);
+        when(productMapper.selectByIds(List.of(2L, 1L))).thenReturn(List.of(lowerRanked, higherRanked));
+        when(productMediaMapper.selectByProductId(anyLong())).thenReturn(List.of());
+
+        List<Product> result = productService.listProductsByIdsInOrder(List.of(2L, 1L));
+
+        assertEquals(List.of(2L, 1L), result.stream().map(Product::getId).toList());
+    }
 }
