@@ -46,7 +46,9 @@ services:
     environment:
       discovery.type: single-node
       xpack.security.enabled: "false"
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      # Staging and production share one 2 GB Droplet, so each Elasticsearch
+      # gets 256 MB of heap; the listing index is far smaller than that.
+      ES_JAVA_OPTS: "-Xms256m -Xmx256m"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     healthcheck:
