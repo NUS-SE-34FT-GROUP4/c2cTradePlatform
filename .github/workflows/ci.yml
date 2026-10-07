@@ -281,8 +281,8 @@ jobs:
 
   # Promotes the commit staging just verified. The production environment
   # requires a reviewer, so this job waits for a manual approval. Production
-  # shares the staging Droplet: it runs as a second stack (STACK, *_PORT) from
-  # its own directory, with its own database, MinIO and JWT secrets.
+  # runs on its own Droplet (PROD_HOST), with its own database, MinIO and JWT
+  # secrets: sharing the staging Droplet ran it out of memory.
   deploy-production:
     name: Deploy to production
     needs: [ deploy-staging ]
@@ -295,16 +295,16 @@ jobs:
       packages: read
     env:
       STACK: c2csectrade-prod
-      API_PORT: "8081"
-      HTTP_PORT: "8088"
-      MINIO_PORT: "9002"
+      API_PORT: "8080"
+      HTTP_PORT: "80"
+      MINIO_PORT: "9000"
     steps:
       - uses: actions/checkout@v7
 
       - name: Check production is configured
         id: configured
         run: |
-          if [ -z "${{ secrets.STAGING_HOST }}" ] || [ -z "${{ secrets.PROD_JWT_SECRET }}" ]; then
+          if [ -z "${{ secrets.PROD_HOST }}" ] || [ -z "${{ secrets.PROD_JWT_SECRET }}" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Production secrets are not set - skipping deployment."
           else
@@ -315,9 +315,9 @@ jobs:
         if: steps.configured.outputs.ready == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
           source: "compose.staging.yaml,init.sql,scripts/migrations/003_reviews.sql"
           target: "~/c2c-sectrade-prod"
 
@@ -325,9 +325,9 @@ jobs:
         if: steps.configured.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
           script: |
             set -e
             cd ~/c2c-sectrade-prod
@@ -339,7 +339,7 @@ jobs:
             export IMAGE_TAG="${{ github.sha }}"
             export MYSQL_PASSWORD='${{ secrets.PROD_DB_PASSWORD }}'
             export MINIO_ROOT_PASSWORD='${{ secrets.PROD_MINIO_PASSWORD }}'
-            export MINIO_PUBLIC_ENDPOINT='http://${{ secrets.STAGING_HOST }}:${{ env.MINIO_PORT }}'
+            export MINIO_PUBLIC_ENDPOINT='http://${{ secrets.PROD_HOST }}:${{ env.MINIO_PORT }}'
             export JWT_SECRET='${{ secrets.PROD_JWT_SECRET }}'
             docker compose -f compose.staging.yaml pull
             docker compose -f compose.staging.yaml up -d mysql redis minio
@@ -357,7 +357,7 @@ jobs:
         if: steps.configured.outputs.ready == 'true'
         run: |
           for attempt in $(seq 1 30); do
-            if curl -fsS "http://${{ secrets.STAGING_HOST }}:${{ env.API_PORT }}/actuator/health" | grep -q '"status":"UP"'; then
+            if curl -fsS "http://${{ secrets.PROD_HOST }}:${{ env.API_PORT }}/actuator/health" | grep -q '"status":"UP"'; then
               echo "Production is up."
               exit 0
             fi
@@ -370,19 +370,24 @@ jobs:
         if: failure() && steps.configured.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
           script: |
             set -e
             cd ~/c2c-sectrade-prod
             export STACK='${{ env.STACK }}' API_PORT='${{ env.API_PORT }}' HTTP_PORT='${{ env.HTTP_PORT }}' MINIO_PORT='${{ env.MINIO_PORT }}'
             export IMAGE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             export IMAGE_TAG=$(cat .previous-backend 2>/dev/null)
-            export IMAGE_TAG=${IMAGE_TAG:-latest}
             export MYSQL_PASSWORD='${{ secrets.PROD_DB_PASSWORD }}'
             export MINIO_ROOT_PASSWORD='${{ secrets.PROD_MINIO_PASSWORD }}'
-            export MINIO_PUBLIC_ENDPOINT='http://${{ secrets.STAGING_HOST }}:${{ env.MINIO_PORT }}'
+            export MINIO_PUBLIC_ENDPOINT='http://${{ secrets.PROD_HOST }}:${{ env.MINIO_PORT }}'
             export JWT_SECRET='${{ secrets.PROD_JWT_SECRET }}'
+            if [ -z "$IMAGE_TAG" ]; then
+              # First deploy: there is no earlier version, so stop rather than restart a broken one.
+              docker compose -f compose.staging.yaml down
+              echo "First deploy failed; production stack stopped"
+              exit 0
+            fi
             docker compose -f compose.staging.yaml up -d
             echo "Rolled back to $IMAGE_TAG"
