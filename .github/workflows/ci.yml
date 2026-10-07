@@ -278,3 +278,111 @@ jobs:
             export JWT_SECRET='${{ secrets.STAGING_JWT_SECRET }}'
             docker compose -f compose.staging.yaml up -d
             echo "Rolled back to $IMAGE_TAG"
+
+  # Promotes the commit staging just verified. The production environment
+  # requires a reviewer, so this job waits for a manual approval. Production
+  # shares the staging Droplet: it runs as a second stack (STACK, *_PORT) from
+  # its own directory, with its own database, MinIO and JWT secrets.
+  deploy-production:
+    name: Deploy to production
+    needs: [ deploy-staging ]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    env:
+      STACK: c2csectrade-prod
+      API_PORT: "8081"
+      HTTP_PORT: "8088"
+      MINIO_PORT: "9002"
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check production is configured
+        id: configured
+        run: |
+          if [ -z "${{ secrets.STAGING_HOST }}" ] || [ -z "${{ secrets.PROD_JWT_SECRET }}" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Production secrets are not set - skipping deployment."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Copy compose file to the server
+        if: steps.configured.outputs.ready == 'true'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          source: "compose.staging.yaml,init.sql,scripts/migrations/003_reviews.sql"
+          target: "~/c2c-sectrade-prod"
+
+      - name: Pull and restart
+        if: steps.configured.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/c2c-sectrade-prod
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker inspect --format '{{.Config.Image}}' ${{ env.STACK }}-backend 2>/dev/null | sed 's/.*://' > .previous-backend || true
+            export STACK='${{ env.STACK }}' API_PORT='${{ env.API_PORT }}' HTTP_PORT='${{ env.HTTP_PORT }}' MINIO_PORT='${{ env.MINIO_PORT }}'
+            export IMAGE_OWNER="$OWNER"
+            export IMAGE_TAG="${{ github.sha }}"
+            export MYSQL_PASSWORD='${{ secrets.PROD_DB_PASSWORD }}'
+            export MINIO_ROOT_PASSWORD='${{ secrets.PROD_MINIO_PASSWORD }}'
+            export MINIO_PUBLIC_ENDPOINT='http://${{ secrets.STAGING_HOST }}:${{ env.MINIO_PORT }}'
+            export JWT_SECRET='${{ secrets.PROD_JWT_SECRET }}'
+            docker compose -f compose.staging.yaml pull
+            docker compose -f compose.staging.yaml up -d mysql redis minio
+            for attempt in $(seq 1 30); do
+              if docker compose -f compose.staging.yaml exec -T mysql sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade -e "SELECT 1"' >/dev/null 2>&1; then
+                break
+              fi
+              if [ "$attempt" = 30 ]; then echo "MySQL did not become ready"; exit 1; fi
+              sleep 2
+            done
+            docker compose -f compose.staging.yaml exec -T mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' < scripts/migrations/003_reviews.sql
+            docker compose -f compose.staging.yaml up -d
+
+      - name: Smoke test
+        if: steps.configured.outputs.ready == 'true'
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS "http://${{ secrets.STAGING_HOST }}:${{ env.API_PORT }}/actuator/health" | grep -q '"status":"UP"'; then
+              echo "Production is up."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Production did not become healthy within 150s."
+          exit 1
+
+      - name: Roll back if the smoke test failed
+        if: failure() && steps.configured.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/c2c-sectrade-prod
+            export STACK='${{ env.STACK }}' API_PORT='${{ env.API_PORT }}' HTTP_PORT='${{ env.HTTP_PORT }}' MINIO_PORT='${{ env.MINIO_PORT }}'
+            export IMAGE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            export IMAGE_TAG=$(cat .previous-backend 2>/dev/null)
+            export IMAGE_TAG=${IMAGE_TAG:-latest}
+            export MYSQL_PASSWORD='${{ secrets.PROD_DB_PASSWORD }}'
+            export MINIO_ROOT_PASSWORD='${{ secrets.PROD_MINIO_PASSWORD }}'
+            export MINIO_PUBLIC_ENDPOINT='http://${{ secrets.STAGING_HOST }}:${{ env.MINIO_PORT }}'
+            export JWT_SECRET='${{ secrets.PROD_JWT_SECRET }}'
+            docker compose -f compose.staging.yaml up -d
+            echo "Rolled back to $IMAGE_TAG"
