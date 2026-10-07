@@ -17,7 +17,9 @@ import sg.edu.nus.iss.c2csectrade.service.search.ProductIndexEvent;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +66,25 @@ public class ProductService {
             product.setMedia(media);
         }
         return products;
+    }
+
+    /**
+     * Hydrates Elasticsearch hits from authoritative MySQL rows without losing
+     * their relevance order. Missing or no-longer-active rows are ignored.
+     */
+    public List<Product> listProductsByIdsInOrder(List<Long> rankedIds) {
+        if (rankedIds == null || rankedIds.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, Product> productsById = productMapper.selectByIds(rankedIds).stream()
+                .collect(Collectors.toMap(Product::getId, product -> product,
+                        (first, ignored) -> first, LinkedHashMap::new));
+        return rankedIds.stream()
+                .distinct()
+                .map(productsById::get)
+                .filter(java.util.Objects::nonNull)
+                .peek(product -> product.setMedia(productMediaMapper.selectByProductId(product.getId())))
+                .toList();
     }
 
     /**
