@@ -1,0 +1,849 @@
+diff --git a/docs/testing/issue43-uploaded-project.md b/docs/testing/issue43-uploaded-project.md
+new file mode 100644
+index 0000000..c22eab2
+--- /dev/null
++++ b/docs/testing/issue43-uploaded-project.md
+@@ -0,0 +1,62 @@
++# Issue #43 — patch for the uploaded complete project
++
++This patch targets the exact `lut.cn.c2cplatform` source in `c2csectrade(1).zip`.
++It does not apply to the different `sg.edu.nus.iss.c2csectrade` GitHub implementation.
++Only order/expiry code, transaction acceptance tests and their Maven configuration
++are included. Existing recommendation, credit, chat, media and frontend features
++are not copied or replaced.
++
++## Apply and validate
++
++From the root containing the uploaded project's `pom.xml`:
++
++```sh
++git apply --check /path/to/issue43-uploaded-project.patch
++git apply /path/to/issue43-uploaded-project.patch
++mvn verify
++```
++
++Use JDK 17, Maven and a running Docker daemon. `mvn verify` runs unit tests,
++MySQL Testcontainers integration tests, then JaCoCo report and coverage check.
++For a unit-only check without Docker, use `mvn verify -DskipITs`. That command
++is **not** proof that real database tests passed.
++
++## Acceptance mapping
++
++| Requirement | Checks |
++|---|---|
++| Success for four payment methods; correct recorded method | `OrderAcceptanceTest`, `TransactionAcceptanceIT` |
++| Wrong PIN and insufficient balance refused | Both suites; MySQL assertions verify rollback of prior stock updates |
++| Invalid confirm/cancel/payment transitions refused | `OrderAcceptanceTest.invalidTransitionsAreRefused`; repeated payment/completion checks |
++| Paid order never expired, including stale scan results | `OrderExpiryAcceptanceTest.rechecksCandidatesAfterPaymentWinsAndSkipsNonExpiredRows`; `TransactionAcceptanceIT.successfulPaymentDeductsStockOnceAndCannotBeExpired` |
++| Repeated expiry is safe | `OrderExpiryAcceptanceTest`, `TransactionAcceptanceIT.repeatedExpiryNeverInflatesStock` |
++| Non-completed and duplicate review refused | `ReviewAcceptanceTest`; DELIVERED and COMPLETED remain accepted as in uploaded code |
++| Concurrent payment cannot deduct twice | `TransactionAcceptanceIT.concurrentPaymentsHaveOneWinnerAndOneLedgerRow` |
++
++The uploaded checkout does not reserve/deduct stock or remove cart items until
++payment. Therefore expiry cannot release a separate reservation: none exists in
++this model. The fix leaves stock and cart untouched instead of inventing inventory
++or increasing existing cart quantities. It locks and rechecks each candidate row.
++Payment, completion and cancellation take the same order row lock; read-only order
++lookup keeps its existing interface. The expiry transaction no longer swallows
++write failures, allowing Spring to roll it back.
++
++The transaction integration context uses the uploaded `init.sql`, real mapper XML
++and real Spring transaction proxies. It stubs only credit scoring (outside this
++issue); it does not mock order, stock, wallet persistence or the transaction manager.
++External Redis/MinIO/RabbitMQ servers are unnecessary for this focused context.
++
++## Coverage and scope limits
++
++The per-class JaCoCo gate requires 81% line coverage on the three implementations
++actually exercised here: `OrderServiceImpl`, `ReviewServiceImpl`, `OrderExpireTask`.
++It is not an application-wide coverage figure or branch-coverage claim.
++
++Neither the uploaded source nor its documentation identifies the five design
++problems/classes referenced by #43. This patch does not invent that list or replace
++the uploaded architecture to manufacture five patterns. That acceptance criterion
++must be mapped to the team's actual design list before #43 can be marked fully done.
++
++Existing behavior outside this issue remains: sellers are credited at confirmation,
++reviews permit both DELIVERED and COMPLETED, and cancellation has its own existing
++cart-handling behavior. The patch does not introduce a new payment/state architecture.
+diff --git a/pom.xml b/pom.xml
+index 8141eb6..60ade98 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -97,6 +97,10 @@
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-amqp</artifactId>
+         </dependency>
++        <dependency>
++            <groupId>org.testcontainers</groupId><artifactId>mysql</artifactId>
++            <version>1.21.4</version><scope>test</scope>
++        </dependency>
+     </dependencies>
+ 
+     <repositories>
+@@ -107,7 +111,34 @@
+     </repositories>
+ 
+     <build>
++        <testResources>
++            <testResource><directory>src/test/resources</directory></testResource>
++            <testResource><directory>${project.basedir}</directory><includes><include>init.sql</include></includes></testResource>
++        </testResources>
+         <plugins>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-failsafe-plugin</artifactId>
++                <version>3.1.2</version>
++                <executions><execution><goals><goal>integration-test</goal><goal>verify</goal></goals></execution></executions>
++            </plugin>
++            <plugin>
++                <groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId><version>0.8.11</version>
++                <executions>
++                    <execution><goals><goal>prepare-agent</goal></goals></execution>
++                    <execution><id>report</id><phase>verify</phase><goals><goal>report</goal><goal>check</goal></goals>
++                        <configuration><rules><rule>
++                            <element>CLASS</element>
++                            <includes>
++                                <include>lut.cn.c2cplatform.service.impl.OrderServiceImpl</include>
++                                <include>lut.cn.c2cplatform.service.impl.ReviewServiceImpl</include>
++                                <include>lut.cn.c2cplatform.scheduled.OrderExpireTask</include>
++                            </includes>
++                            <limits><limit><counter>LINE</counter><value>COVEREDRATIO</value><minimum>0.81</minimum></limit></limits>
++                        </rule></rules></configuration>
++                    </execution>
++                </executions>
++            </plugin>
+             <plugin>
+                 <groupId>org.springframework.boot</groupId>
+                 <artifactId>spring-boot-maven-plugin</artifactId>
+diff --git a/src/main/java/lut/cn/c2cplatform/mapper/OrderMapper.java b/src/main/java/lut/cn/c2cplatform/mapper/OrderMapper.java
+index fe1e65f..2219a6b 100644
+--- a/src/main/java/lut/cn/c2cplatform/mapper/OrderMapper.java
++++ b/src/main/java/lut/cn/c2cplatform/mapper/OrderMapper.java
+@@ -11,6 +11,10 @@ import java.util.List;
+ public interface OrderMapper {
+     void insert(Order order);
+     Order findById(Integer id);
++
++    /** Serialize payment, completion, cancellation and expiry for one order. */
++    @Select("SELECT * FROM `orders` WHERE id = #{id} FOR UPDATE")
++    Order findByIdForUpdate(@Param("id") Integer id);
+     void updateStatus(Order order);
+     List<Order> findByUserId(@Param("userId") Integer userId);
+     List<Order> findExpiredOrders();
+diff --git a/src/main/java/lut/cn/c2cplatform/scheduled/OrderExpireTask.java b/src/main/java/lut/cn/c2cplatform/scheduled/OrderExpireTask.java
+index e1a917a..0f320ad 100644
+--- a/src/main/java/lut/cn/c2cplatform/scheduled/OrderExpireTask.java
++++ b/src/main/java/lut/cn/c2cplatform/scheduled/OrderExpireTask.java
+@@ -1,127 +1,37 @@
+ package lut.cn.c2cplatform.scheduled;
+ 
+-import lut.cn.c2cplatform.entity.CartItem;
+ import lut.cn.c2cplatform.entity.Order;
+-import lut.cn.c2cplatform.entity.OrderItem;
+-import lut.cn.c2cplatform.mapper.CartItemMapper;
+-import lut.cn.c2cplatform.mapper.OrderItemMapper;
+ import lut.cn.c2cplatform.mapper.OrderMapper;
+-import org.slf4j.Logger;
+-import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.scheduling.annotation.Scheduled;
+ import org.springframework.stereotype.Component;
+ import org.springframework.transaction.annotation.Transactional;
+ 
+-import java.time.Instant;
+-import java.util.List;
+-import java.util.stream.Collectors;
++import java.util.Date;
+ 
+-/**
+- * 订单过期自动关闭任务
+- * 每分钟执行一次，检查并关闭过期的待支付订单
+- * 如果订单来自购物车，则将商品恢复到购物车
+- */
++/** Pending orders do not deduct stock or remove cart lines in this project. */
+ @Component
+ public class OrderExpireTask {
+-
+-    private static final Logger logger = LoggerFactory.getLogger(OrderExpireTask.class);
+-
+     @Autowired
+     private OrderMapper orderMapper;
+ 
+-    @Autowired
+-    private OrderItemMapper orderItemMapper;
+-
+-    @Autowired
+-    private CartItemMapper cartItemMapper;
+-
+-    @Autowired
+-    private lut.cn.c2cplatform.mapper.ProductMapper productMapper;
+-
+-    /**
+-     * 每分钟执行一次，检查并关闭过期订单
+-     * 使用 @Scheduled 注解实现定时任务
+-     */
+-    @Scheduled(fixedRate = 60000) // 每60秒执行一次
++    @Scheduled(fixedRate = 60000)
+     @Transactional
+     public void closeExpiredOrders() {
+-        try {
+-            // 查询所有过期的待支付订单
+-            List<Order> expiredOrders = orderMapper.findExpiredOrders();
+-
+-            if (expiredOrders.isEmpty()) {
+-                return;
++        for (Order candidate : orderMapper.findExpiredOrders()) {
++            // Payment uses the same row lock. Re-read after acquiring it: the
++            // candidate may have been paid or expired since the initial scan.
++            Order order = orderMapper.findByIdForUpdate(candidate.getId());
++            Date now = new Date();
++            if (order == null || !"PENDING".equals(order.getStatus())
++                    || order.getExpireTime() == null || !order.getExpireTime().before(now)) {
++                continue;
+             }
+-
+-            logger.info("发现 {} 个过期订单，开始处理...", expiredOrders.size());
+-
+-            for (Order order : expiredOrders) {
+-                try {
+-                    // 获取订单项
+-                    List<OrderItem> orderItems = orderItemMapper.findByOrderId(order.getId());
+-
+-                    // 恢复库存和购物车商品
+-                    for (OrderItem item : orderItems) {
+-                        // 恢复库存
+-                        try {
+-                            lut.cn.c2cplatform.entity.Product product = productMapper.selectById(item.getProductId().longValue());
+-                            if (product != null) {
+-                                product.setStock(product.getStock() + item.getQuantity());
+-                                product.setUpdatedAt(java.time.LocalDateTime.now());
+-                                productMapper.update(product);
+-                                logger.info("订单 {} 的商品 {} 库存已恢复 {} 件", order.getId(), item.getProductId(), item.getQuantity());
+-                            }
+-                        } catch (Exception e) {
+-                            logger.error("恢复商品 {} 库存失败: {}", item.getProductId(), e.getMessage());
+-                        }
+-
+-                        // 恢复来自购物车的商品
+-                        if (Boolean.TRUE.equals(item.getFromCart())) {
+-                            // 检查购物车中是否已存在该商品
+-                            CartItem existingCartItem = cartItemMapper.selectByUserIdAndProductId(
+-                                order.getUserId().longValue(),
+-                                item.getProductId().longValue()
+-                            );
+-
+-                            if (existingCartItem != null) {
+-                                // 如果购物车中已存在，更新数量
+-                                existingCartItem.setQuantity(existingCartItem.getQuantity() + item.getQuantity());
+-                                existingCartItem.setUpdatedAt(Instant.now());
+-                                cartItemMapper.update(existingCartItem);
+-                                logger.info("订单 {} 的商品 {} 已恢复到购物车（更新数量）", order.getId(), item.getProductId());
+-                            } else {
+-                                // 如果不存在，重新添加到购物车
+-                                CartItem cartItem = new CartItem();
+-                                cartItem.setUserId(order.getUserId().longValue());
+-                                cartItem.setProductId(item.getProductId().longValue());
+-                                cartItem.setQuantity(item.getQuantity());
+-                                cartItem.setCreatedAt(Instant.now());
+-                                cartItem.setUpdatedAt(Instant.now());
+-                                cartItemMapper.insert(cartItem);
+-                                logger.info("订单 {} 的商品 {} 已恢复到购物车（新增）", order.getId(), item.getProductId());
+-                            }
+-                        }
+-                    }
+-
+-                    logger.info("订单 {} 已过期，库存和购物车已恢复", order.getId());
+-                } catch (Exception e) {
+-                    logger.error("处理过期订单 {} 失败: {}", order.getId(), e.getMessage(), e);
+-                }
+-            }
+-
+-            // 批量更新订单状态为 EXPIRED
+-            List<Integer> orderIds = expiredOrders.stream()
+-                .map(Order::getId)
+-                .collect(Collectors.toList());
+-
+-            orderMapper.batchUpdateStatusToExpired(orderIds);
+-
+-            logger.info("成功关闭 {} 个过期订单", orderIds.size());
+-
+-        } catch (Exception e) {
+-            logger.error("关闭过期订单任务执行失败: {}", e.getMessage(), e);
++            order.setStatus("EXPIRED");
++            order.setUpdatedAt(now);
++            orderMapper.updateStatus(order);
++            // No stock/cart restoration: checkout has changed neither. Restoring
++            // here would create extra stock and duplicate cart quantities.
+         }
+     }
+ }
+-
+diff --git a/src/main/java/lut/cn/c2cplatform/service/impl/OrderServiceImpl.java b/src/main/java/lut/cn/c2cplatform/service/impl/OrderServiceImpl.java
+index 6657a56..9ceb461 100644
+--- a/src/main/java/lut/cn/c2cplatform/service/impl/OrderServiceImpl.java
++++ b/src/main/java/lut/cn/c2cplatform/service/impl/OrderServiceImpl.java
+@@ -206,7 +206,7 @@ public class OrderServiceImpl implements OrderService {
+     @Override
+     @Transactional
+     public Order payOrder(Integer orderId, Integer userId, PaymentRequest paymentRequest) {
+-        Order order = orderMapper.findById(orderId);
++        Order order = orderMapper.findByIdForUpdate(orderId);
+         if (order == null || !"PENDING".equals(order.getStatus())) {
+             throw new RuntimeException("Order not found or not pending");
+         }
+@@ -319,7 +319,7 @@ public class OrderServiceImpl implements OrderService {
+     @Override
+     @Transactional
+     public Order confirmOrder(Integer orderId) {
+-        Order order = orderMapper.findById(orderId);
++        Order order = orderMapper.findByIdForUpdate(orderId);
+         if (order == null) {
+             throw new RuntimeException("订单不存在");
+         }
+@@ -376,7 +376,7 @@ public class OrderServiceImpl implements OrderService {
+     @Override
+     @Transactional
+     public Order cancelOrder(Integer orderId) {
+-        Order order = orderMapper.findById(orderId);
++        Order order = orderMapper.findByIdForUpdate(orderId);
+         if (order == null || !"PENDING".equals(order.getStatus())) {
+             throw new RuntimeException("Order not found or not pending");
+         }
+diff --git a/src/test/java/lut/cn/c2cplatform/OrderAcceptanceTest.java b/src/test/java/lut/cn/c2cplatform/OrderAcceptanceTest.java
+new file mode 100644
+index 0000000..10388f1
+--- /dev/null
++++ b/src/test/java/lut/cn/c2cplatform/OrderAcceptanceTest.java
+@@ -0,0 +1,212 @@
++package lut.cn.c2cplatform;
++
++import lut.cn.c2cplatform.dto.PaymentRequest;
++import lut.cn.c2cplatform.entity.*;
++import lut.cn.c2cplatform.mapper.*;
++import lut.cn.c2cplatform.service.CreditScoreService;
++import lut.cn.c2cplatform.service.HybridRecommendationService;
++import lut.cn.c2cplatform.service.impl.OrderServiceImpl;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++import org.springframework.security.crypto.bcrypt.BCrypt;
++import org.springframework.test.util.ReflectionTestUtils;
++
++import java.math.BigDecimal;
++import java.util.Date;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++
++class OrderAcceptanceTest {
++    OrderMapper orders = mock(OrderMapper.class);
++    OrderItemMapper items = mock(OrderItemMapper.class);
++    TransactionMapper transactions = mock(TransactionMapper.class);
++    CartItemMapper carts = mock(CartItemMapper.class);
++    ProductMapper products = mock(ProductMapper.class);
++    UserMapper users = mock(UserMapper.class);
++    BargainActivityMapper bargains = mock(BargainActivityMapper.class);
++    CreditScoreService credit = mock(CreditScoreService.class);
++    HybridRecommendationService recommendation = mock(HybridRecommendationService.class);
++    OrderServiceImpl service = new OrderServiceImpl();
++    Order order;
++    OrderItem line;
++    Product product;
++    User buyer, seller;
++
++    @BeforeEach
++    void setup() {
++        ReflectionTestUtils.setField(service, "orderMapper", orders);
++        ReflectionTestUtils.setField(service, "orderItemMapper", items);
++        ReflectionTestUtils.setField(service, "transactionMapper", transactions);
++        ReflectionTestUtils.setField(service, "cartItemMapper", carts);
++        ReflectionTestUtils.setField(service, "productMapper", products);
++        ReflectionTestUtils.setField(service, "userMapper", users);
++        ReflectionTestUtils.setField(service, "bargainActivityMapper", bargains);
++        ReflectionTestUtils.setField(service, "creditScoreService", credit);
++        ReflectionTestUtils.setField(service, "hybridRecommendationService", recommendation);
++        order = new Order(); order.setId(50); order.setUserId(1); order.setStatus("PENDING");
++        order.setTotalAmount(new BigDecimal("30.00"));
++        line = new OrderItem(); line.setProductId(7); line.setQuantity(1); line.setPrice(new BigDecimal("30.00")); line.setFromCart(false);
++        product = new Product(); product.setId(7L); product.setUserId(2L); product.setName("Book"); product.setStock(2); product.setPrice(new BigDecimal("30.00"));
++        buyer = new User(); buyer.setId(1L); buyer.setBalance(new BigDecimal("100.00")); buyer.setPaymentPasswordHash(BCrypt.hashpw("123456", BCrypt.gensalt(4)));
++        seller = new User(); seller.setId(2L); seller.setBalance(BigDecimal.ZERO);
++        when(orders.findByIdForUpdate(50)).thenReturn(order);
++        when(items.findByOrderId(50)).thenReturn(List.of(line));
++        when(products.selectByIdForUpdate(7L)).thenReturn(product);
++        when(products.selectById(7L)).thenReturn(product);
++        when(products.decreaseStock(7L, 1)).thenReturn(1);
++        when(users.selectById(1L)).thenReturn(buyer);
++        when(users.selectById(2L)).thenReturn(seller);
++        doAnswer(inv -> { ((Order) inv.getArgument(0)).setId(50); return null; }).when(orders).insert(any());
++        when(orders.findByUserId(1)).thenReturn(List.of());
++    }
++    private PaymentRequest payment(String method, String password) {
++        PaymentRequest r = new PaymentRequest(); r.setPaymentMethod(method); r.setPassword(password); return r;
++    }
++    @ParameterizedTest @ValueSource(strings = {"balance", "alipay", "wechat", "bank"})
++    void paysOnceAndRecordsSelectedMethod(String method) {
++        assertEquals("PAID", service.payOrder(50, 1, payment(method, "123456")).getStatus());
++        assertEquals(new BigDecimal("balance".equals(method) ? "70.00" : "100.00"), buyer.getBalance());
++        verify(products).decreaseStock(7L, 1);
++        verify(transactions).insert(argThat(t -> "SUCCESS".equals(t.getStatus()) && method.equals(t.getPaymentMethod()) && t.getAmount().compareTo(new BigDecimal("30")) == 0));
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment(method, "123456")));
++        verify(transactions, times(1)).insert(any());
++    }
++    @Test
++    void insufficientBalanceIsRefused() {
++        buyer.setBalance(new BigDecimal("5.00"));
++        RuntimeException e = assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", "123456")));
++        assertTrue(e.getMessage().contains("余额不足"));
++        assertEquals(new BigDecimal("5.00"), buyer.getBalance());
++        verify(transactions, never()).insert(any()); verify(orders, never()).updateStatus(any());
++        // Database rollback of the preceding stock update is verified by TransactionAcceptanceIT.
++    }
++    @ParameterizedTest @ValueSource(strings = {"balance", "alipay", "wechat", "bank"})
++    void wrongPasswordTouchesNoStockOrLedger(String method) {
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment(method, "000000")));
++        verify(products, never()).decreaseStock(anyLong(), anyInt());
++        verify(users, never()).update(any()); verify(transactions, never()).insert(any());
++    }
++    @Test
++    void paymentRejectsInvalidPasswordMissingUserAndWrongOwner() {
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 99, payment("balance", "123456")));
++        for (String bad : new String[]{null, "12345", "abcdef"}) {
++            assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", bad)));
++        }
++        buyer.setPaymentPasswordHash(null);
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", "123456")));
++        when(users.selectById(1L)).thenReturn(null);
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", "123456")));
++    }
++    @Test
++    void unavailableStockAndFailedDeductionAreRefused() {
++        product.setStock(0);
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", "123456")));
++        product.setStock(2); when(products.decreaseStock(7L, 1)).thenReturn(0);
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", "123456")));
++        when(products.selectByIdForUpdate(7L)).thenReturn(null);
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", "123456")));
++    }
++    @Test
++    void soldOutPaymentEndsBargainsAndRemovesPurchasedCartLine() {
++        line.setFromCart(true);
++        Product sold = new Product(); sold.setStock(0);
++        when(products.selectById(7L)).thenReturn(sold);
++        service.payOrder(50, 1, payment("balance", "123456"));
++        verify(bargains).markAllActiveAsFailed(7L);
++        verify(carts).deleteByUserIdAndProductId(1L, 7L);
++    }
++    @Test
++    void invalidTransitionsAreRefused() {
++        for (String state : List.of("PENDING", "CANCELED", "EXPIRED", "COMPLETED")) {
++            order.setStatus(state); assertThrows(RuntimeException.class, () -> service.confirmOrder(50));
++        }
++        for (String state : List.of("PAID", "DELIVERED", "EXPIRED", "COMPLETED")) {
++            order.setStatus(state); assertThrows(RuntimeException.class, () -> service.cancelOrder(50));
++        }
++        verify(users, never()).update(any()); verify(orders, never()).updateStatus(any());
++    }
++    @ParameterizedTest @ValueSource(strings = {"PAID", "DELIVERED"})
++    void receiptCreditsSellerOnlyOnce(String state) {
++        order.setStatus(state);
++        assertEquals("COMPLETED", service.confirmOrder(50).getStatus());
++        assertEquals(new BigDecimal("30.00"), seller.getBalance());
++        verify(credit).updateCreditScore(2L); verify(credit).updateCreditScore(1L);
++        assertThrows(RuntimeException.class, () -> service.confirmOrder(50));
++        verify(users, times(1)).update(seller);
++    }
++    @Test
++    void invalidSellerCreditIsRefused() {
++        order.setStatus("PAID"); line.setPrice(BigDecimal.ZERO);
++        assertThrows(RuntimeException.class, () -> service.confirmOrder(50));
++        line.setPrice(new BigDecimal("30.00")); seller.setBalance(new BigDecimal("9999999999999.99"));
++        assertThrows(RuntimeException.class, () -> service.confirmOrder(50));
++    }
++    @Test
++    void directAndBargainCheckoutDoNotDeductStock() {
++        Order direct = service.createOrderForProduct(1, 7L, 1);
++        assertEquals("PENDING", direct.getStatus()); assertEquals(new BigDecimal("30.00"), direct.getTotalAmount());
++        assertTrue(direct.getExpireTime().after(direct.getCreatedAt()));
++        Order bargained = service.createBargainOrder(1, 7L, 2, new BigDecimal("10.00"));
++        assertEquals(new BigDecimal("20.00"), bargained.getTotalAmount());
++        verify(products, never()).decreaseStock(anyLong(), anyInt());
++    }
++    @Test
++    void cartCheckoutKeepsLinesAndPricesWithoutDeductingStock() {
++        CartItem cart = new CartItem(); cart.setProductId(7L); cart.setQuantity(2);
++        when(carts.selectByUserId(1L)).thenReturn(List.of(cart));
++        assertEquals(new BigDecimal("60.00"), service.createOrderFromCart(1).getTotalAmount());
++        verify(items).insert(argThat(i -> Boolean.TRUE.equals(i.getFromCart()) && i.getQuantity() == 2));
++        verify(products, never()).decreaseStock(anyLong(), anyInt());
++        verify(carts, never()).deleteByUserId(anyLong());
++    }
++    @Test
++    void checkoutRejectsMissingProductsStockAndEmptyCart() {
++        when(carts.selectByUserId(1L)).thenReturn(List.of());
++        assertThrows(RuntimeException.class, () -> service.createOrderFromCart(1));
++        when(products.selectByIdForUpdate(7L)).thenReturn(null);
++        assertThrows(RuntimeException.class, () -> service.createOrderForProduct(1, 7L, 1));
++        assertThrows(RuntimeException.class, () -> service.createBargainOrder(1, 7L, 1, BigDecimal.ONE));
++        product.setStock(0); when(products.selectByIdForUpdate(7L)).thenReturn(product);
++        assertThrows(RuntimeException.class, () -> service.createOrderForProduct(1, 7L, 1));
++        assertThrows(RuntimeException.class, () -> service.createBargainOrder(1, 7L, 1, BigDecimal.ONE));
++        CartItem cart = new CartItem(); cart.setProductId(7L); cart.setQuantity(1);
++        when(carts.selectByUserId(1L)).thenReturn(List.of(cart));
++        assertThrows(RuntimeException.class, () -> service.createOrderFromCart(1));
++        when(products.selectByIdForUpdate(7L)).thenReturn(null);
++        assertThrows(RuntimeException.class, () -> service.createOrderFromCart(1));
++    }
++    @Test
++    void cancellationRestoresMissingCartAndLeavesStockAlone() {
++        line.setFromCart(true);
++        assertEquals("CANCELED", service.cancelOrder(50).getStatus());
++        verify(carts).insert(argThat(c -> c.getUserId() == 1L && c.getProductId() == 7L && c.getQuantity() == 1));
++        verify(products, never()).update(any());
++    }
++    @Test
++    void existingCartAndReadMethodsUseUploadedContracts() {
++        line.setFromCart(true); CartItem cart = new CartItem(); cart.setQuantity(2);
++        when(carts.selectByUserIdAndProductId(1L, 7L)).thenReturn(cart);
++        service.cancelOrder(50); assertEquals(3, cart.getQuantity());
++        when(orders.findById(50)).thenReturn(order);
++        assertSame(order, service.getOrderById(50));
++        service.getUserOrders(1); service.getSellerOrders(2); verify(orders).findBySellerId(2);
++    }
++    @Test
++    void checkoutCancelsOldPendingOrdersBeforeCreatingNewOnes() {
++        order.setExpireTime(new Date(0)); when(orders.findByUserId(1)).thenReturn(List.of(order));
++        service.createOrderForProduct(1, 7L, 1);
++        assertEquals("CANCELED", order.getStatus());
++    }
++    @Test
++    void missingOrdersAreRefused() {
++        when(orders.findByIdForUpdate(50)).thenReturn(null);
++        assertThrows(RuntimeException.class, () -> service.payOrder(50, 1, payment("balance", "123456")));
++        assertThrows(RuntimeException.class, () -> service.confirmOrder(50));
++        assertThrows(RuntimeException.class, () -> service.cancelOrder(50));
++    }
++}
+diff --git a/src/test/java/lut/cn/c2cplatform/OrderExpiryAcceptanceTest.java b/src/test/java/lut/cn/c2cplatform/OrderExpiryAcceptanceTest.java
+new file mode 100644
+index 0000000..78805a9
+--- /dev/null
++++ b/src/test/java/lut/cn/c2cplatform/OrderExpiryAcceptanceTest.java
+@@ -0,0 +1,53 @@
++package lut.cn.c2cplatform;
++
++import lut.cn.c2cplatform.entity.Order;
++import lut.cn.c2cplatform.mapper.OrderMapper;
++import lut.cn.c2cplatform.scheduled.OrderExpireTask;
++import org.junit.jupiter.api.Test;
++import org.springframework.test.util.ReflectionTestUtils;
++import java.util.Date;
++import java.util.List;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.Mockito.*;
++
++class OrderExpiryAcceptanceTest {
++    @Test
++    void expiresPendingOnceWithoutInventingStockOrDuplicatingCart() {
++        OrderMapper mapper = mock(OrderMapper.class);
++        OrderExpireTask task = new OrderExpireTask(); ReflectionTestUtils.setField(task, "orderMapper", mapper);
++        Order o = order("PENDING");
++        when(mapper.findExpiredOrders()).thenReturn(List.of(o));
++        when(mapper.findByIdForUpdate(50)).thenReturn(o);
++        task.closeExpiredOrders(); assertEquals("EXPIRED", o.getStatus());
++        task.closeExpiredOrders(); verify(mapper, times(1)).updateStatus(o);
++    }
++    private Order order(String state) {
++        Order o = new Order(); o.setId(50); o.setStatus(state); o.setExpireTime(new Date(0)); return o;
++    }
++    @Test
++    void rechecksCandidatesAfterPaymentWinsAndSkipsNonExpiredRows() {
++        OrderMapper mapper = mock(OrderMapper.class); OrderExpireTask task = new OrderExpireTask();
++        ReflectionTestUtils.setField(task, "orderMapper", mapper);
++        when(mapper.findExpiredOrders()).thenReturn(List.of(order("PENDING")));
++        for (String state : List.of("PAID", "COMPLETED", "EXPIRED", "CANCELED")) {
++            Order locked = order(state); when(mapper.findByIdForUpdate(50)).thenReturn(locked);
++            task.closeExpiredOrders(); assertEquals(state, locked.getStatus());
++        }
++        Order future = order("PENDING"); future.setExpireTime(new Date(Long.MAX_VALUE));
++        when(mapper.findByIdForUpdate(50)).thenReturn(future); task.closeExpiredOrders();
++        future.setExpireTime(null); task.closeExpiredOrders();
++        when(mapper.findByIdForUpdate(50)).thenReturn(null); task.closeExpiredOrders();
++        verify(mapper, never()).updateStatus(any());
++    }
++    @Test
++    void emptySweepIsNoopAndWriteFailurePropagatesForRollback() {
++        OrderMapper mapper = mock(OrderMapper.class); OrderExpireTask task = new OrderExpireTask();
++        ReflectionTestUtils.setField(task, "orderMapper", mapper);
++        when(mapper.findExpiredOrders()).thenReturn(List.of()); task.closeExpiredOrders();
++        verify(mapper, never()).findByIdForUpdate(anyInt());
++        Order o = order("PENDING"); when(mapper.findExpiredOrders()).thenReturn(List.of(o));
++        when(mapper.findByIdForUpdate(50)).thenReturn(o);
++        doThrow(new RuntimeException("database failure")).when(mapper).updateStatus(o);
++        assertThrows(RuntimeException.class, task::closeExpiredOrders);
++    }
++}
+diff --git a/src/test/java/lut/cn/c2cplatform/ReviewAcceptanceTest.java b/src/test/java/lut/cn/c2cplatform/ReviewAcceptanceTest.java
+new file mode 100644
+index 0000000..f8c0d76
+--- /dev/null
++++ b/src/test/java/lut/cn/c2cplatform/ReviewAcceptanceTest.java
+@@ -0,0 +1,108 @@
++package lut.cn.c2cplatform;
++
++import lut.cn.c2cplatform.dto.ReviewRequest;
++import lut.cn.c2cplatform.entity.*;
++import lut.cn.c2cplatform.mapper.*;
++import lut.cn.c2cplatform.service.CreditScoreService;
++import lut.cn.c2cplatform.service.HybridRecommendationService;
++import lut.cn.c2cplatform.service.impl.ReviewServiceImpl;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++import org.springframework.test.util.ReflectionTestUtils;
++import java.math.BigDecimal;
++import java.util.List;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.Mockito.*;
++
++class ReviewAcceptanceTest {
++    ReviewMapper reviews = mock(ReviewMapper.class);
++    OrderMapper orders = mock(OrderMapper.class);
++    OrderItemMapper items = mock(OrderItemMapper.class);
++    ProductMapper products = mock(ProductMapper.class);
++    UserMapper users = mock(UserMapper.class);
++    CreditScoreService credit = mock(CreditScoreService.class);
++    HybridRecommendationService recommendation = mock(HybridRecommendationService.class);
++    ReviewServiceImpl service = new ReviewServiceImpl();
++    Order order; ReviewRequest request;
++    @BeforeEach
++    void setup() {
++        ReflectionTestUtils.setField(service, "reviewMapper", reviews);
++        ReflectionTestUtils.setField(service, "orderMapper", orders);
++        ReflectionTestUtils.setField(service, "orderItemMapper", items);
++        ReflectionTestUtils.setField(service, "productMapper", products);
++        ReflectionTestUtils.setField(service, "userMapper", users);
++        ReflectionTestUtils.setField(service, "creditScoreService", credit);
++        ReflectionTestUtils.setField(service, "hybridRecommendationService", recommendation);
++        order = new Order(); order.setId(50); order.setUserId(1); order.setStatus("COMPLETED");
++        when(orders.findById(50)).thenReturn(order);
++        request = new ReviewRequest(); request.setOrderId(50); request.setProductRating(5); request.setSellerRating(4);
++        OrderItem item = new OrderItem(); item.setProductId(7); item.setQuantity(1); item.setPrice(BigDecimal.TEN);
++        when(items.findByOrderId(50)).thenReturn(List.of(item));
++        Product p = new Product(); p.setId(7L); p.setUserId(2L); p.setName("Book");
++        when(products.selectById(7L)).thenReturn(p);
++    }
++    @ParameterizedTest @ValueSource(strings = {"PENDING", "PAID", "CANCELED", "EXPIRED"})
++    void nonCompletedOrderCannotBeReviewed(String state) {
++        order.setStatus(state);
++        assertThrows(RuntimeException.class, () -> service.createReview(1, request));
++        verify(reviews, never()).insert(any());
++    }
++    @ParameterizedTest @ValueSource(strings = {"DELIVERED", "COMPLETED"})
++    void preservesBothUploadedCompletedStatesAndRefusesSecondReview(String state) {
++        order.setStatus(state); request.setComment("Good"); request.setReviewImages(List.of("https://example.test/a.png")); request.setIsAnonymous(true);
++        Review saved = service.createReview(1, request);
++        assertEquals(5, saved.getProductRating()); assertEquals(4, saved.getSellerRating());
++        assertEquals(7L, saved.getProductId()); assertEquals(2, saved.getSellerId());
++        assertEquals("https://example.test/a.png", saved.getReviewImages()); assertTrue(saved.getIsAnonymous());
++        verify(credit).updateCreditScore(2L); verify(recommendation).updatePopularity(7L, "review");
++        when(reviews.selectByOrderId(50)).thenReturn(saved);
++        assertThrows(RuntimeException.class, () -> service.createReview(1, request));
++        verify(reviews, times(1)).insert(any());
++    }
++    @Test
++    void rejectsWrongBuyerMissingOrderAndInvalidRatings() {
++        assertThrows(RuntimeException.class, () -> service.createReview(99, request));
++        for (int bad : new int[]{0, 6}) {
++            request.setProductRating(bad); assertThrows(RuntimeException.class, () -> service.createReview(1, request));
++        }
++        request.setProductRating(5);
++        for (int bad : new int[]{0, 6}) {
++            request.setSellerRating(bad); assertThrows(RuntimeException.class, () -> service.createReview(1, request));
++        }
++        when(orders.findById(50)).thenReturn(null);
++        assertThrows(RuntimeException.class, () -> service.createReview(1, request));
++    }
++    @Test
++    void rejectsMissingPurchasedItemsAndProduct() {
++        when(items.findByOrderId(50)).thenReturn(List.of());
++        assertThrows(RuntimeException.class, () -> service.createReview(1, request));
++        OrderItem item = new OrderItem(); item.setProductId(7); when(items.findByOrderId(50)).thenReturn(List.of(item));
++        when(products.selectById(7L)).thenReturn(null);
++        assertThrows(RuntimeException.class, () -> service.createReview(1, request));
++    }
++    @Test
++    void publicAnonymousAndNamedReviewsUseUploadedResponseContract() {
++        Review saved = service.createReview(1, request);
++        when(reviews.selectByProductId(7L)).thenReturn(List.of(saved));
++        User buyer = new User(); buyer.setDisplayName("Alice"); buyer.setAvatarUrl("avatar");
++        when(users.selectById(1L)).thenReturn(buyer);
++        var response = service.getProductReviews(7L).get(0);
++        assertEquals(1, response.getBuyerId()); assertEquals("Alice", response.getBuyerName()); assertEquals("Book", response.getProductName());
++        assertTrue(response.getReviewImages().isEmpty());
++        saved.setIsAnonymous(true); saved.setReviewImages("a,b");
++        response = service.getProductReviews(7L).get(0);
++        assertNull(response.getBuyerId()); assertEquals("匿名用户", response.getBuyerName()); assertEquals(List.of("a", "b"), response.getReviewImages());
++    }
++    @Test
++    void listsAndReviewChecksUseExistingMapperContracts() {
++        assertFalse(service.hasReviewed(50)); when(reviews.selectByOrderId(50)).thenReturn(new Review());
++        assertTrue(service.hasReviewed(50));
++        service.getSellerReviews(2); service.getBuyerReviews(1);
++        verify(reviews).selectBySellerId(2); verify(reviews).selectByBuyerId(1);
++        assertEquals(0.0, service.getProductAverageRating(7L));
++        when(reviews.getAverageProductRating(7L)).thenReturn(4.5);
++        assertEquals(4.5, service.getProductAverageRating(7L));
++    }
++}
+diff --git a/src/test/java/lut/cn/c2cplatform/TransactionAcceptanceIT.java b/src/test/java/lut/cn/c2cplatform/TransactionAcceptanceIT.java
+new file mode 100644
+index 0000000..6d42ad9
+--- /dev/null
++++ b/src/test/java/lut/cn/c2cplatform/TransactionAcceptanceIT.java
+@@ -0,0 +1,140 @@
++package lut.cn.c2cplatform;
++
++import lut.cn.c2cplatform.dto.PaymentRequest;
++import lut.cn.c2cplatform.entity.Order;
++import lut.cn.c2cplatform.scheduled.OrderExpireTask;
++import lut.cn.c2cplatform.service.CreditScoreService;
++import lut.cn.c2cplatform.service.OrderService;
++import lut.cn.c2cplatform.service.impl.OrderServiceImpl;
++import org.apache.ibatis.session.SqlSessionFactory;
++import org.junit.jupiter.api.*;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++import org.mybatis.spring.SqlSessionFactoryBean;
++import org.mybatis.spring.annotation.MapperScan;
++import org.springframework.context.annotation.*;
++import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.jdbc.datasource.DataSourceTransactionManager;
++import org.springframework.jdbc.datasource.DriverManagerDataSource;
++import org.springframework.security.crypto.bcrypt.BCrypt;
++import org.springframework.transaction.PlatformTransactionManager;
++import org.springframework.transaction.annotation.EnableTransactionManagement;
++import org.testcontainers.containers.MySQLContainer;
++
++import javax.sql.DataSource;
++import java.math.BigDecimal;
++import java.util.UUID;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.Mockito.mock;
++
++/** Real mapper XML, uploaded init.sql and Spring transaction proxies; no mapper mocks. */
++class TransactionAcceptanceIT {
++    static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.0.36")
++            .withDatabaseName("trade").withUsername("integration").withPassword("integration")
++            .withInitScript("init.sql");
++    static AnnotationConfigApplicationContext context;
++    JdbcTemplate jdbc; OrderService orders; OrderExpireTask expiry;
++    Long buyer, seller, product; Integer orderId;
++    @BeforeAll static void start() {
++        MYSQL.start(); context = new AnnotationConfigApplicationContext(Config.class);
++    }
++    @AfterAll static void stop() {
++        if (context != null) context.close(); MYSQL.stop();
++    }
++    @Configuration @EnableTransactionManagement
++    @MapperScan("lut.cn.c2cplatform.mapper")
++    static class Config {
++        @Bean DataSource dataSource() { return new DriverManagerDataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword()); }
++        @Bean PlatformTransactionManager transactionManager(DataSource ds) { return new DataSourceTransactionManager(ds); }
++        @Bean SqlSessionFactory sqlSessionFactory(DataSource ds) throws Exception {
++            SqlSessionFactoryBean f = new SqlSessionFactoryBean(); f.setDataSource(ds);
++            org.apache.ibatis.session.Configuration c = new org.apache.ibatis.session.Configuration();
++            c.setMapUnderscoreToCamelCase(true); f.setConfiguration(c);
++            f.setTypeAliasesPackage("lut.cn.c2cplatform.entity");
++            f.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/*.xml"));
++            return f.getObject();
++        }
++        @Bean OrderService orderService() { return new OrderServiceImpl(); }
++        @Bean OrderExpireTask expiry() { return new OrderExpireTask(); }
++        @Bean CreditScoreService creditScoreService() { return mock(CreditScoreService.class); }
++    }
++    @BeforeEach void seed() {
++        jdbc = new JdbcTemplate(context.getBean(DataSource.class)); orders = context.getBean(OrderService.class); expiry = context.getBean(OrderExpireTask.class);
++        buyer = user("buyer", "100.00"); seller = user("seller", "0.00");
++        jdbc.update("INSERT INTO pms_product(user_id,name,price,stock,status) VALUES (?,'Issue43 item',30,2,1)", seller);
++        product = jdbc.queryForObject("SELECT id FROM pms_product WHERE user_id=?", Long.class, seller);
++        orderId = orders.createOrderForProduct(buyer.intValue(), product, 1).getId();
++    }
++    Long user(String role, String balance) {
++        String name = role + "-" + UUID.randomUUID();
++        jdbc.update("INSERT INTO users(username,email,password_hash,payment_password_hash,balance) VALUES (?,?,?,?,?)",
++                name, name + "@example.test", BCrypt.hashpw("login", BCrypt.gensalt(4)), BCrypt.hashpw("123456", BCrypt.gensalt(4)), new BigDecimal(balance));
++        return jdbc.queryForObject("SELECT id FROM users WHERE username=?", Long.class, name);
++    }
++    @AfterEach void cleanup() {
++        if (orderId != null) {
++            jdbc.update("DELETE FROM transactions WHERE order_id=?", orderId);
++            jdbc.update("DELETE FROM order_items WHERE order_id=?", orderId);
++            jdbc.update("DELETE FROM orders WHERE id=?", orderId);
++        }
++        if (product != null) jdbc.update("DELETE FROM pms_product WHERE id=?", product);
++        if (buyer != null) jdbc.update("DELETE FROM users WHERE id=?", buyer);
++        if (seller != null) jdbc.update("DELETE FROM users WHERE id=?", seller);
++    }
++    PaymentRequest payment(String method, String pin) {
++        PaymentRequest r = new PaymentRequest(); r.setPaymentMethod(method); r.setPassword(pin); return r;
++    }
++    String status() { return jdbc.queryForObject("SELECT status FROM orders WHERE id=?", String.class, orderId); }
++    int stock() { return jdbc.queryForObject("SELECT stock FROM pms_product WHERE id=?", Integer.class, product); }
++    int ledger() { return jdbc.queryForObject("SELECT COUNT(*) FROM transactions WHERE order_id=?", Integer.class, orderId); }
++    BigDecimal balance() { return jdbc.queryForObject("SELECT balance FROM users WHERE id=?", BigDecimal.class, buyer); }
++    @ParameterizedTest @ValueSource(strings = {"balance", "alipay", "wechat", "bank"})
++    void successfulPaymentDeductsStockOnceAndCannotBeExpired(String method) {
++        orders.payOrder(orderId, buyer.intValue(), payment(method, "123456"));
++        assertEquals("PAID", status()); assertEquals(1, stock()); assertEquals(1, ledger());
++        assertEquals(new BigDecimal("balance".equals(method) ? "70.00" : "100.00"), balance());
++        assertThrows(RuntimeException.class, () -> orders.payOrder(orderId, buyer.intValue(), payment(method, "123456")));
++        jdbc.update("UPDATE orders SET expire_time=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE id=?", orderId);
++        expiry.closeExpiredOrders(); assertEquals("PAID", status()); assertEquals(1, stock()); assertEquals(1, ledger());
++    }
++    @Test void insufficientBalanceRollsBackEarlierStockDeduction() {
++        jdbc.update("UPDATE users SET balance=5 WHERE id=?", buyer);
++        assertThrows(RuntimeException.class, () -> orders.payOrder(orderId, buyer.intValue(), payment("balance", "123456")));
++        assertEquals("PENDING", status()); assertEquals(2, stock()); assertEquals(0, ledger()); assertEquals(new BigDecimal("5.00"), balance());
++    }
++    @ParameterizedTest @ValueSource(strings = {"balance", "alipay", "wechat", "bank"})
++    void wrongPasswordCommitsNothing(String method) {
++        assertThrows(RuntimeException.class, () -> orders.payOrder(orderId, buyer.intValue(), payment(method, "000000")));
++        assertEquals("PENDING", status()); assertEquals(2, stock()); assertEquals(0, ledger()); assertEquals(new BigDecimal("100.00"), balance());
++    }
++    @Test void repeatedExpiryNeverInflatesStock() {
++        jdbc.update("UPDATE orders SET expire_time=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE id=?", orderId);
++        expiry.closeExpiredOrders(); expiry.closeExpiredOrders();
++        assertEquals("EXPIRED", status()); assertEquals(2, stock()); assertEquals(0, ledger());
++        assertThrows(RuntimeException.class, () -> orders.payOrder(orderId, buyer.intValue(), payment("balance", "123456")));
++    }
++    @Test void concurrentPaymentsHaveOneWinnerAndOneLedgerRow() throws Exception {
++        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
++        java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
++        java.util.concurrent.Callable<Boolean> attempt = () -> {
++            start.await();
++            try {
++                orders.payOrder(orderId, buyer.intValue(), payment("balance", "123456"));
++                return true;
++            } catch (RuntimeException refused) {
++                if (!refused.getMessage().contains("not pending")) throw refused;
++                return false;
++            }
++        };
++        try {
++            var first = pool.submit(attempt); var second = pool.submit(attempt); start.countDown();
++            assertNotEquals(first.get(15, java.util.concurrent.TimeUnit.SECONDS), second.get(15, java.util.concurrent.TimeUnit.SECONDS));
++            assertEquals("PAID", status()); assertEquals(1, ledger()); assertEquals(1, stock());
++            assertEquals(new BigDecimal("70.00"), balance());
++        } finally {
++            pool.shutdownNow(); assertTrue(pool.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS));
++        }
++    }
++
++}
