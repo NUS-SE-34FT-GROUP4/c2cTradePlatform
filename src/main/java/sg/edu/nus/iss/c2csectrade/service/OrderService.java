@@ -3,9 +3,11 @@ package sg.edu.nus.iss.c2csectrade.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sg.edu.nus.iss.c2csectrade.entity.*;
+import sg.edu.nus.iss.c2csectrade.event.OrderStateChangedEvent;
 import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
 import sg.edu.nus.iss.c2csectrade.mapper.*;
 
@@ -36,6 +38,7 @@ public class OrderService {
     private final OrderItemMapper orderItemMapper;
     private final CartItemMapper cartItemMapper;
     private final ProductMapper productMapper;
+    private final ApplicationEventPublisher events;
 
     @Value("${order.payment-window-minutes:15}")
     private int paymentWindowMinutes;
@@ -43,11 +46,13 @@ public class OrderService {
     public OrderService(OrderMapper orderMapper,
                         OrderItemMapper orderItemMapper,
                         CartItemMapper cartItemMapper,
-                        ProductMapper productMapper) {
+                        ProductMapper productMapper,
+                        ApplicationEventPublisher events) {
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
         this.cartItemMapper = cartItemMapper;
         this.productMapper = productMapper;
+        this.events = events;
     }
 
     /**
@@ -158,18 +163,6 @@ public class OrderService {
         }
     }
 
-    @Transactional
-    public Order cancel(Long buyerId, Long orderId) {
-        Order order = orderMapper.selectById(orderId);
-        if (order == null || !order.getBuyerId().equals(buyerId)) {
-            throw new IllegalArgumentException("Order not found");
-        }
-        if (!OrderStatus.PENDING_PAYMENT.name().equals(order.getStatus())) {
-            throw new IllegalStateException("Only an unpaid order can be cancelled");
-        }
-        releaseAndMark(order, OrderStatus.CANCELLED);
-        return orderMapper.selectById(orderId);
-    }
 
     /**
      * Expire orders whose payment window has passed and hand their held stock
@@ -192,7 +185,13 @@ public class OrderService {
         for (OrderItem item : orderItemMapper.selectByOrderId(order.getId())) {
             productMapper.releaseStock(item.getProductId(), item.getQuantity());
         }
+        String from = order.getStatus();
         orderMapper.updateStatus(order.getId(), status.name());
+
+        // Observers pick this up after the commit, not inside it. Covers both
+        // the buyer cancelling and the window expiring.
+        events.publishEvent(new OrderStateChangedEvent(order.getId(), order.getOrderNo(),
+                order.getBuyerId(), order.getSellerId(), from, status.name(), order.getTotalAmount()));
     }
 
     public List<Order> listForBuyer(Long buyerId) {

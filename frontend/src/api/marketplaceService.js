@@ -38,6 +38,15 @@ export const orders = {
   list: (role = 'buyer') => client.get('/orders', { params: { role } }),
   get: (orderId) => client.get(`/orders/${orderId}`),
   cancel: (orderId) => client.post(`/orders/${orderId}/cancel`),
+  pay: (orderId, paymentMethod, paymentPassword) =>
+    client.post(`/orders/${orderId}/pay`, { paymentMethod, paymentPassword }),
+  ship: (orderId) => client.post(`/orders/${orderId}/ship`),
+  confirmReceipt: (orderId) => client.post(`/orders/${orderId}/confirm-receipt`),
+};
+
+export const wallet = {
+  // { balance, hasPaymentPassword }
+  summary: () => client.get('/wallet'),
 };
 
 export const favorites = {

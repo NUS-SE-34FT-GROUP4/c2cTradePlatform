@@ -74,6 +74,18 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/orders/:orderId',
+    name: 'order-detail',
+    component: () => import('../views/OrderDetailView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/orders/:orderId/pay',
+    name: 'payment',
+    component: () => import('../views/PaymentView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/favorites',
     name: 'favorites',
     component: FavoritesView,
@@ -83,6 +95,12 @@ const routes = [
     path: '/chat',
     name: 'chat',
     component: ChatView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payment-password/setup',
+    name: 'payment-password-setup',
+    component: () => import('../views/PaymentPasswordSetup.vue'),
     meta: { requiresAuth: true },
   },
 ];

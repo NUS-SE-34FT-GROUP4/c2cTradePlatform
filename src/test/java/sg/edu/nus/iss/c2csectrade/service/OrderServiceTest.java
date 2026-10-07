@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import sg.edu.nus.iss.c2csectrade.entity.*;
 import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
@@ -31,6 +32,7 @@ class OrderServiceTest {
     @Mock private OrderItemMapper orderItemMapper;
     @Mock private CartItemMapper cartItemMapper;
     @Mock private ProductMapper productMapper;
+    @Mock private ApplicationEventPublisher events;
 
     @InjectMocks private OrderService orderService;
 
@@ -130,27 +132,6 @@ class OrderServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> orderService.checkoutFromCart(BUYER, List.of(1L)));
-    }
-
-    @Test
-    @DisplayName("Cancelling an unpaid order releases exactly what it reserved")
-    void cancelReleasesReservedStock() {
-        Order order = new Order();
-        order.setId(500L);
-        order.setBuyerId(BUYER);
-        order.setSellerId(SELLER_A);
-        order.setStatus(OrderStatus.PENDING_PAYMENT.name());
-        when(orderMapper.selectById(500L)).thenReturn(order);
-
-        OrderItem item = new OrderItem();
-        item.setProductId(101L);
-        item.setQuantity(3);
-        when(orderItemMapper.selectByOrderId(500L)).thenReturn(List.of(item));
-
-        orderService.cancel(BUYER, 500L);
-
-        verify(productMapper).releaseStock(101L, 3);
-        verify(orderMapper).updateStatus(500L, OrderStatus.CANCELLED.name());
     }
 
     @Test

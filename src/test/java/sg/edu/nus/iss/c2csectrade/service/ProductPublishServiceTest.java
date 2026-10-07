@@ -3,6 +3,7 @@ package sg.edu.nus.iss.c2csectrade.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.context.ApplicationEventPublisher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -14,6 +15,7 @@ import sg.edu.nus.iss.c2csectrade.exception.ProductAccessDeniedException;
 import sg.edu.nus.iss.c2csectrade.mapper.ProductMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.ProductMediaMapper;
 import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
+import sg.edu.nus.iss.c2csectrade.service.search.ProductIndexEvent;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,6 +31,7 @@ class ProductPublishServiceTest {
     @Mock private ProductMapper productMapper;
     @Mock private ProductMediaMapper productMediaMapper;
     @Mock private UserMapper userMapper;
+    @Mock private ApplicationEventPublisher eventPublisher;
     @InjectMocks private ProductService productService;
 
     private ProductPublishRequest request(String name, String price) {
@@ -59,6 +62,7 @@ class ProductPublishServiceTest {
         assertFalse(stored.contains("<script>"));
         assertFalse(stored.contains("alert"));
         assertTrue(stored.contains("really"));
+        verify(eventPublisher).publishEvent(ProductIndexEvent.upsert(1L));
     }
 
     @Test
@@ -98,6 +102,21 @@ class ProductPublishServiceTest {
     }
 
     @Test
+    @DisplayName("Editing a listing schedules its search document for refresh")
+    void editingRefreshesSearchDocument() {
+        Product own = new Product();
+        own.setId(101L);
+        own.setUserId(20L);
+        own.setStatus(1);
+        when(productMapper.selectById(101L)).thenReturn(own);
+        when(productMediaMapper.selectByProductId(101L)).thenReturn(List.of());
+
+        productService.update(101L, request("Renamed", "10.00"), 20L);
+
+        verify(eventPublisher).publishEvent(ProductIndexEvent.upsert(101L));
+    }
+
+    @Test
     @DisplayName("Delisting sets the status and keeps the row, so existing orders still resolve")
     void delistKeepsRow() {
         Product own = new Product();
@@ -112,6 +131,7 @@ class ProductPublishServiceTest {
         verify(productMapper).update(captor.capture());
         assertEquals(0, captor.getValue().getStatus());
         verify(productMapper, never()).deleteById(anyLong());
+        verify(eventPublisher).publishEvent(ProductIndexEvent.delete(101L));
     }
 
     @Test
