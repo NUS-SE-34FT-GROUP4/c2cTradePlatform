@@ -145,6 +145,28 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <!-- Fails mvn verify when line coverage drops below the floor. Main sits
+                         at 44.5% (Sprint 3); raise the floor as coverage grows. -->
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.40</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
