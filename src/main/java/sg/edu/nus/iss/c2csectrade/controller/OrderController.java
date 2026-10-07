@@ -9,6 +9,9 @@ import sg.edu.nus.iss.c2csectrade.entity.User;
 import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
 import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
 import sg.edu.nus.iss.c2csectrade.service.OrderService;
+import sg.edu.nus.iss.c2csectrade.service.OrderStateService;
+import sg.edu.nus.iss.c2csectrade.service.PaymentService;
+import sg.edu.nus.iss.c2csectrade.entity.OrderAction;
 
 import java.util.List;
 import java.util.Map;
@@ -19,10 +22,17 @@ import java.util.function.Function;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PaymentService paymentService;
+    private final OrderStateService orderStateService;
     private final UserMapper userMapper;
 
-    public OrderController(OrderService orderService, UserMapper userMapper) {
+    public OrderController(OrderService orderService,
+                           PaymentService paymentService,
+                           OrderStateService orderStateService,
+                           UserMapper userMapper) {
         this.orderService = orderService;
+        this.paymentService = paymentService;
+        this.orderStateService = orderStateService;
         this.userMapper = userMapper;
     }
 
@@ -77,7 +87,33 @@ public class OrderController {
 
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<?> cancel(@PathVariable Long orderId, Authentication authentication) {
-        return asUser(authentication, buyerId -> ResponseEntity.ok(orderService.cancel(buyerId, orderId)));
+        return asUser(authentication, userId ->
+                ResponseEntity.ok(orderStateService.apply(userId, orderId, OrderAction.CANCEL)));
+    }
+
+    /** The seller dispatches a paid order. */
+    @PostMapping("/{orderId}/ship")
+    public ResponseEntity<?> ship(@PathVariable Long orderId, Authentication authentication) {
+        return asUser(authentication, userId ->
+                ResponseEntity.ok(orderStateService.apply(userId, orderId, OrderAction.SHIP)));
+    }
+
+    /** The buyer confirms a shipped order has arrived. */
+    @PostMapping("/{orderId}/confirm-receipt")
+    public ResponseEntity<?> confirmReceipt(@PathVariable Long orderId, Authentication authentication) {
+        return asUser(authentication, userId ->
+                ResponseEntity.ok(orderStateService.apply(userId, orderId, OrderAction.CONFIRM_RECEIPT)));
+    }
+
+    @PostMapping("/{orderId}/pay")
+    public ResponseEntity<?> pay(@PathVariable Long orderId,
+                                 @RequestBody Map<String, Object> body,
+                                 Authentication authentication) {
+        return asUser(authentication, buyerId -> ResponseEntity.ok(paymentService.pay(
+                buyerId,
+                orderId,
+                String.valueOf(body.get("paymentMethod")),
+                body.get("paymentPassword") == null ? null : String.valueOf(body.get("paymentPassword")))));
     }
 
     private ResponseEntity<?> asUser(Authentication authentication, Function<Long, ResponseEntity<?>> action) {

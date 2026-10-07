@@ -125,18 +125,20 @@ ON DUPLICATE KEY UPDATE user_id=VALUES(user_id);
 -- =================================================================
 -- Test Seller Accounts
 -- Password for all users: admin123
+-- Payment password for all users: 123456
 -- =================================================================
 
 -- 1. Create Users
 -- IDs 101-105 to avoid conflicts
-INSERT INTO `users` (`id`, `username`, `display_name`, `password_hash`, `email`, `avatar_url`, `balance`) VALUES
-(101, 'seller_lvl1', 'Seller Level 1', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', 'seller1@test.com', 'https://i.pravatar.cc/150?u=seller1', 1000.00),
-(102, 'seller_lvl2', 'Seller Level 2', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', 'seller2@test.com', 'https://i.pravatar.cc/150?u=seller2', 2000.00),
-(103, 'seller_lvl3', 'Seller Level 3', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', 'seller3@test.com', 'https://i.pravatar.cc/150?u=seller3', 3000.00),
-(104, 'seller_lvl4', 'Seller Level 4', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', 'seller4@test.com', 'https://i.pravatar.cc/150?u=seller4', 4000.00),
-(105, 'seller_lvl5', 'Seller Level 5', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', 'seller5@test.com', 'https://i.pravatar.cc/150?u=seller5', 5000.00)
+INSERT INTO `users` (`id`, `username`, `display_name`, `password_hash`, `payment_password_hash`, `email`, `avatar_url`, `balance`) VALUES
+(101, 'seller_lvl1', 'Seller Level 1', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', '$2a$12$qKa0QH..hifzPlSsE6U.Q.4gGjw513N7.xWFpmr5Q.cp12YhGY7lG', 'seller1@test.com', 'https://i.pravatar.cc/150?u=seller1', 1000.00),
+(102, 'seller_lvl2', 'Seller Level 2', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', '$2a$12$qKa0QH..hifzPlSsE6U.Q.4gGjw513N7.xWFpmr5Q.cp12YhGY7lG', 'seller2@test.com', 'https://i.pravatar.cc/150?u=seller2', 2000.00),
+(103, 'seller_lvl3', 'Seller Level 3', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', '$2a$12$qKa0QH..hifzPlSsE6U.Q.4gGjw513N7.xWFpmr5Q.cp12YhGY7lG', 'seller3@test.com', 'https://i.pravatar.cc/150?u=seller3', 3000.00),
+(104, 'seller_lvl4', 'Seller Level 4', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', '$2a$12$qKa0QH..hifzPlSsE6U.Q.4gGjw513N7.xWFpmr5Q.cp12YhGY7lG', 'seller4@test.com', 'https://i.pravatar.cc/150?u=seller4', 4000.00),
+(105, 'seller_lvl5', 'Seller Level 5', '$2a$12$9l1r7OVMYW3xsv/JQchZKutlvkIJgopmbNC3jEA3hUkNbN/ivzMn2', '$2a$12$qKa0QH..hifzPlSsE6U.Q.4gGjw513N7.xWFpmr5Q.cp12YhGY7lG', 'seller5@test.com', 'https://i.pravatar.cc/150?u=seller5', 5000.00)
 ON DUPLICATE KEY UPDATE 
     password_hash=VALUES(password_hash), 
+    payment_password_hash=VALUES(payment_password_hash),
     display_name=VALUES(display_name),
     email=VALUES(email);
 
@@ -359,3 +361,18 @@ CREATE TABLE IF NOT EXISTS review (
     CONSTRAINT ck_review_product_rating CHECK (product_rating BETWEEN 1 AND 5),
     CONSTRAINT ck_review_seller_rating CHECK (seller_rating BETWEEN 1 AND 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sprint 3: system notifications (WP4). Raised by the order-state Observer,
+-- one row per recipient, so a user who was offline still sees what happened.
+-- Additive migration: safe for an existing Sprint 3 database.
+CREATE TABLE IF NOT EXISTS system_notification (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    order_id BIGINT NULL,
+    content VARCHAR(500) NOT NULL,
+    read_flag TINYINT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_notif_user (user_id, read_flag, created_at),
+    CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notif_order FOREIGN KEY (order_id) REFERENCES oms_order(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Persisted system notifications, one row per recipient.';
