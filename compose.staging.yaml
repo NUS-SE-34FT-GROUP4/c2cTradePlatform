@@ -1,9 +1,16 @@
-# Staging. Same shape as compose.yaml, but it pulls published images instead of
-# building, and every credential comes from the environment rather than the file.
+# Staging and production. Same shape as compose.yaml, but it pulls published
+# images instead of building, and every credential comes from the environment
+# rather than the file.
+#
+# Both stacks run on one Droplet. STACK prefixes the container names and the
+# *_PORT variables move the host ports, so production (STACK=c2csectrade-prod)
+# runs beside staging, which keeps the defaults. Volumes and the network are
+# separate because each stack is deployed from its own directory, which compose
+# uses as the project name.
 services:
   mysql:
     image: mysql:8.0
-    container_name: c2csectrade-mysql
+    container_name: ${STACK:-c2csectrade}-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
       MYSQL_DATABASE: trade
@@ -22,7 +29,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: c2csectrade-redis
+    container_name: ${STACK:-c2csectrade}-redis
     volumes:
       - redis-data:/data
     healthcheck:
@@ -35,7 +42,7 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
-    container_name: c2csectrade-elasticsearch
+    container_name: ${STACK:-c2csectrade}-elasticsearch
     environment:
       discovery.type: single-node
       xpack.security.enabled: "false"
@@ -55,13 +62,13 @@ services:
     # license (quay.io/minio/aistor/minio). This is the community rebuild that
     # still runs unlicensed with the same server entrypoint and CLI args.
     image: cgr.dev/chainguard/minio:latest
-    container_name: c2csectrade-minio
+    container_name: ${STACK:-c2csectrade}-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
     ports:
-      - "9000:9000"
+      - "${MINIO_PORT:-9000}:9000"
     volumes:
       - minio-data:/data
     networks: [ c2csectrade-network ]
@@ -69,7 +76,7 @@ services:
 
   backend:
     image: ghcr.io/${IMAGE_OWNER:?set IMAGE_OWNER}/c2c-sectrade-backend:${IMAGE_TAG:-latest}
-    container_name: c2csectrade-backend
+    container_name: ${STACK:-c2csectrade}-backend
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/trade?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci
@@ -86,7 +93,7 @@ services:
       # The backend has no fallback key, so this must be set or it will not boot.
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
     depends_on:
       mysql:
         condition: service_healthy
@@ -102,9 +109,9 @@ services:
 
   frontend:
     image: ghcr.io/${IMAGE_OWNER:?set IMAGE_OWNER}/c2c-sectrade-frontend:${IMAGE_TAG:-latest}
-    container_name: c2csectrade-frontend
+    container_name: ${STACK:-c2csectrade}-frontend
     ports:
-      - "80:80"
+      - "${HTTP_PORT:-80}:80"
     depends_on:
       - backend
     networks: [ c2csectrade-network ]
