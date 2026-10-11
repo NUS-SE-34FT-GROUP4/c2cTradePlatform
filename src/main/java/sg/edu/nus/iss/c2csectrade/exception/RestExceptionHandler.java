@@ -61,6 +61,15 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
+    @ExceptionHandler(ModerationException.class)
+    @ResponseBody
+    public ResponseEntity<?> handleModeration(ModerationException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", ex.getTitle());
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(body);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<?> handleGeneric(Exception ex) {
