@@ -45,6 +45,9 @@ CREATE TABLE `users` (
     `email` VARCHAR(100) NOT NULL COMMENT 'User email, unique',
     `avatar_url` VARCHAR(255) NULL COMMENT 'User avatar URL',
     `balance` DECIMAL(15, 2) NOT NULL DEFAULT 0.00 COMMENT 'User balance',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE or BANNED',
+    `ban_reason` VARCHAR(500) NULL COMMENT 'Shown to the user on every refusal',
+    `banned_at` DATETIME NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update time',
     PRIMARY KEY (`id`),
@@ -376,3 +379,37 @@ CREATE TABLE IF NOT EXISTS system_notification (
     CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_notif_order FOREIGN KEY (order_id) REFERENCES oms_order(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Persisted system notifications, one row per recipient.';
+
+-- Sprint 4 moderation: reports and the admin audit log (scripts/migrations/004_moderation.sql)
+CREATE TABLE IF NOT EXISTS report (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    reporter_id BIGINT NOT NULL,
+    target_type VARCHAR(10) NOT NULL COMMENT 'PRODUCT or USER',
+    target_id BIGINT NOT NULL,
+    reason VARCHAR(30) NOT NULL,
+    detail VARCHAR(1000) NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'OPEN' COMMENT 'OPEN, UPHELD or DISMISSED',
+    decided_by BIGINT NULL,
+    decision_note VARCHAR(500) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    decided_at DATETIME NULL,
+    INDEX idx_report_status (status, created_at),
+    INDEX idx_report_reporter (reporter_id),
+    INDEX idx_report_target (target_type, target_id, status),
+    CONSTRAINT fk_report_reporter FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_report_decided_by FOREIGN KEY (decided_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Reports on a product or a user, and their decision';
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    admin_id BIGINT NOT NULL,
+    action VARCHAR(30) NOT NULL COMMENT 'BAN_USER, REINSTATE_USER, UPHOLD_REPORT, DISMISS_REPORT, DELIST_PRODUCT',
+    target_type VARCHAR(10) NOT NULL,
+    target_id BIGINT NOT NULL,
+    report_id BIGINT NULL,
+    note VARCHAR(500) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_created (created_at),
+    CONSTRAINT fk_audit_admin FOREIGN KEY (admin_id) REFERENCES users(id),
+    CONSTRAINT fk_audit_report FOREIGN KEY (report_id) REFERENCES report(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Append-only record of administrator actions';

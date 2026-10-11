@@ -1,5 +1,6 @@
 package sg.edu.nus.iss.c2csectrade.config;
 
+import sg.edu.nus.iss.c2csectrade.security.BannedAccount;
 import sg.edu.nus.iss.c2csectrade.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +50,7 @@ public class SecurityConfig {
            .authorizeHttpRequests(auth -> auth
                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/product/*").permitAll()
                .requestMatchers("/api/auth/**").permitAll()
+               .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reports/reasons").permitAll()
                .requestMatchers("/api/captcha/**").permitAll()
                .requestMatchers("/api/products").permitAll() // 允许所有用户查看商品列表
                .requestMatchers("/api/products/*").permitAll() // 允许所有用户查看商品详情
@@ -61,6 +63,10 @@ public class SecurityConfig {
             )
            .exceptionHandling(ex -> ex
                .authenticationEntryPoint((request, response, authException) -> {
+                   if (BannedAccount.flagged(request)) {
+                       BannedAccount.write(response, (String) request.getAttribute(BannedAccount.REQUEST_ATTRIBUTE));
+                       return;
+                   }
                    response.setContentType("application/json;charset=UTF-8");
                    response.setStatus(401);
                    response.getWriter().write("{\"error\":\"未授权访问\"}");

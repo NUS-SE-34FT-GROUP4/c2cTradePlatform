@@ -4,6 +4,7 @@ import sg.edu.nus.iss.c2csectrade.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Mapper
@@ -22,4 +23,12 @@ public interface UserMapper {
     User selectByIdForUpdate(@Param("id") Long id);
     int updateBalance(@Param("id") Long id, @Param("balance") BigDecimal balance);
     int deleteById(@Param("id") Long id);
+
+    int updateBan(@Param("id") Long id, @Param("status") String status,
+                  @Param("banReason") String banReason, @Param("bannedAt") Instant bannedAt);
+
+    List<User> searchForAdmin(@Param("status") String status, @Param("q") String q,
+                              @Param("limit") int limit, @Param("offset") long offset);
+
+    long countForAdmin(@Param("status") String status, @Param("q") String q);
 }

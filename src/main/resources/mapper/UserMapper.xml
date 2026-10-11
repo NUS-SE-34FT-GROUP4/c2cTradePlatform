@@ -10,6 +10,9 @@
         <result property="email" column="email"/>
         <result property="avatarUrl" column="avatar_url"/>
         <result property="balance" column="balance"/>
+        <result property="status" column="status"/>
+        <result property="banReason" column="ban_reason"/>
+        <result property="bannedAt" column="banned_at"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -54,6 +57,29 @@
     <update id="updateBalance">
         UPDATE users SET balance = #{balance} WHERE id=#{id}
     </update>
+    <!-- Moderation (#61). Only these statements touch the ban columns. -->
+    <update id="updateBan">
+        UPDATE users SET status=#{status}, ban_reason=#{banReason}, banned_at=#{bannedAt} WHERE id=#{id}
+    </update>
+    <sql id="adminUserFilter">
+        <where>
+            <if test="status != null and status != ''">AND u.status = #{status}</if>
+            <if test="q != null and q != ''">
+                AND (u.username LIKE CONCAT('%', #{q}, '%') OR u.display_name LIKE CONCAT('%', #{q}, '%') OR u.email LIKE CONCAT('%', #{q}, '%'))
+            </if>
+        </where>
+    </sql>
+    <select id="searchForAdmin" resultMap="UserWithRolesResultMap">
+        SELECT u.* FROM users u
+        <include refid="adminUserFilter"/>
+        ORDER BY u.id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="countForAdmin" resultType="long">
+        SELECT COUNT(*) FROM users u
+        <include refid="adminUserFilter"/>
+    </select>
+
     <delete id="deleteById" parameterType="long">
         DELETE FROM users WHERE id=#{id}
     </delete>
