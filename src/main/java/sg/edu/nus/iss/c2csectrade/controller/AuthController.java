@@ -6,16 +6,21 @@ import sg.edu.nus.iss.c2csectrade.payload.PasswordResetRequest;
 import sg.edu.nus.iss.c2csectrade.payload.AuthResponse;
 import sg.edu.nus.iss.c2csectrade.service.AuthService;
 import sg.edu.nus.iss.c2csectrade.service.CaptchaService;
+import sg.edu.nus.iss.c2csectrade.security.BannedAccount;
 import sg.edu.nus.iss.c2csectrade.security.JwtTokenProvider;
+import sg.edu.nus.iss.c2csectrade.security.UserDetailsServiceImpl;
 import sg.edu.nus.iss.c2csectrade.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,6 +34,10 @@ public class AuthController {
     private JwtTokenProvider jwtTokenProvider;
     @Autowired
     private CaptchaService captchaService;
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
@@ -51,6 +60,14 @@ public class AuthController {
             authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
+        } catch (LockedException ex) {
+            // Spring checks the lock before the password; only say why with the right password.
+            UserDetails account = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+            if (passwordEncoder.matches(loginRequest.getPassword(), account.getPassword())) {
+                String reason = account instanceof BannedAccount.AccountUser banned ? banned.getBanReason() : null;
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BannedAccount.body(reason));
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用户名或密码错误");
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用户名或密码错误");
         }
