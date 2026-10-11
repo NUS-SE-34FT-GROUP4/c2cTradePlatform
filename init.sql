@@ -376,3 +376,42 @@ CREATE TABLE IF NOT EXISTS system_notification (
     CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_notif_order FOREIGN KEY (order_id) REFERENCES oms_order(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Persisted system notifications, one row per recipient.';
+
+-- =================================================================
+-- Sprint 4: bargain campaigns (WP4)
+-- =================================================================
+-- Additive migration: safe for an existing Sprint 3 database. Do not rerun
+-- init.sql on live data.
+USE trade;
+
+-- A buyer-run price-cut campaign on one listing. Holds no stock and takes no
+-- money: expiring or converting one releases nothing.
+CREATE TABLE IF NOT EXISTS bargain_campaign (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    buyer_id BIGINT NOT NULL COMMENT 'The buyer running the campaign',
+    start_price DECIMAL(10,2) NOT NULL COMMENT 'Price the campaign opens at',
+    current_price DECIMAL(10,2) NOT NULL COMMENT 'Live price after helpers',
+    floor_price DECIMAL(10,2) NOT NULL COMMENT 'Never crossed, however many helpers',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE, EXPIRED, CONVERTED',
+    deadline DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_campaign_product (product_id, status),
+    INDEX idx_campaign_buyer (buyer_id, status),
+    CONSTRAINT fk_campaign_product FOREIGN KEY (product_id) REFERENCES pms_product(id),
+    CONSTRAINT fk_campaign_buyer FOREIGN KEY (buyer_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Buyer-run price-cut campaign on one listing.';
+
+-- One help per person per campaign, enforced by the unique key.
+CREATE TABLE IF NOT EXISTS bargain_campaign_helper (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    campaign_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_helper_campaign_user (campaign_id, user_id),
+    CONSTRAINT fk_helper_campaign FOREIGN KEY (campaign_id) REFERENCES bargain_campaign(id) ON DELETE CASCADE,
+    CONSTRAINT fk_helper_user FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Who pushed a campaign down a step.';
+
+SELECT 'Sprint 4 bargain campaign tables created.' AS status;
