@@ -414,4 +414,23 @@ CREATE TABLE IF NOT EXISTS bargain_campaign_helper (
     CONSTRAINT fk_helper_user FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Who pushed a campaign down a step.';
 
-SELECT 'Sprint 4 bargain campaign tables created.' AS status;
+-- One negotiation thread is (product_id, buyer_id); the latest entry's status
+-- is the state of the thread. Nothing is reserved until an offer is accepted.
+CREATE TABLE IF NOT EXISTS bargain_offer (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    buyer_id BIGINT NOT NULL COMMENT 'The buyer side of the thread',
+    seller_id BIGINT NOT NULL,
+    offer_from VARCHAR(10) NOT NULL COMMENT 'BUYER or SELLER - who made this entry',
+    price DECIMAL(10,2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING, COUNTERED, ACCEPTED, REJECTED',
+    order_id BIGINT NULL COMMENT 'Set on acceptance - the negotiated order',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_offer_thread (product_id, buyer_id, created_at),
+    INDEX idx_offer_seller (seller_id),
+    CONSTRAINT fk_offer_product FOREIGN KEY (product_id) REFERENCES pms_product(id),
+    CONSTRAINT fk_offer_buyer FOREIGN KEY (buyer_id) REFERENCES users(id),
+    CONSTRAINT fk_offer_seller FOREIGN KEY (seller_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Offer thread entries; accepting one creates the order.';
+
+SELECT 'Sprint 4 bargain campaign and offer tables created.' AS status;

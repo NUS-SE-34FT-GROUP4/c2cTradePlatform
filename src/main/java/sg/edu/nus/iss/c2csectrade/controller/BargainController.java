@@ -8,6 +8,7 @@ import sg.edu.nus.iss.c2csectrade.exception.InsufficientStockException;
 import sg.edu.nus.iss.c2csectrade.mapper.UserMapper;
 import sg.edu.nus.iss.c2csectrade.entity.User;
 import sg.edu.nus.iss.c2csectrade.service.BargainCampaignService;
+import sg.edu.nus.iss.c2csectrade.service.BargainOfferService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,10 +27,14 @@ import java.util.function.Function;
 public class BargainController {
 
     private final BargainCampaignService campaignService;
+    private final BargainOfferService offerService;
     private final UserMapper userMapper;
 
-    public BargainController(BargainCampaignService campaignService, UserMapper userMapper) {
+    public BargainController(BargainCampaignService campaignService,
+                             BargainOfferService offerService,
+                             UserMapper userMapper) {
         this.campaignService = campaignService;
+        this.offerService = offerService;
         this.userMapper = userMapper;
     }
 
@@ -60,6 +65,52 @@ public class BargainController {
                 return ResponseEntity.badRequest().body(Map.of("message", "productId is required"));
             }
             return ResponseEntity.ok(campaignService.listForProduct(productId));
+        });
+    }
+
+    @PostMapping("/offers")
+    public ResponseEntity<?> makeOffer(@RequestBody Map<String, Object> body, Authentication authentication) {
+        return asUser(authentication, userId -> {
+            if (body.get("productId") == null || body.get("price") == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "productId and price are required"));
+            }
+            Long productId = Long.valueOf(String.valueOf(body.get("productId")));
+            BigDecimal price = new BigDecimal(String.valueOf(body.get("price")));
+            return ResponseEntity.status(HttpStatus.CREATED).body(offerService.makeOffer(userId, productId, price));
+        });
+    }
+
+    @PostMapping("/offers/{id}/counter")
+    public ResponseEntity<?> counterOffer(@PathVariable Long id,
+                                          @RequestBody Map<String, Object> body,
+                                          Authentication authentication) {
+        return asUser(authentication, userId -> {
+            if (body.get("price") == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "price is required"));
+            }
+            BigDecimal price = new BigDecimal(String.valueOf(body.get("price")));
+            return ResponseEntity.ok(offerService.counter(id, userId, price));
+        });
+    }
+
+    /** Returns {orderId}: the negotiated order, which the page sends to payment. */
+    @PostMapping("/offers/{id}/accept")
+    public ResponseEntity<?> acceptOffer(@PathVariable Long id, Authentication authentication) {
+        return asUser(authentication, userId -> ResponseEntity.ok(offerService.accept(id, userId)));
+    }
+
+    @PostMapping("/offers/{id}/reject")
+    public ResponseEntity<?> rejectOffer(@PathVariable Long id, Authentication authentication) {
+        return asUser(authentication, userId -> ResponseEntity.ok(offerService.reject(id, userId)));
+    }
+
+    @GetMapping("/offers")
+    public ResponseEntity<?> offers(@RequestParam(required = false) Long productId, Authentication authentication) {
+        return asUser(authentication, userId -> {
+            if (productId == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "productId is required"));
+            }
+            return ResponseEntity.ok(offerService.listForProduct(productId, userId));
         });
     }
 
