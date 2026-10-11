@@ -210,7 +210,7 @@ jobs:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
-          source: "compose.staging.yaml,init.sql,scripts/migrations/003_reviews.sql"
+          source: "compose.staging.yaml,init.sql,scripts/migrations/003_reviews.sql,scripts/migrations/004_moderation.sql"
           target: "~/c2c-sectrade"
 
       - name: Pull and restart
@@ -235,8 +235,8 @@ jobs:
             export MINIO_PUBLIC_ENDPOINT='${{ secrets.STAGING_MINIO_PUBLIC_ENDPOINT }}'
             export JWT_SECRET='${{ secrets.STAGING_JWT_SECRET }}'
             docker compose -f compose.staging.yaml pull
-            # Existing MySQL volumes do not rerun init.sql. Apply the additive review migration
-            # before starting the application version that queries the new table.
+            # Existing MySQL volumes do not rerun init.sql. Apply the additive migrations
+            # (reviews, moderation) before starting the application version that uses them.
             docker compose -f compose.staging.yaml up -d mysql redis minio
             for attempt in $(seq 1 30); do
               if docker compose -f compose.staging.yaml exec -T mysql sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade -e "SELECT 1"' >/dev/null 2>&1; then
@@ -246,6 +246,7 @@ jobs:
               sleep 2
             done
             docker compose -f compose.staging.yaml exec -T mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' < scripts/migrations/003_reviews.sql
+            docker compose -f compose.staging.yaml exec -T mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' < scripts/migrations/004_moderation.sql
             docker compose -f compose.staging.yaml up -d
 
       - name: Smoke test
@@ -344,7 +345,7 @@ jobs:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
-          source: "compose.staging.yaml,init.sql,scripts/migrations/003_reviews.sql"
+          source: "compose.staging.yaml,init.sql,scripts/migrations/003_reviews.sql,scripts/migrations/004_moderation.sql"
           target: "~/c2c-sectrade-prod"
 
       - name: Pull and restart
@@ -377,6 +378,7 @@ jobs:
               sleep 2
             done
             docker compose -f compose.staging.yaml exec -T mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' < scripts/migrations/003_reviews.sql
+            docker compose -f compose.staging.yaml exec -T mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' < scripts/migrations/004_moderation.sql
             docker compose -f compose.staging.yaml up -d
 
       - name: Smoke test

@@ -20,6 +20,10 @@ public class User implements Serializable {
     private String paymentPasswordHash;
     private String avatarUrl;
     private java.math.BigDecimal balance; // 用户余额
+    /** ACTIVE or BANNED; a banned account is refused on login and on every authenticated request. */
+    private String status;
+    private String banReason;
+    private Instant bannedAt;
     private Instant createdAt;
     private Instant updatedAt;
     private Set<Role> roles;

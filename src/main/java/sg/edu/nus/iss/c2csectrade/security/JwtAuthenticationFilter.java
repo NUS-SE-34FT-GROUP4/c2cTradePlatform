@@ -31,6 +31,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else if (tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (!userDetails.isAccountNonLocked()) {
+                    // Banned after the token was issued. Stay anonymous, so public pages still
+                    // work, and let the entry point answer 403 ACCOUNT_BANNED everywhere else.
+                    String reason = userDetails instanceof BannedAccount.AccountUser account ? account.getBanReason() : null;
+                    request.setAttribute(BannedAccount.REQUEST_ATTRIBUTE, reason == null ? "" : reason);
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

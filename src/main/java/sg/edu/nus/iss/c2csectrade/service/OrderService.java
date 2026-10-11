@@ -96,6 +96,23 @@ public class OrderService {
         return createOrders(buyerId, List.of(new Line(product, quantity))).get(0);
     }
 
+    /**
+     * One product, one order, at a price agreed in bargaining rather than the
+     * listing price. Reserves stock through the same conditional update as any
+     * other checkout, so two accepted offers on the last unit cannot both win.
+     */
+    @Transactional
+    public Order checkoutNegotiated(Long buyerId, Long productId, BigDecimal price) {
+        if (price == null || price.signum() <= 0) {
+            throw new IllegalArgumentException("Price must be positive");
+        }
+        Product product = productMapper.selectById(productId);
+        if (product == null) {
+            throw new IllegalArgumentException("Listing not found");
+        }
+        return createOrders(buyerId, List.of(new Line(product, 1, price))).get(0);
+    }
+
     private List<Order> createOrders(Long buyerId, List<Line> lines) {
         // Group first, so the split is decided before anything is reserved.
         Map<Long, List<Line>> bySeller = new LinkedHashMap<>();
@@ -137,7 +154,9 @@ public class OrderService {
                 item.setProductName(product.getName());
                 item.setQuantity(line.quantity());
                 // The snapshot. Everything downstream prices off this, not the listing.
-                item.setUnitPriceSnapshot(product.getPrice());
+                // A negotiated price (bargain accept) overrides the listing price.
+                item.setUnitPriceSnapshot(line.negotiatedPrice() != null
+                        ? line.negotiatedPrice() : product.getPrice());
                 items.add(item);
                 total = total.add(item.getSubtotal());
             }
@@ -217,7 +236,11 @@ public class OrderService {
                 ThreadLocalRandom.current().nextInt(10000));
     }
 
-    /** A product plus how many of it, before it is grouped into an order. */
-    private record Line(Product product, int quantity) {
+    /** A product plus how many of it, before it is grouped into an order. A
+     *  negotiated price overrides the listing price when present. */
+    private record Line(Product product, int quantity, BigDecimal negotiatedPrice) {
+        Line(Product product, int quantity) {
+            this(product, quantity, null);
+        }
     }
 }

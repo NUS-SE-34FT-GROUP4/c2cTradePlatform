@@ -18,6 +18,9 @@ public interface ProductMapper {
                                      @Param("category") String category);
     int insert(Product product);
     int update(Product product);
+
+    /** Moderation: delist (0) without touching the listing's other fields. */
+    int updateStatus(@Param("id") Long id, @Param("status") int status);
     int deleteById(@Param("id") Long id);
 
     // For recommendations

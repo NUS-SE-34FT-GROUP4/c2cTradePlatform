@@ -30,9 +30,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         List<GrantedAuthority> authorities = user.getRoles() == null ? List.of() : user.getRoles().stream()
                .map(role -> new SimpleGrantedAuthority(role.getName()))
                .collect(Collectors.toList());
-        return new org.springframework.security.core.userdetails.User(
+        // A banned account is locked: login is refused and the JWT filter stops its tokens.
+        return new BannedAccount.AccountUser(
                 user.getUsername(),
                 user.getPasswordHash(),  // 使用 getPasswordHash 而不是 getPassword
+                "BANNED".equals(user.getStatus()),
+                user.getBanReason(),
                 authorities
         );
     }

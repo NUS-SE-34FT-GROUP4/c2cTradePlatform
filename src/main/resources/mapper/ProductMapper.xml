@@ -88,6 +88,9 @@
         INSERT INTO pms_product (user_id, name, description, price, stock, condition_level, location, category, status, created_at, updated_at)
         VALUES (#{userId}, #{name}, #{description}, #{price}, #{stock}, #{conditionLevel}, #{location}, #{category}, #{status}, #{createdAt}, #{updatedAt})
     </insert>
+    <update id="updateStatus">
+        UPDATE pms_product SET status=#{status}, updated_at=NOW() WHERE id=#{id}
+    </update>
     <update id="update" parameterType="sg.edu.nus.iss.c2csectrade.entity.Product">
         UPDATE pms_product
         SET user_id=#{userId}, name=#{name}, description=#{description}, price=#{price}, stock=#{stock}, condition_level=#{conditionLevel}, location=#{location}, category=#{category}, status=#{status}, updated_at=#{updatedAt}
