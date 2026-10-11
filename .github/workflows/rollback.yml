@@ -1,0 +1,114 @@
+name: Rollback
+
+# Redeploys an image tag that CI has already published, without editing YAML:
+# Actions -> Rollback -> Run workflow, pick the environment, and either give a
+# commit SHA or leave it empty for the version before the one running now.
+# The job uses the same GitHub environment as the deployment, so it waits for
+# the same approval; a rejected approval never touches the server.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment to roll back
+        type: choice
+        options: [ staging, production ]
+        default: staging
+      image_tag:
+        description: Commit SHA to deploy (empty = the version before the current one)
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  rollback:
+    name: Roll back ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.target }}
+    # Same groups as the deploy jobs in ci.yml, so the two never overlap.
+    concurrency:
+      group: deploy-${{ inputs.target }}
+      cancel-in-progress: false
+    env:
+      # Staging and production share the Droplet; production is the second stack.
+      DIR: ${{ inputs.target == 'production' && '~/c2c-sectrade-prod' || '~/c2c-sectrade' }}
+      STACK: ${{ inputs.target == 'production' && 'c2csectrade-prod' || 'c2csectrade' }}
+      API_PORT: ${{ inputs.target == 'production' && '8081' || '8080' }}
+      HTTP_PORT: ${{ inputs.target == 'production' && '8088' || '80' }}
+      MINIO_PORT: ${{ inputs.target == 'production' && '9002' || '9000' }}
+    steps:
+      - name: Check the requested tag exists
+        if: inputs.image_tag != ''
+        run: |
+          TAG='${{ inputs.image_tag }}'
+          if ! echo "$TAG" | grep -Eq '^[0-9a-f]{7,40}$'; then
+            echo "::error::image_tag must be a commit SHA, got '$TAG'"
+            exit 1
+          fi
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          for app in backend frontend; do
+            docker manifest inspect "ghcr.io/$OWNER/c2c-sectrade-$app:$TAG" > /dev/null \
+              || { echo "::error::ghcr.io/$OWNER/c2c-sectrade-$app:$TAG was never published"; exit 1; }
+          done
+
+      - name: Switch to the older image
+        id: switch
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ env.DIR }}
+            CURRENT=$(docker inspect --format '{{.Config.Image}}' ${{ env.STACK }}-backend 2>/dev/null | sed 's/.*://')
+            TAG='${{ inputs.image_tag }}'
+            TAG=${TAG:-$(cat .previous-backend 2>/dev/null)}
+            if [ -z "$TAG" ]; then echo "No previous version recorded; pass image_tag."; exit 1; fi
+            if [ "$TAG" = "$CURRENT" ]; then echo "$TAG is already running."; exit 1; fi
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            export STACK='${{ env.STACK }}' API_PORT='${{ env.API_PORT }}' HTTP_PORT='${{ env.HTTP_PORT }}' MINIO_PORT='${{ env.MINIO_PORT }}'
+            export IMAGE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            export IMAGE_TAG="$TAG"
+            export MYSQL_PASSWORD='${{ inputs.target == 'production' && secrets.PROD_DB_PASSWORD || secrets.STAGING_DB_PASSWORD }}'
+            export MINIO_ROOT_PASSWORD='${{ inputs.target == 'production' && secrets.PROD_MINIO_PASSWORD || secrets.STAGING_MINIO_PASSWORD }}'
+            export MINIO_PUBLIC_ENDPOINT='${{ inputs.target == 'production' && format('http://{0}:9002', secrets.STAGING_HOST) || secrets.STAGING_MINIO_PUBLIC_ENDPOINT }}'
+            export JWT_SECRET='${{ inputs.target == 'production' && secrets.PROD_JWT_SECRET || secrets.STAGING_JWT_SECRET }}'
+            docker compose -f compose.staging.yaml pull backend frontend
+            docker compose -f compose.staging.yaml up -d backend frontend
+            # The version rolled back from becomes "previous", so running the
+            # workflow again with an empty tag goes forward again.
+            echo "$CURRENT" > .previous-backend
+            echo "$TAG" > .live-backend
+            echo "$(date -u +%FT%TZ) rollback $CURRENT -> $TAG run=${{ github.run_id }} by=${{ github.actor }}" >> deploy-history.log
+            echo "Rolled back from $CURRENT to $TAG"
+
+      - name: Smoke test
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS "http://${{ secrets.STAGING_HOST }}:${{ env.API_PORT }}/actuator/health" | grep -q '"status":"UP"'; then
+              echo "${{ inputs.target }} is up."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "${{ inputs.target }} did not become healthy within 150s."
+          exit 1
+
+      - name: Show the live version and recent history
+        if: always()
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd ${{ env.DIR }}
+            echo "Live: $(cat .live-backend 2>/dev/null)"
+            tail -n 5 deploy-history.log 2>/dev/null
