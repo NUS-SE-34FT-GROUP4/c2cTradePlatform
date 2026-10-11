@@ -181,6 +181,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: staging
+    # Shared with rollback.yml, so a deployment and a rollback never overlap.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
     permissions:
       contents: read
       packages: read
@@ -257,6 +261,23 @@ jobs:
           echo "Staging did not become healthy within 150s."
           exit 1
 
+      # .live-backend is what rollback.yml reads; deploy-history.log is the audit trail.
+      - name: Record the live version
+        if: steps.configured.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd ~/c2c-sectrade
+            echo "${{ github.sha }}" > .live-backend
+            echo "$(date -u +%FT%TZ) deploy ${{ github.sha }} run=${{ github.run_id }} by=${{ github.actor }}" >> deploy-history.log
+
+      - name: Summary
+        if: steps.configured.outputs.ready == 'true'
+        run: echo "Staging is live on \`${{ github.sha }}\`." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Roll back if the smoke test failed
         if: failure() && steps.configured.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
@@ -277,6 +298,8 @@ jobs:
             export MINIO_PUBLIC_ENDPOINT='${{ secrets.STAGING_MINIO_PUBLIC_ENDPOINT }}'
             export JWT_SECRET='${{ secrets.STAGING_JWT_SECRET }}'
             docker compose -f compose.staging.yaml up -d
+            echo "$IMAGE_TAG" > .live-backend
+            echo "$(date -u +%FT%TZ) auto-rollback $IMAGE_TAG run=${{ github.run_id }} (smoke test failed for ${{ github.sha }})" >> deploy-history.log
             echo "Rolled back to $IMAGE_TAG"
 
   # Promotes the commit staging just verified. The production environment
@@ -290,6 +313,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
     permissions:
       contents: read
       packages: read
@@ -366,6 +392,22 @@ jobs:
           echo "Production did not become healthy within 150s."
           exit 1
 
+      - name: Record the live version
+        if: steps.configured.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd ~/c2c-sectrade-prod
+            echo "${{ github.sha }}" > .live-backend
+            echo "$(date -u +%FT%TZ) deploy ${{ github.sha }} run=${{ github.run_id }} by=${{ github.actor }}" >> deploy-history.log
+
+      - name: Summary
+        if: steps.configured.outputs.ready == 'true'
+        run: echo "Production is live on \`${{ github.sha }}\`." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Roll back if the smoke test failed
         if: failure() && steps.configured.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
@@ -385,4 +427,6 @@ jobs:
             export MINIO_PUBLIC_ENDPOINT='http://${{ secrets.STAGING_HOST }}:${{ env.MINIO_PORT }}'
             export JWT_SECRET='${{ secrets.PROD_JWT_SECRET }}'
             docker compose -f compose.staging.yaml up -d
+            echo "$IMAGE_TAG" > .live-backend
+            echo "$(date -u +%FT%TZ) auto-rollback $IMAGE_TAG run=${{ github.run_id }} (smoke test failed for ${{ github.sha }})" >> deploy-history.log
             echo "Rolled back to $IMAGE_TAG"
