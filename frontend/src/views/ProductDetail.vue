@@ -107,6 +107,12 @@
         <p v-if="reviewError" role="alert">{{ reviewError }}</p>
         <ProductReviews v-else :reviews="productReviews" :average-rating="averageRating" :total-reviews="productReviews.length" />
 
+        <!-- Bargaining: campaign panel and the offer thread (S4-07) -->
+        <div class="bargain-section">
+          <CampaignPanel :product="product" />
+          <OfferThread :product="product" />
+        </div>
+
         <!-- Action buttons -->
         <div class="action-buttons">
           <button class="btn btn-home" @click="goHome">🏠 Back to Home</button>
@@ -132,6 +138,8 @@ import { getCategoryLabel } from '@/utils/categoryData';
 import productService from '@/api/productService';
 import axios from 'axios';
 import ProductReviews from '@/components/ProductReviews.vue';
+import CampaignPanel from '@/components/bargain/CampaignPanel.vue';
+import OfferThread from '@/components/bargain/OfferThread.vue';
 import { reviews } from '@/api/marketplaceService';
 
 const route = useRoute();
@@ -515,6 +523,12 @@ onUnmounted(() => {
 }
 
 /* Action buttons */
+.bargain-section {
+  margin: 30px 0;
+  display: grid;
+  gap: 20px;
+}
+
 .action-buttons {
   display: flex;
   gap: 15px;
