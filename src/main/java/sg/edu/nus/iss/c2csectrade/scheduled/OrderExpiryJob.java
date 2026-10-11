@@ -6,12 +6,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import sg.edu.nus.iss.c2csectrade.service.BargainCampaignService;
 import sg.edu.nus.iss.c2csectrade.service.OrderService;
 
 import java.time.Duration;
 
 /**
- * Releases the stock held by orders whose payment window has passed.
+ * Releases the stock held by orders whose payment window has passed, and
+ * closes bargain campaigns past their deadline. One job, one lock, one tick:
+ * the campaign sweep holds nothing, so it simply rides along.
  *
  * The work itself already existed and is tested; this only decides when it
  * runs. Two things it has to get right:
@@ -31,13 +34,17 @@ public class OrderExpiryJob {
     private static final String LOCK_KEY = "lock:order-expiry";
 
     private final OrderService orderService;
+    private final BargainCampaignService campaignService;
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${order.expiry-job.lock-seconds:60}")
     private long lockSeconds;
 
-    public OrderExpiryJob(OrderService orderService, RedisTemplate<String, Object> redisTemplate) {
+    public OrderExpiryJob(OrderService orderService,
+                          BargainCampaignService campaignService,
+                          RedisTemplate<String, Object> redisTemplate) {
         this.orderService = orderService;
+        this.campaignService = campaignService;
         this.redisTemplate = redisTemplate;
     }
 
@@ -51,6 +58,7 @@ public class OrderExpiryJob {
             if (expired > 0) {
                 log.info("Expiry job released the stock held by {} unpaid orders", expired);
             }
+            campaignService.expireDue();
         } catch (Exception e) {
             // A scheduled method that throws is simply not retried until the
             // next tick, and the exception would otherwise go unlogged.

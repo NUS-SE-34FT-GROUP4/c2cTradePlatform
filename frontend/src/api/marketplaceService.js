@@ -74,3 +74,14 @@ export const reviews = {
     return client.post('/reviews/images', form, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
 };
+
+export const bargain = {
+  createCampaign: (payload) => client.post('/bargain/campaigns', payload),
+  helpCampaign: (campaignId) => client.post(`/bargain/campaigns/${campaignId}/help`),
+  campaigns: (productId) => client.get('/bargain/campaigns', { params: { productId } }),
+  makeOffer: (productId, price) => client.post('/bargain/offers', { productId, price }),
+  counterOffer: (offerId, price) => client.post(`/bargain/offers/${offerId}/counter`, { price }),
+  acceptOffer: (offerId) => client.post(`/bargain/offers/${offerId}/accept`),
+  rejectOffer: (offerId) => client.post(`/bargain/offers/${offerId}/reject`),
+  offers: (productId) => client.get('/bargain/offers', { params: { productId } }),
+};
