@@ -147,9 +147,33 @@ class OrderServiceTest {
         item.setQuantity(1);
         when(orderItemMapper.selectByOrderId(600L)).thenReturn(List.of(item));
 
+        // The conditional claim succeeds: nobody paid in the meantime.
+        when(orderMapper.transition(600L, OrderStatus.PENDING_PAYMENT.name(),
+                OrderStatus.EXPIRED.name(), null)).thenReturn(1);
+
         assertEquals(1, orderService.expireOverdueOrders());
         verify(productMapper).releaseStock(202L, 1);
-        verify(orderMapper).updateStatus(600L, OrderStatus.EXPIRED.name());
+        verify(orderMapper).transition(600L, OrderStatus.PENDING_PAYMENT.name(),
+                OrderStatus.EXPIRED.name(), null);
+    }
+
+    @Test
+    @DisplayName("An order paid between the sweep and the claim is left alone, stock included")
+    void expiryLosesTheRaceToPaymentAndChangesNothing() {
+        Order overdue = new Order();
+        overdue.setId(600L);
+        overdue.setStatus(OrderStatus.PENDING_PAYMENT.name());
+        when(orderMapper.selectExpiredPending(any())).thenReturn(List.of(overdue));
+
+        // The buyer paid after the select above, so the claim changes no row.
+        when(orderMapper.transition(600L, OrderStatus.PENDING_PAYMENT.name(),
+                OrderStatus.EXPIRED.name(), null)).thenReturn(0);
+
+        assertEquals(0, orderService.expireOverdueOrders(),
+                "an order that is no longer unpaid must not count as expired");
+        // Releasing here would hand back stock the payment had already deducted.
+        verify(productMapper, never()).releaseStock(anyLong(), anyInt());
+        verify(orderMapper, never()).updateStatus(anyLong(), anyString());
     }
 
     @Test

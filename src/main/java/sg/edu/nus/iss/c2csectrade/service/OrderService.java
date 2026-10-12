@@ -191,26 +191,49 @@ public class OrderService {
     @Transactional
     public int expireOverdueOrders() {
         List<Order> overdue = orderMapper.selectExpiredPending(LocalDateTime.now());
+        int expired = 0;
         for (Order order : overdue) {
-            releaseAndMark(order, OrderStatus.EXPIRED);
+            if (expire(order)) {
+                expired++;
+            }
         }
-        if (!overdue.isEmpty()) {
-            log.info("Expired {} unpaid orders and released their reserved stock", overdue.size());
+        if (expired > 0) {
+            log.info("Expired {} unpaid orders and released their reserved stock", expired);
         }
-        return overdue.size();
+        return expired;
     }
 
-    private void releaseAndMark(Order order, OrderStatus status) {
+    /**
+     * Expires one overdue order, or does nothing if it is no longer awaiting
+     * payment.
+     *
+     * The claim is a conditional update naming PENDING_PAYMENT, so a buyer who
+     * pays between the select above and this update keeps the order: the update
+     * changes no row and the stock stays deducted. Marking the status
+     * unconditionally would expire an order that had just been paid, releasing
+     * stock that the payment had already deducted and leaving the buyer charged
+     * for a dead order.
+     *
+     * @return true if this call is the one that expired the order
+     */
+    private boolean expire(Order order) {
+        if (orderMapper.transition(order.getId(),
+                OrderStatus.PENDING_PAYMENT.name(),
+                OrderStatus.EXPIRED.name(),
+                null) == 0) {
+            log.debug("Order {} was no longer awaiting payment; left as it is", order.getOrderNo());
+            return false;
+        }
         for (OrderItem item : orderItemMapper.selectByOrderId(order.getId())) {
             productMapper.releaseStock(item.getProductId(), item.getQuantity());
         }
-        String from = order.getStatus();
-        orderMapper.updateStatus(order.getId(), status.name());
 
-        // Observers pick this up after the commit, not inside it. Covers both
-        // the buyer cancelling and the window expiring.
+        // Observers pick this up after the commit, not inside it.
         events.publishEvent(new OrderStateChangedEvent(order.getId(), order.getOrderNo(),
-                order.getBuyerId(), order.getSellerId(), from, status.name(), order.getTotalAmount()));
+                order.getBuyerId(), order.getSellerId(),
+                OrderStatus.PENDING_PAYMENT.name(), OrderStatus.EXPIRED.name(),
+                order.getTotalAmount()));
+        return true;
     }
 
     public List<Order> listForBuyer(Long buyerId) {
