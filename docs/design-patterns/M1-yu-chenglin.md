@@ -1,7 +1,8 @@
 # Replaceable file storage — Strategy
 
-**Owner:** M1 YU CHENGLIN · **Sprint:** 3 · **Code:** `service/FileStorageService.java`,
-`service/impl/MinioFileStorageService.java` · **Tests:** `MinioFileStorageServiceTest`
+**Owner:** M1 YU CHENGLIN · **Sprint:** 3 (code), 4 (write-up, #79) · **Code:** `service/FileStorageService.java`,
+`service/impl/MinioFileStorageService.java`; used by `AvatarController`, `ProductController`, `ReviewController` ·
+**Tests:** `MinioFileStorageServiceTest`
 
 ## The design problem
 
@@ -20,6 +21,18 @@ already changed once and is likely to change again:
 If each controller talked to MinIO directly, changing the backend would mean editing every
 feature that uploads. The validation rules would also be copied into each of them and could
 drift apart.
+
+**The brute-force version, measured against today's code.** Three features upload now:
+`AvatarController` (WP1), `ProductController` (WP2) and `ReviewController` (WP5, added in
+Sprint 3). `MinioFileStorageService` holds 84 lines of logic that every uploader needs: the
+size and type checks, the `folder/yyyy/MM/dd/<uuid>.<ext>` naming, the public-URL rewrite and
+the bucket policy. Without the interface that logic would sit in three controllers, about 250
+lines in three copies, and:
+
+- the MinIO image change in Sprint 2 (`ad95ba6`) would have been three edits instead of zero;
+- a fix to the type whitelist would have to be made three times, and missing one would let
+  that feature accept files the others reject;
+- each controller test would have to mock `MinioClient` and its builder arguments.
 
 ## The pattern
 
@@ -68,6 +81,11 @@ controller has to know that.
 
 ## Consequences and honest limits
 
+- **It has already paid off once.** When M5 added review photos in Sprint 3 (`93fecb0`),
+  `ReviewController` needed one line, `storage.upload(file, "review")`, and no storage code,
+  validation or MinIO knowledge. The new feature got the same limits and naming as the other
+  two for free.
+
 - **Adding a backend is one class.** An S3 or local-disk storage would implement
   `FileStorageService` and be selected by configuration. Neither `AvatarController` nor
   `ProductController` would change.
@@ -92,3 +110,16 @@ controller has to know that.
 
 Coverage (JaCoCo, Sprint 3): `MinioFileStorageService` 98% lines / 91% branches, above the
 80% required by NFR 6.3.
+
+## Diagrams (deferred)
+
+The report template (§3.5) asks for four UML diagrams: class and sequence diagrams for the
+problem, and for the solution. This page covers the four text elements only. The diagrams are
+scheduled in Sprint 5 issue #96 (due 1 November), together with the "administrator moderates a
+report" use case:
+
+- problem: class diagram of three controllers each depending on `MinioClient`, and the
+  sequence of one upload through that duplicated code;
+- solution: class diagram of the three contexts depending on `FileStorageService`, and the
+  sequence `ReviewController` → `FileStorageService.upload` → `MinioFileStorageService` →
+  `MinioClient`.
