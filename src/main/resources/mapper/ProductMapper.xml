@@ -158,4 +158,11 @@
         WHERE id = #{id}
         AND stock >= #{quantity}
     </update>
+
+    <!-- Mirror of decreaseStock, for a refund. No guard: the quantity being
+         returned was taken off this row by the payment it reverses. -->
+    <update id="restoreStock">
+        UPDATE pms_product SET stock = stock + #{quantity}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
 </mapper>

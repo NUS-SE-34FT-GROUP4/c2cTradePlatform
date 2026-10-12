@@ -6,5 +6,6 @@ public enum OrderAction {
     SHIP,
     CONFIRM_RECEIPT,
     CANCEL,
-    EXPIRE
+    EXPIRE,
+    REFUND
 }

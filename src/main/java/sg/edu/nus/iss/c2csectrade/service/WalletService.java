@@ -153,6 +153,30 @@ public class WalletService {
     }
 
     /**
+     * Takes money back out of an account without a payment password: the
+     * seller's side of a refund, which the seller's own action triggers.
+     *
+     * Refusing rather than going negative is deliberate. A seller who has
+     * already spent the money cannot refund until they top up, which is
+     * visible and recoverable; a negative balance would be neither.
+     *
+     * @return the balance after the debit
+     */
+    @Transactional
+    public BigDecimal debit(Long userId, BigDecimal amount) {
+        requireValidAmount(amount);
+        BigDecimal current = lockBalance(userId);
+        if (current.compareTo(amount) < 0) {
+            throw new InsufficientBalanceException(
+                    "Balance cannot cover " + amount.toPlainString()
+                            + "; only " + current.toPlainString() + " available");
+        }
+        BigDecimal updated = current.subtract(amount);
+        userMapper.updateBalance(userId, updated);
+        return updated;
+    }
+
+    /**
      * Reads the balance with SELECT ... FOR UPDATE. A concurrent payment or
      * top-up on the same user waits until this transaction commits, so neither
      * works from a stale balance and overwrites the other's change.

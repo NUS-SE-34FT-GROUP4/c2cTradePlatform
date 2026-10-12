@@ -10,10 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sg.edu.nus.iss.c2csectrade.entity.*;
 import sg.edu.nus.iss.c2csectrade.exception.InsufficientBalanceException;
 import sg.edu.nus.iss.c2csectrade.mapper.*;
+import sg.edu.nus.iss.c2csectrade.service.payment.AlipayPaymentStrategy;
 import sg.edu.nus.iss.c2csectrade.service.payment.BalancePaymentStrategy;
 import sg.edu.nus.iss.c2csectrade.service.payment.PaymentStrategy;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -152,5 +154,150 @@ class PaymentServiceTest {
     void unknownMethodIsRejected() {
         assertThrows(IllegalArgumentException.class,
                 () -> paymentService.pay(BUYER, ORDER, "bitcoin", "123456"));
+    }
+
+    // ---- Sprint 4: refunding a paid order (#68) ----
+
+    private Order paidOrder() {
+        Order order = pendingOrder();
+        order.setStatus(OrderStatus.PAID.name());
+        return order;
+    }
+
+    private Transaction paymentRow(String method, String amount) {
+        Transaction paid = new Transaction();
+        paid.setId(9000L);
+        paid.setOrderId(ORDER);
+        paid.setAmount(new BigDecimal(amount));
+        paid.setPaymentMethod(method);
+        paid.setTransactionType(TransactionType.PAYMENT.name());
+        paid.setStatus("SUCCESS");
+        paid.setCreatedAt(LocalDateTime.of(2026, 10, 17, 9, 0));
+        return paid;
+    }
+
+    private void stubRefundableOrder(String method, String amount) {
+        when(orderMapper.selectById(ORDER)).thenReturn(paidOrder());
+        lenient().when(orderMapper.transition(eq(ORDER), anyString(), anyString(), isNull()))
+                .thenReturn(1);
+        lenient().when(transactionMapper.selectByOrderId(ORDER))
+                .thenReturn(List.of(paymentRow(method, amount)));
+        OrderItem item = new OrderItem();
+        item.setProductId(101L);
+        item.setQuantity(2);
+        item.setProductName("Textbook");
+        lenient().when(orderItemMapper.selectByOrderId(ORDER)).thenReturn(List.of(item));
+    }
+
+    @Test
+    @DisplayName("A refund is a new ledger row; the payment row is never touched")
+    void refundIsAppendOnly() {
+        stubRefundableOrder("balance", "30.00");
+
+        paymentService.refund(SELLER, ORDER);
+
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionMapper).insert(captor.capture());
+        Transaction recorded = captor.getValue();
+        assertEquals(TransactionType.REFUND.name(), recorded.getTransactionType());
+        assertEquals(new BigDecimal("30.00"), recorded.getAmount());
+        assertEquals("balance", recorded.getPaymentMethod());
+        assertEquals("SUCCESS", recorded.getStatus());
+        // Nothing else on the mapper: no update, no delete of the payment row.
+        verify(transactionMapper).selectByOrderId(ORDER);
+        verifyNoMoreInteractions(transactionMapper);
+    }
+
+    @Test
+    @DisplayName("Refunding a balance payment moves the money back the way it came")
+    void balanceRefundReversesBothSides() {
+        stubRefundableOrder("balance", "30.00");
+
+        paymentService.refund(SELLER, ORDER);
+
+        verify(walletService).debit(SELLER, new BigDecimal("30.00"));
+        verify(walletService).credit(BUYER, new BigDecimal("30.00"));
+    }
+
+    @Test
+    @DisplayName("A refund puts the sold stock back, not the reservation")
+    void refundRestoresStock() {
+        stubRefundableOrder("balance", "30.00");
+
+        paymentService.refund(SELLER, ORDER);
+
+        verify(productMapper).restoreStock(101L, 2);
+        verify(productMapper, never()).reserveStock(anyLong(), anyInt());
+    }
+
+    @Test
+    @DisplayName("The refunded amount comes from the ledger, not from the order total")
+    void refundUsesTheAmountActuallyPaid() {
+        // A bargain was accepted at 18.00 while the order total says 30.00.
+        stubRefundableOrder("balance", "18.00");
+
+        paymentService.refund(SELLER, ORDER);
+
+        verify(walletService).debit(SELLER, new BigDecimal("18.00"));
+        verify(walletService).credit(BUYER, new BigDecimal("18.00"));
+    }
+
+    @Test
+    @DisplayName("A second refund on the same order is refused before any money moves")
+    void doubleRefundIsRefused() {
+        when(orderMapper.selectById(ORDER)).thenReturn(paidOrder());
+        // The first refund already claimed the transition, so this one changes no row.
+        when(orderMapper.transition(eq(ORDER), anyString(), anyString(), isNull())).thenReturn(0);
+
+        assertThrows(IllegalStateException.class, () -> paymentService.refund(SELLER, ORDER));
+
+        verifyNoInteractions(walletService);
+        verify(transactionMapper, never()).insert(any());
+        verify(productMapper, never()).restoreStock(anyLong(), anyInt());
+    }
+
+    @Test
+    @DisplayName("An order that was never paid cannot be refunded")
+    void unpaidOrderCannotBeRefunded() {
+        when(orderMapper.selectById(ORDER)).thenReturn(pendingOrder());
+
+        assertThrows(IllegalStateException.class, () -> paymentService.refund(SELLER, ORDER));
+
+        verify(orderMapper, never()).transition(anyLong(), anyString(), anyString(), any());
+        verifyNoInteractions(walletService);
+    }
+
+    @Test
+    @DisplayName("A shipped order cannot be refunded; the state machine says so, not this class")
+    void shippedOrderCannotBeRefunded() {
+        Order shipped = pendingOrder();
+        shipped.setStatus(OrderStatus.SHIPPED.name());
+        when(orderMapper.selectById(ORDER)).thenReturn(shipped);
+
+        assertThrows(IllegalStateException.class, () -> paymentService.refund(SELLER, ORDER));
+        verifyNoInteractions(walletService);
+    }
+
+    @Test
+    @DisplayName("Only the order's own seller can refund it")
+    void otherSellerCannotRefund() {
+        when(orderMapper.selectById(ORDER)).thenReturn(paidOrder());
+
+        assertThrows(IllegalArgumentException.class, () -> paymentService.refund(999L, ORDER));
+        verifyNoInteractions(walletService);
+    }
+
+    @Test
+    @DisplayName("An external method's refund claws back from the seller and leaves the buyer alone")
+    void gatewayRefundDoesNotCreditTheBuyer() {
+        PaymentService withGateway = new PaymentService(orderMapper, orderItemMapper, productMapper,
+                transactionMapper, event -> { },
+                List.of(new AlipayPaymentStrategy(walletService)));
+        stubRefundableOrder("alipay", "30.00");
+
+        withGateway.refund(SELLER, ORDER);
+
+        verify(walletService).debit(SELLER, new BigDecimal("30.00"));
+        verify(walletService, never()).credit(eq(BUYER), any());
     }
 }
