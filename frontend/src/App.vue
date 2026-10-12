@@ -25,6 +25,9 @@
             <div v-if="isAdmin" class="dropdown-item" @click="goToAdminReports">
               <span class="icon">🚩</span> Report Management
             </div>
+            <div v-if="isAdmin" class="dropdown-item" @click="goToAdminAudit">
+              <span class="icon">📋</span> Audit Log
+            </div>
             <div class="dropdown-divider"></div>
             <div class="dropdown-item logout" @click="handleLogout">
               <span class="icon">🚪</span> Logout
@@ -142,6 +145,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { isAdministrator } from '@/utils/admin.mjs';
 import emitter from '@/eventBus';
 import realtime from '@/utils/realtime';
 
@@ -153,7 +157,7 @@ let notificationId = 0;
 
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const currentUser = computed(() => authStore.user);
-const isAdmin = computed(() => currentUser.value?.role === 'ROLE_ADMIN');
+const isAdmin = computed(() => isAdministrator(currentUser.value));
 
 const userAvatar = computed(() => {
   if (currentUser.value?.avatarUrl) {
@@ -183,6 +187,11 @@ const goToAdminChat = () => {
 
 const goToAdminReports = () => {
   router.push('/admin/reports');
+  showUserMenu.value = false;
+};
+
+const goToAdminAudit = () => {
+  router.push('/admin/audit-log');
   showUserMenu.value = false;
 };
 

@@ -3,6 +3,7 @@ import axios from 'axios';
 const apiBase = process.env.VUE_APP_API_BASE_URL || '/api';
 
 const client = axios.create({ baseURL: apiBase, headers: { 'Content-Type': 'application/json' } });
+export { client as marketplaceClient };
 
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem('jwt_token');
@@ -84,4 +85,14 @@ export const bargain = {
   acceptOffer: (offerId) => client.post(`/bargain/offers/${offerId}/accept`),
   rejectOffer: (offerId) => client.post(`/bargain/offers/${offerId}/reject`),
   offers: (productId) => client.get('/bargain/offers', { params: { productId } }),
+};
+
+export const adminModeration = {
+  reports: (params) => client.get('/admin/reports', { params }),
+  uphold: (id, note) => client.post(`/admin/reports/${id}/uphold`, { note }),
+  dismiss: (id, note) => client.post(`/admin/reports/${id}/dismiss`, { note }),
+  users: (params) => client.get('/admin/users', { params }),
+  ban: (id, reason) => client.post(`/admin/users/${id}/ban`, { reason }),
+  reinstate: (id, note) => client.post(`/admin/users/${id}/reinstate`, { note }),
+  auditLog: (params) => client.get('/admin/audit-log', { params }),
 };
