@@ -3,6 +3,8 @@ package sg.edu.nus.iss.c2csectrade.service.payment;
 import sg.edu.nus.iss.c2csectrade.entity.Order;
 import sg.edu.nus.iss.c2csectrade.entity.PaymentMethod;
 
+import java.math.BigDecimal;
+
 /**
  * How money moves for one payment method.
  *
@@ -24,4 +26,14 @@ public interface PaymentStrategy {
      *                        that settles inside this system verifies it
      */
     void settle(Order order, Long buyerId, String paymentPassword);
+
+    /**
+     * Move the money back. Each method reverses exactly what its own
+     * {@link #settle} did, which is why this sits behind the same interface
+     * rather than in one refund routine that branches on the method.
+     *
+     * @param amount what was actually paid, read from the payment's ledger row
+     *               rather than recomputed from the order
+     */
+    void refund(Order order, BigDecimal amount);
 }

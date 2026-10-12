@@ -24,11 +24,18 @@ public enum OrderStatus {
         }
     },
 
-    /** Paid and waiting for the seller to dispatch. */
+    /**
+     * Paid and waiting for the seller to dispatch. The seller may also refund
+     * instead of dispatching, which is the only way money flows back out.
+     */
     PAID {
         @Override
         public OrderStatus after(OrderAction action) {
-            return action == OrderAction.SHIP ? SHIPPED : null;
+            return switch (action) {
+                case SHIP -> SHIPPED;
+                case REFUND -> REFUNDED;
+                default -> null;
+            };
         }
 
         @Override
@@ -52,7 +59,14 @@ public enum OrderStatus {
 
     COMPLETED,
     CANCELLED,
-    EXPIRED;
+    EXPIRED,
+
+    /**
+     * Paid, then refunded. Terminal: the ledger keeps both the payment and the
+     * refund as separate rows, so this state is the end of the order rather
+     * than a return to PENDING_PAYMENT.
+     */
+    REFUNDED;
 
     /** Who is allowed to ask for an action in this state. */
     public enum Actor { BUYER, SELLER, SYSTEM }
@@ -76,7 +90,7 @@ public enum OrderStatus {
     }
 
     public boolean isTerminal() {
-        return this == COMPLETED || this == CANCELLED || this == EXPIRED;
+        return this == COMPLETED || this == CANCELLED || this == EXPIRED || this == REFUNDED;
     }
 
     /** Stock is still only reserved, not yet deducted, while the order is unpaid. */

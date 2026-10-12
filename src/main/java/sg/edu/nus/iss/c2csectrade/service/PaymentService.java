@@ -8,6 +8,8 @@ import sg.edu.nus.iss.c2csectrade.event.OrderStateChangedEvent;
 import sg.edu.nus.iss.c2csectrade.mapper.*;
 import sg.edu.nus.iss.c2csectrade.service.payment.PaymentStrategy;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -75,7 +77,7 @@ public class PaymentService {
         }
 
         strategy.settle(order, buyerId, paymentPassword);
-        recordTransaction(order, method, TransactionType.PAYMENT);
+        recordTransaction(order, method, TransactionType.PAYMENT, order.getTotalAmount());
         convertReservationToDeduction(orderId);
 
         // Observers pick this up after the commit, not inside it.
@@ -86,10 +88,83 @@ public class PaymentService {
         return orderMapper.selectById(orderId);
     }
 
-    private void recordTransaction(Order order, PaymentMethod method, TransactionType type) {
+    /**
+     * Refunding a paid order.
+     *
+     * The order's own state decides whether this is allowed, and the
+     * conditional update claims the transition, so a second refund changes no
+     * row and is refused before any money moves — the same guard that stops a
+     * double payment.
+     *
+     * Nothing in the ledger is updated or deleted: the refund is a new row
+     * beside the payment it reverses, so the order still shows what was paid.
+     */
+    @Transactional
+    public Order refund(Long sellerId, Long orderId) {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null || !order.getSellerId().equals(sellerId)) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        OrderStatus current = order.statusAsEnum();
+        if (current.after(OrderAction.REFUND) == null) {
+            throw new IllegalStateException("Cannot refund an order that is "
+                    + current.name().toLowerCase().replace('_', ' '));
+        }
+
+        if (orderMapper.transition(orderId,
+                OrderStatus.PAID.name(),
+                OrderStatus.REFUNDED.name(),
+                null) == 0) {
+            throw new IllegalStateException("This order has already moved on");
+        }
+
+        // The amount and the method come from the payment's own ledger row, not
+        // from the order: a negotiated price or a later listing edit must not
+        // change what is handed back.
+        Transaction payment = originalPayment(orderId);
+        PaymentMethod method = PaymentMethod.of(payment.getPaymentMethod());
+        PaymentStrategy strategy = strategies.get(method);
+        if (strategy == null) {
+            throw new IllegalStateException(
+                    "No refund path for payment method: " + payment.getPaymentMethod());
+        }
+
+        strategy.refund(order, payment.getAmount());
+        recordTransaction(order, method, TransactionType.REFUND, payment.getAmount());
+        restoreStock(orderId);
+
+        events.publishEvent(new OrderStateChangedEvent(order.getId(), order.getOrderNo(),
+                order.getBuyerId(), order.getSellerId(),
+                OrderStatus.PAID.name(), OrderStatus.REFUNDED.name(), payment.getAmount()));
+
+        return orderMapper.selectById(orderId);
+    }
+
+    /** The successful payment this refund reverses; the latest one if ever retried. */
+    private Transaction originalPayment(Long orderId) {
+        return transactionMapper.selectByOrderId(orderId).stream()
+                .filter(t -> t.typeAsEnum() == TransactionType.PAYMENT && t.isSuccessful())
+                .max(Comparator.comparing(Transaction::getCreatedAt))
+                .orElseThrow(() -> new IllegalStateException(
+                        "This order has no successful payment to refund"));
+    }
+
+    /**
+     * The payment turned the reservation into a deduction, so a refund puts the
+     * stock back rather than re-reserving it.
+     */
+    private void restoreStock(Long orderId) {
+        for (OrderItem item : orderItemMapper.selectByOrderId(orderId)) {
+            productMapper.restoreStock(item.getProductId(), item.getQuantity());
+        }
+    }
+
+    private void recordTransaction(Order order, PaymentMethod method, TransactionType type,
+                                   BigDecimal amount) {
         Transaction transaction = new Transaction();
         transaction.setOrderId(order.getId());
-        transaction.setAmount(order.getTotalAmount());
+        transaction.setAmount(amount);
         transaction.setPaymentMethod(method.code());
         transaction.setTransactionType(type.name());
         transaction.setStatus("SUCCESS");

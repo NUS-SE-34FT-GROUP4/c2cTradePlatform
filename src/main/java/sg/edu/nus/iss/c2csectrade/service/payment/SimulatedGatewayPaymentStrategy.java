@@ -6,6 +6,8 @@ import sg.edu.nus.iss.c2csectrade.entity.Order;
 import sg.edu.nus.iss.c2csectrade.entity.PaymentMethod;
 import sg.edu.nus.iss.c2csectrade.service.WalletService;
 
+import java.math.BigDecimal;
+
 /**
  * Shared behaviour for the three external methods. The proposal calls for them
  * to be simulated (NFR 6.4), so no network call is made: the payment password
@@ -28,5 +30,18 @@ abstract class SimulatedGatewayPaymentStrategy implements PaymentStrategy {
         walletService.credit(order.getSellerId(), order.getTotalAmount());
         log.info("Simulated {} settlement of {} for order {}",
                 method().code(), order.getTotalAmount(), order.getOrderNo());
+    }
+
+    /**
+     * Mirror of settle: the seller gives the money back, and the buyer is
+     * reimbursed through the same external channel it arrived on, which is
+     * outside this system (NFR 6.4). So the buyer's balance is left alone
+     * here, exactly as settle left it alone.
+     */
+    @Override
+    public void refund(Order order, BigDecimal amount) {
+        walletService.debit(order.getSellerId(), amount);
+        log.info("Simulated {} refund of {} for order {}; buyer reimbursed off-platform",
+                method().code(), amount, order.getOrderNo());
     }
 }

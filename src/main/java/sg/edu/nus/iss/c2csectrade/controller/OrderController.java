@@ -105,6 +105,13 @@ public class OrderController {
                 ResponseEntity.ok(orderStateService.apply(userId, orderId, OrderAction.CONFIRM_RECEIPT)));
     }
 
+    /** The seller refunds a paid order instead of dispatching it. */
+    @PostMapping("/{orderId}/refund")
+    public ResponseEntity<?> refund(@PathVariable Long orderId, Authentication authentication) {
+        return asUser(authentication, sellerId ->
+                ResponseEntity.ok(paymentService.refund(sellerId, orderId)));
+    }
+
     @PostMapping("/{orderId}/pay")
     public ResponseEntity<?> pay(@PathVariable Long orderId,
                                  @RequestBody Map<String, Object> body,

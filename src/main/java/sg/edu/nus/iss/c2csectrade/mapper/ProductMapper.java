@@ -43,5 +43,12 @@ public interface ProductMapper {
 
     /** 释放预留（取消订单或 15 分钟超时）。 */
     int releaseStock(@Param("id") Long id, @Param("quantity") Integer quantity);
+
+    /**
+     * 退款时把已售出的库存加回货架。
+     * 它是 {@link #decreaseStock} 的镜像，不是 {@link #releaseStock} 的镜像 ——
+     * 付款时预留已经转成实扣，所以这里加的是 stock 而不是减 reserved_stock。
+     */
+    int restoreStock(@Param("id") Long id, @Param("quantity") Integer quantity);
 }
 
