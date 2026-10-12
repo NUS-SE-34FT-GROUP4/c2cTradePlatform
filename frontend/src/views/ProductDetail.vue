@@ -75,7 +75,7 @@
       <!-- Product info -->
       <div class="product-info">
         <h1 class="product-title">{{ product.name }}</h1>
-        <div class="product-price">¥{{ product.price }}</div>
+        <div class="product-price">{{ money(product.price) }}</div>
         <div class="product-meta">
           <div class="meta-item" v-if="product.category">
             <span class="meta-label">Category:</span>
@@ -109,8 +109,8 @@
 
         <!-- Bargaining: campaign panel and the offer thread (S4-07) -->
         <div class="bargain-section">
-          <CampaignPanel :product="product" />
-          <OfferThread :product="product" />
+          <CampaignPanel :key="`campaign-${product.id}`" :product="product" />
+          <OfferThread :key="`offers-${product.id}`" :product="product" @order-created="fetchProduct" />
         </div>
 
         <!-- Action buttons -->
@@ -141,6 +141,7 @@ import ProductReviews from '@/components/ProductReviews.vue';
 import CampaignPanel from '@/components/bargain/CampaignPanel.vue';
 import OfferThread from '@/components/bargain/OfferThread.vue';
 import { reviews } from '@/api/marketplaceService';
+import { money } from '@/utils/bargain.mjs';
 
 const route = useRoute();
 const router = useRouter();

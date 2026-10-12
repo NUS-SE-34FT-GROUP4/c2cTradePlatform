@@ -68,6 +68,10 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Test bargaining UI behaviour
+        working-directory: frontend
+        run: npm run test:bargain
+
       # vue-cli-service runs ESLint as part of the build, so a lint error fails this step
       - name: Build
         working-directory: frontend
