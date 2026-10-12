@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
+import { adminRedirect } from '@/utils/admin.mjs';
 
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
@@ -14,6 +15,13 @@ import ChatView from '../views/ChatView.vue';
 
 // ===== Define route rules =====
 const routes = [
+  { path: '/admin', redirect: '/admin/reports', meta: { requiresAuth: true, requiresAdmin: true } },
+  ...['reports', 'users', 'audit-log'].map((section) => ({
+    path: `/admin/${section}`,
+    name: `admin-${section}`,
+    component: () => import('../views/AdminBackOfficeView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true, adminSection: section === 'audit-log' ? 'audit' : section },
+  })),
   {
     path: '/orders/:orderId/review',
     name: 'review',
@@ -114,6 +122,8 @@ const router = createRouter({
 // ===== Global route guard =====
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
+  const redirect = adminRedirect(to, authStore);
+  if (redirect) return next(redirect);
 
   // Requires login
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {

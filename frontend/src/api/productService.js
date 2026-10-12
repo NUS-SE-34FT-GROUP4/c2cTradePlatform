@@ -8,6 +8,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+export { apiClient as productClient };
 
 // Request interceptor: automatically attach JWT Token
 apiClient.interceptors.request.use(
