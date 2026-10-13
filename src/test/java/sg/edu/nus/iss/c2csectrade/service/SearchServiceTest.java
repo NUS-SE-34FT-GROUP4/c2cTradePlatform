@@ -66,7 +66,7 @@ class SearchServiceTest {
     }
 
     @Test
-    @DisplayName("Keyword searches hydrate Elasticsearch hits in relevance order")
+    @DisplayName("Elasticsearch ranks only the authoritative SQL matches")
     void usesElasticsearchRankingForKeywordSearch() {
         Product second = product(2L);
         Product first = product(1L);
@@ -75,7 +75,8 @@ class SearchServiceTest {
                 dto("Algorithm handbook", "Reference"),
                 dto("Data structures", "Includes algorithm examples")));
         when(searchQuery.search(any(ProductSearchCriteria.class))).thenReturn(List.of(2L, 1L));
-        when(productService.listProductsByIdsInOrder(List.of(2L, 1L))).thenReturn(rankedProducts);
+        when(productService.listProductsWithFilters("algorithm", null, null, null, null, null))
+                .thenReturn(List.of(first, second));
         when(productService.convertToDTOList(rankedProducts)).thenReturn(rankedDtos);
 
         List<ProductDTO> result = searchService.search(
@@ -84,7 +85,7 @@ class SearchServiceTest {
         assertSame(rankedDtos, result);
         assertTrue(result.get(0).getHighlightedName().startsWith("<mark>Algorithm</mark>"));
         assertTrue(result.get(1).getHighlightedDescription().contains("<mark>algorithm</mark>"));
-        verify(productService, never()).listProductsWithFilters(any(), any(), any(), any(), any(), any());
+        verify(productService, never()).listProductsByIdsInOrder(any());
     }
 
     @Test
@@ -113,16 +114,91 @@ class SearchServiceTest {
     }
 
     @Test
-    @DisplayName("A MySQL hydration failure is not mislabeled as an Elasticsearch outage")
+    @DisplayName("A MySQL failure is not mislabeled as an Elasticsearch outage")
     void doesNotHideMysqlHydrationFailure() {
-        when(searchQuery.search(any(ProductSearchCriteria.class))).thenReturn(List.of(3L));
-        when(productService.listProductsByIdsInOrder(List.of(3L)))
+        when(productService.listProductsWithFilters("charger", null, null, null, null, null))
                 .thenThrow(new IllegalStateException("database unavailable"));
 
         assertThrows(IllegalStateException.class, () -> searchService.search(
                 "charger", null, null, null, null, null));
 
-        verify(productService, never()).listProductsWithFilters(any(), any(), any(), any(), any(), any());
+        verifyNoInteractions(searchQuery);
+    }
+
+    @Test
+    void missingExtraAndDuplicateEsHitsCannotChangeMembership() {
+        Product first = product(1L);
+        Product second = product(2L);
+        Product missed = product(3L);
+        when(productService.listProductsWithFilters("phone", null, null, null, null, null))
+                .thenReturn(List.of(first, second, missed));
+        when(searchQuery.search(any())).thenReturn(List.of(2L, 99L, 2L, 1L));
+        when(productService.convertToDTOList(List.of(second, first, missed))).thenReturn(List.of());
+
+        searchService.search("phone", null, null, null, null, null);
+
+        verify(productService).convertToDTOList(List.of(second, first, missed));
+    }
+
+    @Test
+    void anEmptyIndexCannotHideSqlMatches() {
+        List<Product> products = List.of(product(4L));
+        when(productService.listProductsWithFilters("C++", null, null, null, null, null))
+                .thenReturn(products);
+        when(searchQuery.search(any())).thenReturn(List.of());
+        when(productService.convertToDTOList(products)).thenReturn(List.of());
+
+        searchService.search("C++", null, null, null, null, null);
+
+        verify(productService).convertToDTOList(products);
+    }
+
+    @Test
+    void esResultWindowCannotTruncateTheCatalogue() {
+        List<Product> products = java.util.stream.LongStream.rangeClosed(1, 1005)
+                .mapToObj(this::product).toList();
+        when(productService.listProductsWithFilters("book", null, null, null, null, null))
+                .thenReturn(products);
+        when(searchQuery.search(any())).thenReturn(java.util.stream.LongStream.rangeClosed(1, 1000)
+                .boxed().toList());
+        when(productService.convertToDTOList(products)).thenReturn(List.of());
+
+        searchService.search("book", null, null, null, null, null);
+
+        verify(productService).convertToDTOList(products);
+    }
+
+    @Test
+    void recoveryRetriesEsWithoutRecreatingTheService() {
+        Product first = product(1L);
+        Product second = product(2L);
+        when(productService.listProductsWithFilters("book", null, null, null, null, null))
+                .thenReturn(List.of(first, second));
+        when(searchQuery.search(any()))
+                .thenThrow(new IllegalStateException("offline"))
+                .thenReturn(List.of(2L, 1L));
+        when(productService.convertToDTOList(any())).thenReturn(List.of());
+
+        searchService.search("book", null, null, null, null, null);
+        searchService.search("book", null, null, null, null, null);
+
+        verify(productService).convertToDTOList(List.of(first, second));
+        verify(productService).convertToDTOList(List.of(second, first));
+        verify(searchQuery, times(2)).search(any());
+        verify(productService, times(2)).listProductsWithFilters("book", null, null, null, null, null);
+    }
+
+    @Test
+    void dtoConversionFailureIsNotCaughtAsAnEsFailure() {
+        List<Product> products = List.of(product(1L));
+        when(productService.listProductsWithFilters("phone", null, null, null, null, null))
+                .thenReturn(products);
+        when(searchQuery.search(any())).thenReturn(List.of(1L));
+        when(productService.convertToDTOList(products)).thenThrow(new IllegalStateException("credit unavailable"));
+
+        assertThrows(IllegalStateException.class,
+                () -> searchService.search("phone", null, null, null, null, null));
+        verify(productService).listProductsWithFilters("phone", null, null, null, null, null);
     }
 
     @Test
