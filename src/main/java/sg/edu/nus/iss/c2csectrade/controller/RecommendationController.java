@@ -27,9 +27,10 @@ public class RecommendationController {
     /** Related items on the detail page. Open to anonymous visitors. */
     @GetMapping("/products/{productId}/similar")
     public ResponseEntity<?> similar(@PathVariable Long productId,
-                                     @RequestParam(defaultValue = "8") int limit) {
+                                     @RequestParam(defaultValue = "8") int limit,
+                                     @RequestParam(defaultValue = "same-category") String strategy) {
         return ResponseEntity.ok(productService.convertToDTOList(
-                recommendationService.similarTo(productId, Math.min(limit, 24))));
+                recommendationService.similarTo(productId, Math.min(limit, 24), strategy)));
     }
 
     /** The home feed's suggestions; falls back to recent listings without history. */
