@@ -38,6 +38,7 @@ public class OrderService {
     private final OrderItemMapper orderItemMapper;
     private final CartItemMapper cartItemMapper;
     private final ProductMapper productMapper;
+    private final PaymentService paymentService;
     private final ApplicationEventPublisher events;
 
     @Value("${order.payment-window-minutes:15}")
@@ -47,11 +48,13 @@ public class OrderService {
                         OrderItemMapper orderItemMapper,
                         CartItemMapper cartItemMapper,
                         ProductMapper productMapper,
+                        PaymentService paymentService,
                         ApplicationEventPublisher events) {
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
         this.cartItemMapper = cartItemMapper;
         this.productMapper = productMapper;
+        this.paymentService = paymentService;
         this.events = events;
     }
 
@@ -250,6 +253,9 @@ public class OrderService {
                 || (!order.getBuyerId().equals(userId) && !order.getSellerId().equals(userId))) {
             return null;
         }
+        // Only on the single-order read: the list views would need a query per
+        // order for a number neither party acts on from a list.
+        order.setHeldAmount(paymentService.heldAmount(orderId));
         return order;
     }
 

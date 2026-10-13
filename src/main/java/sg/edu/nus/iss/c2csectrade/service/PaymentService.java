@@ -22,6 +22,11 @@ import java.util.stream.Collectors;
  * payable, settle, record the movement, advance the state, turn the stock
  * reservation into a real deduction. Only the settlement step varies, and that
  * is delegated to a {@link PaymentStrategy}.
+ *
+ * Paying does not pay the seller. The amount is held against the order until
+ * the buyer confirms receipt, and every movement in or out of that holding is
+ * its own ledger row, so what is still held is always the difference between
+ * the rows rather than a number someone has to keep up to date.
  */
 @Service
 public class PaymentService {
@@ -76,6 +81,8 @@ public class PaymentService {
             throw new IllegalStateException("This order is no longer awaiting payment");
         }
 
+        // Takes the money from the buyer only. The seller is paid in
+        // releaseToSeller, once the buyer has confirmed the item arrived.
         strategy.settle(order, buyerId, paymentPassword);
         recordTransaction(order, method, TransactionType.PAYMENT, order.getTotalAmount());
         convertReservationToDeduction(orderId);
@@ -98,6 +105,11 @@ public class PaymentService {
      *
      * Nothing in the ledger is updated or deleted: the refund is a new row
      * beside the payment it reverses, so the order still shows what was paid.
+     *
+     * The money being returned is the amount held against the order, so this
+     * takes nothing from the seller and cannot fail because the seller has
+     * already spent it. Once the order is COMPLETED the money is the seller's
+     * and the state machine refuses the action outright.
      */
     @Transactional
     public Order refund(Long sellerId, Long orderId) {
@@ -124,13 +136,7 @@ public class PaymentService {
         // change what is handed back.
         Transaction payment = originalPayment(orderId);
         PaymentMethod method = PaymentMethod.of(payment.getPaymentMethod());
-        PaymentStrategy strategy = strategies.get(method);
-        if (strategy == null) {
-            throw new IllegalStateException(
-                    "No refund path for payment method: " + payment.getPaymentMethod());
-        }
-
-        strategy.refund(order, payment.getAmount());
+        settledBy(payment).refund(order, payment.getAmount());
         recordTransaction(order, method, TransactionType.REFUND, payment.getAmount());
         restoreStock(orderId);
 
@@ -139,6 +145,61 @@ public class PaymentService {
                 OrderStatus.PAID.name(), OrderStatus.REFUNDED.name(), payment.getAmount()));
 
         return orderMapper.selectById(orderId);
+    }
+
+    /**
+     * Handing the held money to the seller, because the buyer confirmed the
+     * item arrived.
+     *
+     * Called from inside the transaction that moves the order to COMPLETED, so
+     * the payout and the state change commit together or not at all. The
+     * transition itself is claimed with a conditional update, which is what
+     * stops two confirmations paying the seller twice.
+     *
+     * The amount comes from the payment's own ledger row, and the payout is a
+     * third row beside it rather than an edit, so the order keeps showing what
+     * was paid as well as what was handed over.
+     */
+    @Transactional
+    public void releaseToSeller(Order order) {
+        Transaction payment = originalPayment(order.getId());
+        PaymentMethod method = PaymentMethod.of(payment.getPaymentMethod());
+        settledBy(payment).releaseToSeller(order, payment.getAmount());
+        recordTransaction(order, method, TransactionType.PAYOUT, payment.getAmount());
+    }
+
+    /**
+     * What is still held against this order: everything paid in, less whatever
+     * has been handed to the seller or returned to the buyer.
+     *
+     * Derived from the ledger instead of stored on the order, so it cannot
+     * drift away from the rows that explain it.
+     */
+    public BigDecimal heldAmount(Long orderId) {
+        BigDecimal held = BigDecimal.ZERO;
+        for (Transaction movement : transactionMapper.selectByOrderId(orderId)) {
+            if (!movement.isSuccessful() || movement.typeAsEnum() == null) {
+                continue;
+            }
+            held = switch (movement.typeAsEnum()) {
+                case PAYMENT -> held.add(movement.getAmount());
+                case PAYOUT, REFUND -> held.subtract(movement.getAmount());
+            };
+        }
+        return held;
+    }
+
+    /**
+     * The strategy that took this payment, so the money goes back out the way
+     * it came in even if the buyer's chosen method has since been withdrawn.
+     */
+    private PaymentStrategy settledBy(Transaction payment) {
+        PaymentStrategy strategy = strategies.get(PaymentMethod.of(payment.getPaymentMethod()));
+        if (strategy == null) {
+            throw new IllegalStateException(
+                    "No settlement path for payment method: " + payment.getPaymentMethod());
+        }
+        return strategy;
     }
 
     /** The successful payment this refund reverses; the latest one if ever retried. */

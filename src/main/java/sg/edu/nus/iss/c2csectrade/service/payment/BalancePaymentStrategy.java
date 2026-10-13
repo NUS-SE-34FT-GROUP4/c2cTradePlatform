@@ -9,8 +9,11 @@ import java.math.BigDecimal;
 
 /**
  * The only method settled inside this system: the buyer's balance is debited
- * and the seller's credited in the same transaction, so the money never exists
- * in neither account.
+ * at payment and the seller's is credited when the buyer confirms receipt.
+ *
+ * Between those two points the money is in neither account. It is accounted
+ * for by the order's own ledger rows, which is what lets the seller refund a
+ * paid order without needing the balance to still be there.
  */
 @Component
 public class BalancePaymentStrategy implements PaymentStrategy {
@@ -29,13 +32,16 @@ public class BalancePaymentStrategy implements PaymentStrategy {
     @Override
     public void settle(Order order, Long buyerId, String paymentPassword) {
         walletService.pay(buyerId, paymentPassword, order.getTotalAmount());
-        walletService.credit(order.getSellerId(), order.getTotalAmount());
     }
 
-    /** The exact reverse of settle: the seller gives it back, the buyer gets it. */
+    @Override
+    public void releaseToSeller(Order order, BigDecimal amount) {
+        walletService.credit(order.getSellerId(), amount);
+    }
+
+    /** The held money goes back where it came from; the seller never had it. */
     @Override
     public void refund(Order order, BigDecimal amount) {
-        walletService.debit(order.getSellerId(), amount);
         walletService.credit(order.getBuyerId(), amount);
     }
 }

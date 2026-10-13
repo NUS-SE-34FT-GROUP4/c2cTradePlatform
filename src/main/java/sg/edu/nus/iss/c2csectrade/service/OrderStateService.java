@@ -16,7 +16,10 @@ import sg.edu.nus.iss.c2csectrade.event.OrderStateChangedEvent;
  * {@link OrderStatus} itself rather than in a chain of status comparisons here.
  * This class only does what every transition has in common: look the order up,
  * ask the state whether the action is allowed, check the caller is the right
- * party, apply it, and release the reservation when the order closes unpaid.
+ * party, apply it, and settle whatever the state was holding — a stock
+ * reservation when the order closes unpaid, the buyer's money when the buyer
+ * confirms receipt. Both are decided by asking the state what it holds rather
+ * than by naming the action.
  */
 @Service
 public class OrderStateService {
@@ -24,15 +27,18 @@ public class OrderStateService {
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
     private final ProductMapper productMapper;
+    private final PaymentService paymentService;
     private final ApplicationEventPublisher events;
 
     public OrderStateService(OrderMapper orderMapper,
                              OrderItemMapper orderItemMapper,
                              ProductMapper productMapper,
+                             PaymentService paymentService,
                              ApplicationEventPublisher events) {
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
         this.productMapper = productMapper;
+        this.paymentService = paymentService;
         this.events = events;
     }
 
@@ -60,6 +66,15 @@ public class OrderStateService {
 
         if (current.holdsReservation() && next.isTerminal()) {
             releaseReservation(orderId);
+        }
+
+        // The money has been held since payment. Leaving a state that holds it
+        // for one that does not is the buyer confirming receipt, so this is the
+        // point it becomes the seller's — in this transaction, with the state
+        // change that justifies it. A refund leaves the same group but is
+        // performed by PaymentService, which pays the buyer instead.
+        if (current.holdsPayment() && !next.holdsPayment()) {
+            paymentService.releaseToSeller(order);
         }
 
         // Every transition announces itself once, from the one place that

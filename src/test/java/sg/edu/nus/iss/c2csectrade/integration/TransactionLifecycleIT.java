@@ -65,7 +65,12 @@ class TransactionLifecycleIT extends MySqlIntegrationTest {
         mvc.perform(get("/api/orders/" + id).header("Authorization", token("seller_lvl1")))
                 .andExpect(status().isNotFound());
         postJson("/api/orders/" + id + "/confirm-receipt", "admin", "{}", 409);
-        assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM oms_transaction WHERE order_id=?", Integer.class, id));
+        // The payment, plus the payout that confirming receipt released to the
+        // seller (#109). The refused second confirmation added neither.
+        assertEquals(2, jdbc.queryForObject("SELECT COUNT(*) FROM oms_transaction WHERE order_id=?", Integer.class, id));
+        assertEquals("PAYMENT,PAYOUT", jdbc.queryForObject(
+                "SELECT GROUP_CONCAT(transaction_type ORDER BY id) FROM oms_transaction WHERE order_id=?",
+                String.class, id));
     }
 
     @Test void cancelledOrderReleasesStockExactlyOnceAndCannotBePaid() throws Exception {
