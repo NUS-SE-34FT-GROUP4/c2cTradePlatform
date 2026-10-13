@@ -35,6 +35,8 @@ class ProductServiceTest {
     @Mock
     private UserMapper userMapper;
 
+    @Mock private CreditService creditService;
+
     @InjectMocks
     private ProductService productService;
 

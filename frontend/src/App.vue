@@ -9,6 +9,7 @@
             <span class="username">{{ userDisplayName }}</span>
           </div>
           <div v-if="showUserMenu" class="dropdown-menu" @click.stop>
+            <div class="dropdown-item" v-if="accountCredit"><CreditBadge :credit="accountCredit" /></div>
             <div class="dropdown-item" @click="changeAvatar">
               <span class="icon">👤</span> Change Avatar
             </div>
@@ -141,6 +142,7 @@
 </template>
 
 <script setup>
+import CreditBadge from '@/components/CreditBadge.vue';
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'vue-router';
@@ -171,8 +173,18 @@ const userDisplayName = computed(() => {
   return currentUser.value?.displayName || currentUser.value?.username || 'User';
 });
 
-const toggleUserMenu = () => {
+const accountCredit = ref(null);
+const toggleUserMenu = async () => {
   showUserMenu.value = !showUserMenu.value;
+  if (showUserMenu.value) {
+    accountCredit.value = null;
+    try {
+      const response = await axios.get('/api/users/me');
+      accountCredit.value = response.data.credit;
+    } catch (error) {
+      console.error('Failed to load account credit:', error);
+    }
+  }
 };
 
 const goToAdminUsers = () => {

@@ -23,6 +23,9 @@ public class UserController {
     private UserMapper userMapper;
 
     @Autowired
+    private sg.edu.nus.iss.c2csectrade.service.CreditService creditService;
+
+    @Autowired
     private WalletService walletService;
 
     /**
@@ -129,6 +132,7 @@ public class UserController {
 
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("id", user.getId());
+            userInfo.put("credit", creditService.forSeller(user.getId()));
             userInfo.put("username", user.getUsername());
             userInfo.put("displayName", user.getDisplayName());
             userInfo.put("email", user.getEmail());
