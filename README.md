@@ -116,6 +116,10 @@ storage is mocked; repositories and transaction management are real. A temporary
 key is generated per test JVM. Docker is required and missing Docker fails the suite.
 CI runs `mvn -B verify` and publishes both Surefire and Failsafe reports.
 
+CI also retains Trivy JSON reports and commit-to-GHCR digest/deployment evidence.
+See [release evidence and CLI export](docs/testing/release-evidence.md) for the
+slide-ready summary, advisory-scan limitations and real-release acceptance checklist.
+
 ## Post-transaction reviews (#42)
 
 Ported from the supplied `c2csectrade-main.zip`: review DTOs/entity, the buyer/completed-order
