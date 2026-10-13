@@ -26,9 +26,12 @@ public class RecommendationService {
 
     private final ProductMapper productMapper;
     private final ViewHistoryMapper viewHistoryMapper;
+    private final sg.edu.nus.iss.c2csectrade.service.recommendation.RecommendationStrategyFactory strategies;
 
-    public RecommendationService(ProductMapper productMapper, ViewHistoryMapper viewHistoryMapper) {
+    public RecommendationService(ProductMapper productMapper, ViewHistoryMapper viewHistoryMapper,
+            sg.edu.nus.iss.c2csectrade.service.recommendation.RecommendationStrategyFactory strategies) {
         this.productMapper = productMapper;
+        this.strategies = strategies;
         this.viewHistoryMapper = viewHistoryMapper;
     }
 
@@ -40,20 +43,13 @@ public class RecommendationService {
 
     /** Items in the same category as the one being viewed. */
     public List<Product> similarTo(Long productId, int limit) {
-        Product current = productMapper.selectById(productId);
-        if (current == null) {
-            return List.of();
-        }
-        List<Product> candidates = current.getCategory() == null
-                ? List.of()
-                : productMapper.selectByCategory(current.getCategory());
+        return similarTo(productId, limit, "same-category");
+    }
 
-        List<Product> picked = filter(candidates, productId, limit);
-        if (picked.isEmpty()) {
-            // Nothing left in this category; show something rather than a gap.
-            picked = filter(productMapper.selectRecentProducts(limit * 3), productId, limit);
-        }
-        return picked;
+    public List<Product> similarTo(Long productId, int limit, String strategy) {
+        if (limit <= 0) return List.of();
+        Product current = productMapper.selectById(productId);
+        return current == null ? List.of() : strategies.recommend(strategy, current, Math.min(limit, 24));
     }
 
     /**
@@ -62,6 +58,8 @@ public class RecommendationService {
      * branching and the personalised algorithm are Sprint 5.
      */
     public List<Product> forUser(Long userId, int limit) {
+        if (limit <= 0) return List.of();
+        limit = Math.min(limit, 24);
         List<String> categories = userId == null
                 ? List.of()
                 : viewHistoryMapper.recentCategories(userId, 3);
