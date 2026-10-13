@@ -16,6 +16,9 @@
             <div class="dropdown-item" @click="changeDisplayName">
               <span class="icon">✏️</span> Edit Username
             </div>
+            <div class="dropdown-item" @click="goToMyReports">
+              <span class="icon">🚩</span> My Reports
+            </div>
             <div v-if="isAdmin" class="dropdown-divider"></div>
             <div v-if="isAdmin" class="dropdown-item" @click="goToAdminUsers">
               <span class="icon">👥</span> User Management
@@ -189,6 +192,11 @@ const toggleUserMenu = async () => {
 
 const goToAdminUsers = () => {
   router.push('/admin/users');
+  showUserMenu.value = false;
+};
+
+const goToMyReports = () => {
+  router.push('/my/reports');
   showUserMenu.value = false;
 };
 

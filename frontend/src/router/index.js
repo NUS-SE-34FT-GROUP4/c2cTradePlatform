@@ -58,6 +58,20 @@ const routes = [
     component: ProductDetail,
   },
   {
+    // Public account page; carries the report-user action (#63)
+    path: '/users/:username',
+    name: 'user-profile',
+    component: () => import('../views/UserProfileView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    // The reporter's own reports and their outcomes (#63)
+    path: '/my/reports',
+    name: 'my-reports',
+    component: () => import('../views/MyReportsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/publish',
     name: 'product-create',
     component: ProductCreate,
