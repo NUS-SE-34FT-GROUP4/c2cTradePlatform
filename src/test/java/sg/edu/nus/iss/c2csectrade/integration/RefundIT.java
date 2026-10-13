@@ -101,11 +101,14 @@ class RefundIT extends MySqlIntegrationTest {
 
         Order order = paidOrder();
         assertEquals(0, stockOf(PRODUCT), "payment should have deducted the only unit");
+        assertEquals(0, sellerBefore.compareTo(balanceOf(SELLER)),
+                "payment must not have paid the seller; the money is held against the order");
 
         payments.refund(SELLER, order.getId());
 
         assertEquals(0, buyerBefore.compareTo(balanceOf(BUYER)), "buyer is whole again");
-        assertEquals(0, sellerBefore.compareTo(balanceOf(SELLER)), "seller gave it back");
+        assertEquals(0, sellerBefore.compareTo(balanceOf(SELLER)),
+                "the seller's balance is untouched throughout: they were never paid");
         assertEquals(1, stockOf(PRODUCT), "the unit is for sale again");
         assertEquals(0, jdbc.queryForObject(
                 "SELECT reserved_stock FROM pms_product WHERE id=?", Integer.class, PRODUCT),
@@ -142,6 +145,21 @@ class RefundIT extends MySqlIntegrationTest {
 
         assertEquals(OrderStatus.REFUNDED.name(),
                 orderMapper.selectById(order.getId()).getStatus());
+    }
+
+    @Test
+    @DisplayName("A refund works on a seller with no money at all: nothing is clawed back")
+    void refundDoesNotDependOnTheSellersBalance() {
+        Order order = paidOrder();
+        // The seller spends everything they have between the payment and the refund.
+        jdbc.update("UPDATE users SET balance=0 WHERE id=?", SELLER);
+
+        payments.refund(SELLER, order.getId());
+
+        assertEquals(OrderStatus.REFUNDED.name(),
+                orderMapper.selectById(order.getId()).getStatus());
+        assertEquals(0, new BigDecimal("500.00").compareTo(balanceOf(BUYER)),
+                "the buyer is repaid out of what was held, not out of the seller's balance");
     }
 
     @Test

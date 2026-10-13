@@ -69,14 +69,14 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("Paying by balance debits the buyer, credits the seller and records the movement")
-    void balancePaymentSettlesBothSides() {
+    @DisplayName("Paying by balance debits the buyer and holds the money; the seller is not paid yet")
+    void balancePaymentHoldsTheMoneyAgainstTheOrder() {
         stubPayableOrder();
 
         paymentService.pay(BUYER, ORDER, "balance", "123456");
 
         verify(walletService).pay(BUYER, "123456", new BigDecimal("30.00"));
-        verify(walletService).credit(SELLER, new BigDecimal("30.00"));
+        verify(walletService, never()).credit(anyLong(), any());
 
         ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
         verify(transactionMapper).insert(captor.capture());
@@ -98,7 +98,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("Insufficient balance leaves the seller uncredited and records nothing")
+    @DisplayName("Insufficient balance records nothing and moves no money at all")
     void failedSettlementRecordsNothing() {
         stubPayableOrder();
         doThrow(new InsufficientBalanceException("Not enough balance"))
@@ -209,14 +209,15 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("Refunding a balance payment moves the money back the way it came")
-    void balanceRefundReversesBothSides() {
+    @DisplayName("Refunding a balance payment returns the held money to the buyer")
+    void balanceRefundReturnsTheHeldMoney() {
         stubRefundableOrder("balance", "30.00");
 
         paymentService.refund(SELLER, ORDER);
 
-        verify(walletService).debit(SELLER, new BigDecimal("30.00"));
         verify(walletService).credit(BUYER, new BigDecimal("30.00"));
+        // The seller was never paid, so a refund cannot fail on their balance.
+        verify(walletService, never()).debit(anyLong(), any());
     }
 
     @Test
@@ -238,7 +239,6 @@ class PaymentServiceTest {
 
         paymentService.refund(SELLER, ORDER);
 
-        verify(walletService).debit(SELLER, new BigDecimal("18.00"));
         verify(walletService).credit(BUYER, new BigDecimal("18.00"));
     }
 
@@ -288,16 +288,155 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("An external method's refund claws back from the seller and leaves the buyer alone")
-    void gatewayRefundDoesNotCreditTheBuyer() {
-        PaymentService withGateway = new PaymentService(orderMapper, orderItemMapper, productMapper,
-                transactionMapper, event -> { },
-                List.of(new AlipayPaymentStrategy(walletService)));
+    @DisplayName("An external method's refund moves nothing on the platform: nothing was held here")
+    void gatewayRefundMovesNothingOnPlatform() {
+        PaymentService withGateway = withAlipay();
         stubRefundableOrder("alipay", "30.00");
 
         withGateway.refund(SELLER, ORDER);
 
-        verify(walletService).debit(SELLER, new BigDecimal("30.00"));
-        verify(walletService, never()).credit(eq(BUYER), any());
+        // The buyer is reimbursed off-platform (NFR 6.4), and the seller was
+        // never credited, so neither balance changes here.
+        verifyNoInteractions(walletService);
+    }
+
+    // ---- Sprint 4: the payout is what hands the money over (#109) ----
+
+    private PaymentService withAlipay() {
+        return new PaymentService(orderMapper, orderItemMapper, productMapper,
+                transactionMapper, event -> { },
+                List.of(new AlipayPaymentStrategy(walletService)));
+    }
+
+    private void stubPaidOrderWithLedger(String method, String amount) {
+        lenient().when(transactionMapper.selectByOrderId(ORDER))
+                .thenReturn(List.of(paymentRow(method, amount)));
+    }
+
+    @Test
+    @DisplayName("Releasing to the seller credits them and records a payout beside the payment")
+    void payoutCreditsTheSellerAndIsAppendOnly() {
+        stubPaidOrderWithLedger("balance", "30.00");
+
+        paymentService.releaseToSeller(paidOrder());
+
+        verify(walletService).credit(SELLER, new BigDecimal("30.00"));
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionMapper).insert(captor.capture());
+        Transaction recorded = captor.getValue();
+        assertEquals(TransactionType.PAYOUT.name(), recorded.getTransactionType());
+        assertEquals(new BigDecimal("30.00"), recorded.getAmount());
+        assertEquals("balance", recorded.getPaymentMethod());
+        assertEquals("SUCCESS", recorded.getStatus());
+        // The payment row is read, never rewritten.
+        verify(transactionMapper).selectByOrderId(ORDER);
+        verifyNoMoreInteractions(transactionMapper);
+    }
+
+    @Test
+    @DisplayName("The seller is paid what the buyer actually paid, not the order total")
+    void payoutUsesTheAmountActuallyPaid() {
+        // A bargain was accepted at 18.00 while the order total says 30.00.
+        stubPaidOrderWithLedger("balance", "18.00");
+
+        paymentService.releaseToSeller(paidOrder());
+
+        verify(walletService).credit(SELLER, new BigDecimal("18.00"));
+    }
+
+    @Test
+    @DisplayName("An external method pays the seller on the same signal, not at payment")
+    void gatewayPayoutFollowsTheSameTiming() {
+        PaymentService withGateway = withAlipay();
+        stubPaidOrderWithLedger("alipay", "30.00");
+
+        withGateway.releaseToSeller(paidOrder());
+
+        verify(walletService).credit(SELLER, new BigDecimal("30.00"));
+    }
+
+    @Test
+    @DisplayName("Paying through an external method credits nobody until receipt is confirmed")
+    void gatewayPaymentCreditsNobodyYet() {
+        PaymentService withGateway = withAlipay();
+        stubPayableOrder();
+
+        withGateway.pay(BUYER, ORDER, "alipay", "123456");
+
+        verify(walletService).verifyPaymentPassword(BUYER, "123456");
+        verify(walletService, never()).credit(anyLong(), any());
+        verify(walletService, never()).pay(anyLong(), anyString(), any());
+    }
+
+    @Test
+    @DisplayName("An order with no successful payment cannot be paid out")
+    void payoutWithoutAPaymentIsRefused() {
+        when(transactionMapper.selectByOrderId(ORDER)).thenReturn(List.of());
+
+        assertThrows(IllegalStateException.class,
+                () -> paymentService.releaseToSeller(paidOrder()));
+
+        verifyNoInteractions(walletService);
+        verify(transactionMapper, never()).insert(any());
+    }
+
+    // ---- What is still held is the difference between the ledger rows ----
+
+    private Transaction row(TransactionType type, String amount, String status) {
+        Transaction movement = new Transaction();
+        movement.setOrderId(ORDER);
+        movement.setAmount(new BigDecimal(amount));
+        movement.setPaymentMethod("balance");
+        movement.setTransactionType(type.name());
+        movement.setStatus(status);
+        movement.setCreatedAt(LocalDateTime.of(2026, 10, 17, 9, 0));
+        return movement;
+    }
+
+    @Test
+    @DisplayName("A paid order holds what was paid")
+    void heldAmountIsThePaymentWhileNothingHasLeft() {
+        when(transactionMapper.selectByOrderId(ORDER))
+                .thenReturn(List.of(row(TransactionType.PAYMENT, "30.00", "SUCCESS")));
+
+        assertEquals(new BigDecimal("30.00"), paymentService.heldAmount(ORDER));
+    }
+
+    @Test
+    @DisplayName("A completed order holds nothing: the payout took it")
+    void heldAmountIsZeroAfterThePayout() {
+        when(transactionMapper.selectByOrderId(ORDER)).thenReturn(List.of(
+                row(TransactionType.PAYMENT, "30.00", "SUCCESS"),
+                row(TransactionType.PAYOUT, "30.00", "SUCCESS")));
+
+        assertEquals(0, paymentService.heldAmount(ORDER).signum());
+    }
+
+    @Test
+    @DisplayName("A refunded order holds nothing: the buyer took it back")
+    void heldAmountIsZeroAfterARefund() {
+        when(transactionMapper.selectByOrderId(ORDER)).thenReturn(List.of(
+                row(TransactionType.PAYMENT, "30.00", "SUCCESS"),
+                row(TransactionType.REFUND, "30.00", "SUCCESS")));
+
+        assertEquals(0, paymentService.heldAmount(ORDER).signum());
+    }
+
+    @Test
+    @DisplayName("A failed movement is not money: it changes nothing that is held")
+    void heldAmountIgnoresFailedRows() {
+        when(transactionMapper.selectByOrderId(ORDER)).thenReturn(List.of(
+                row(TransactionType.PAYMENT, "30.00", "SUCCESS"),
+                row(TransactionType.PAYOUT, "30.00", "FAILED")));
+
+        assertEquals(new BigDecimal("30.00"), paymentService.heldAmount(ORDER));
+    }
+
+    @Test
+    @DisplayName("An order that was never paid holds nothing")
+    void heldAmountOfAnUnpaidOrderIsZero() {
+        when(transactionMapper.selectByOrderId(ORDER)).thenReturn(List.of());
+
+        assertEquals(0, paymentService.heldAmount(ORDER).signum());
     }
 }

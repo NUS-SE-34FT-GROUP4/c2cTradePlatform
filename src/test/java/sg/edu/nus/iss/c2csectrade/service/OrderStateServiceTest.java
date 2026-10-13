@@ -28,6 +28,7 @@ class OrderStateServiceTest {
     @Mock private OrderMapper orderMapper;
     @Mock private OrderItemMapper orderItemMapper;
     @Mock private ProductMapper productMapper;
+    @Mock private PaymentService paymentService;
     @Mock private ApplicationEventPublisher events;
     @InjectMocks private OrderStateService orderStateService;
 
@@ -130,6 +131,43 @@ class OrderStateServiceTest {
         stub(OrderStatus.SHIPPED);
         orderStateService.apply(BUYER, ORDER, OrderAction.CONFIRM_RECEIPT);
         verifyNoInteractions(productMapper);
+    }
+
+    @Test
+    @DisplayName("Confirming receipt is what hands the held money to the seller")
+    void confirmingReceiptPaysTheSeller() {
+        stub(OrderStatus.SHIPPED);
+        orderStateService.apply(BUYER, ORDER, OrderAction.CONFIRM_RECEIPT);
+        verify(paymentService).releaseToSeller(argThat(o -> ORDER.equals(o.getId())));
+    }
+
+    @Test
+    @DisplayName("Dispatching pays nobody: the money is still held after the item ships")
+    void shippingPaysNobody() {
+        stub(OrderStatus.PAID);
+        orderStateService.apply(SELLER, ORDER, OrderAction.SHIP);
+        verifyNoInteractions(paymentService);
+    }
+
+    @Test
+    @DisplayName("Closing an unpaid order pays nobody: there was never any money to hold")
+    void cancellingPaysNobody() {
+        stub(OrderStatus.PENDING_PAYMENT);
+        when(orderItemMapper.selectByOrderId(ORDER)).thenReturn(List.of());
+        orderStateService.apply(BUYER, ORDER, OrderAction.CANCEL);
+        verifyNoInteractions(paymentService);
+    }
+
+    @Test
+    @DisplayName("Losing the race to confirm receipt pays the seller nothing")
+    void losingTheConfirmationRacePaysNothing() {
+        when(orderMapper.selectById(ORDER)).thenReturn(order(OrderStatus.SHIPPED));
+        when(orderMapper.transition(eq(ORDER), anyString(), anyString(), isNull())).thenReturn(0);
+
+        assertThrows(IllegalStateException.class,
+                () -> orderStateService.apply(BUYER, ORDER, OrderAction.CONFIRM_RECEIPT));
+
+        verifyNoInteractions(paymentService);
     }
 
     @Test

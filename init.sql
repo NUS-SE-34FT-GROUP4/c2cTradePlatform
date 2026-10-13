@@ -329,14 +329,14 @@ CREATE TABLE `oms_transaction` (
     `order_id` BIGINT NOT NULL,
     `amount` DECIMAL(12,2) NOT NULL COMMENT 'Always positive; direction is given by transaction_type',
     `payment_method` VARCHAR(20) NULL COMMENT 'balance, alipay, wechat, bank',
-    `transaction_type` VARCHAR(20) NOT NULL COMMENT 'PAYMENT, REFUND',
+    `transaction_type` VARCHAR(20) NOT NULL COMMENT 'PAYMENT, PAYOUT, REFUND',
     `status` VARCHAR(20) NOT NULL DEFAULT 'SUCCESS' COMMENT 'SUCCESS, FAILED',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     INDEX `idx_txn_order` (`order_id`),
     CONSTRAINT `fk_txn_order` FOREIGN KEY (`order_id`) REFERENCES `oms_order`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Append-only ledger of payments and refunds.';
+  COMMENT='Append-only ledger of payments, payouts and refunds. What is still held against an order is the payments less the payouts and refunds.';
 
 SELECT 'Sprint 3 payment tables created.' AS status;
 

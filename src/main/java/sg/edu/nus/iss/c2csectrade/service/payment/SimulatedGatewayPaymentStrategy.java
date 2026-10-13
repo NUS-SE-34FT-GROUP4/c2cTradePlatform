@@ -11,8 +11,12 @@ import java.math.BigDecimal;
 /**
  * Shared behaviour for the three external methods. The proposal calls for them
  * to be simulated (NFR 6.4), so no network call is made: the payment password
- * is still verified, the seller is still credited, and the buyer's balance is
- * left alone because the money came from outside.
+ * is still verified and the buyer's balance is left alone, because the money
+ * came from outside.
+ *
+ * The timing matches balance payment: the seller is credited when the buyer
+ * confirms receipt, not at payment, so the order's state means the same thing
+ * whichever method was used.
  */
 abstract class SimulatedGatewayPaymentStrategy implements PaymentStrategy {
 
@@ -27,20 +31,24 @@ abstract class SimulatedGatewayPaymentStrategy implements PaymentStrategy {
     @Override
     public void settle(Order order, Long buyerId, String paymentPassword) {
         walletService.verifyPaymentPassword(buyerId, paymentPassword);
-        walletService.credit(order.getSellerId(), order.getTotalAmount());
-        log.info("Simulated {} settlement of {} for order {}",
+        log.info("Simulated {} settlement of {} for order {}; held until receipt is confirmed",
                 method().code(), order.getTotalAmount(), order.getOrderNo());
     }
 
+    @Override
+    public void releaseToSeller(Order order, BigDecimal amount) {
+        walletService.credit(order.getSellerId(), amount);
+        log.info("Simulated {} payout of {} for order {}",
+                method().code(), amount, order.getOrderNo());
+    }
+
     /**
-     * Mirror of settle: the seller gives the money back, and the buyer is
-     * reimbursed through the same external channel it arrived on, which is
-     * outside this system (NFR 6.4). So the buyer's balance is left alone
-     * here, exactly as settle left it alone.
+     * The buyer is reimbursed through the same external channel the money
+     * arrived on, which is outside this system (NFR 6.4). So nothing moves on
+     * the platform here, exactly as settle moved nothing on it.
      */
     @Override
     public void refund(Order order, BigDecimal amount) {
-        walletService.debit(order.getSellerId(), amount);
         log.info("Simulated {} refund of {} for order {}; buyer reimbursed off-platform",
                 method().code(), amount, order.getOrderNo());
     }

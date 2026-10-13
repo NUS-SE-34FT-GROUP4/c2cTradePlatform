@@ -30,6 +30,12 @@ public class Order implements Serializable {
     /** Seller display name, joined for the order list; not persisted here. */
     private String sellerName;
 
+    /**
+     * What the ledger still holds against this order: paid by the buyer but
+     * not yet the seller's. Derived on the single-order read, not a column.
+     */
+    private BigDecimal heldAmount;
+
     public OrderStatus statusAsEnum() {
         return status == null ? null : OrderStatus.valueOf(status);
     }

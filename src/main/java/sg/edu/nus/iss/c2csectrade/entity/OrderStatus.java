@@ -97,4 +97,13 @@ public enum OrderStatus {
     public boolean holdsReservation() {
         return this == PENDING_PAYMENT;
     }
+
+    /**
+     * The buyer has paid, but the money is held against the order rather than
+     * being the seller's yet. Leaving this group is what settles it: to the
+     * seller when the buyer confirms receipt, back to the buyer on a refund.
+     */
+    public boolean holdsPayment() {
+        return this == PAID || this == SHIPPED;
+    }
 }
