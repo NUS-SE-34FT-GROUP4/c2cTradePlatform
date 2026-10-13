@@ -11,6 +11,7 @@ import java.util.List;
 public class ProductDTO {
     private Long id;
     private Long userId;
+    private CreditSummary sellerCredit;
     private String username;
     private String displayName;
     private String avatarUrl; // 新增：卖家头像URL

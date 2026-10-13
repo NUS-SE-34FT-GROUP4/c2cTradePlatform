@@ -32,6 +32,8 @@ class ProductPublishServiceTest {
     @Mock private ProductMediaMapper productMediaMapper;
     @Mock private UserMapper userMapper;
     @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private CreditService creditService;
+
     @InjectMocks private ProductService productService;
 
     private ProductPublishRequest request(String name, String price) {

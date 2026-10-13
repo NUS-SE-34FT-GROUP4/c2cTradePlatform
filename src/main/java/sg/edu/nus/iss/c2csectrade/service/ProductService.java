@@ -31,6 +31,8 @@ public class ProductService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
+    private CreditService creditService;
+    @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     public Product getProductById(Long id) {
@@ -91,6 +93,10 @@ public class ProductService {
      * Convert Product entity to ProductDTO
      */
     public ProductDTO convertToDTO(Product product) {
+        return product == null ? null : convertToDTO(product, creditService.forSeller(product.getUserId()));
+    }
+
+    private ProductDTO convertToDTO(Product product, sg.edu.nus.iss.c2csectrade.dto.CreditSummary credit) {
         if (product == null) {
             return null;
         }
@@ -98,6 +104,7 @@ public class ProductService {
         ProductDTO dto = new ProductDTO();
         dto.setId(product.getId()); // id已经是Long类型，直接使用
         dto.setUserId(product.getUserId());
+        dto.setSellerCredit(credit);
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
@@ -170,8 +177,11 @@ public class ProductService {
         if (products == null) {
             return new ArrayList<>();
         }
+        var credits = creditService.forSellers(products.stream().filter(java.util.Objects::nonNull)
+                .map(Product::getUserId).toList());
         return products.stream()
-                .map(this::convertToDTO)
+                .map(product -> product == null ? null : convertToDTO(product,
+                        credits.getOrDefault(product.getUserId(), CreditService.UNRATED)))
                 .collect(Collectors.toList());
     }
 
