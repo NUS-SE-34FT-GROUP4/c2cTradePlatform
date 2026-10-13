@@ -9,9 +9,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import sg.edu.nus.iss.c2csectrade.entity.Order;
+import sg.edu.nus.iss.c2csectrade.entity.OrderAction;
 import sg.edu.nus.iss.c2csectrade.entity.OrderStatus;
 import sg.edu.nus.iss.c2csectrade.mapper.OrderMapper;
 import sg.edu.nus.iss.c2csectrade.service.OrderService;
+import sg.edu.nus.iss.c2csectrade.service.OrderStateService;
 import sg.edu.nus.iss.c2csectrade.service.PaymentService;
 
 import java.math.BigDecimal;
@@ -37,12 +39,15 @@ class PaymentConcurrencyIT extends MySqlIntegrationTest {
     private static final Long PRODUCT = 4L;
     private static final Long BUYER = 1L;
     private static final Long OTHER_BUYER = 103L;
+    private static final Long SELLER = 102L;
+    private static final BigDecimal PRICE = new BigDecimal("55.00");
     private static final String PAYMENT_PASSWORD_HASH =
             "$2a$12$qKa0QH..hifzPlSsE6U.Q.4gGjw513N7.xWFpmr5Q.cp12YhGY7lG";
 
     @Autowired JdbcTemplate jdbc;
     @Autowired OrderService orders;
     @Autowired PaymentService payments;
+    @Autowired OrderStateService transitions;
     @Autowired OrderMapper orderMapper;
 
     @BeforeEach
@@ -51,6 +56,7 @@ class PaymentConcurrencyIT extends MySqlIntegrationTest {
             jdbc.update("UPDATE users SET balance=?, payment_password_hash=? WHERE id=?",
                     new BigDecimal("500.00"), PAYMENT_PASSWORD_HASH, buyer);
         }
+        jdbc.update("UPDATE users SET balance=? WHERE id=?", new BigDecimal("2000.00"), SELLER);
     }
 
     @AfterEach
@@ -61,6 +67,7 @@ class PaymentConcurrencyIT extends MySqlIntegrationTest {
                 + "(SELECT id FROM oms_order WHERE buyer_id IN (?, ?))", BUYER, OTHER_BUYER);
         jdbc.update("DELETE FROM oms_order WHERE buyer_id IN (?, ?)", BUYER, OTHER_BUYER);
         jdbc.update("UPDATE pms_product SET stock=1, reserved_stock=0 WHERE id=?", PRODUCT);
+        jdbc.update("UPDATE users SET balance=? WHERE id=?", new BigDecimal("2000.00"), SELLER);
     }
 
     /** Runs both tasks at once and returns the exception each threw, or null. */
@@ -95,6 +102,16 @@ class PaymentConcurrencyIT extends MySqlIntegrationTest {
         return jdbc.queryForObject(
                 "SELECT COUNT(*) FROM oms_transaction WHERE order_id=? AND transaction_type='PAYMENT'",
                 Integer.class, orderId);
+    }
+
+    private int countPayouts(Long orderId) {
+        return jdbc.queryForObject(
+                "SELECT COUNT(*) FROM oms_transaction WHERE order_id=? AND transaction_type='PAYOUT'",
+                Integer.class, orderId);
+    }
+
+    private BigDecimal balanceOf(Long userId) {
+        return jdbc.queryForObject("SELECT balance FROM users WHERE id=?", BigDecimal.class, userId);
     }
 
     private int stock() {
@@ -170,6 +187,60 @@ class PaymentConcurrencyIT extends MySqlIntegrationTest {
                 "one unit of stock can only become one order");
         assertEquals(1, reserved(), "exactly one reservation is held");
         assertEquals(1, stock(), "an unpaid order reserves, it does not deduct");
+    }
+
+    @Test
+    @DisplayName("Refunding while the seller dispatches: the money ends up in exactly one place")
+    void refundAndDispatchCannotBothWin() throws Exception {
+        Order order = orders.checkoutDirect(BUYER, PRODUCT, 1);
+        payments.pay(BUYER, order.getId(), "balance", "123456");
+        BigDecimal buyerAfterPaying = balanceOf(BUYER);
+        BigDecimal sellerBefore = balanceOf(SELLER);
+
+        // Both leave PAID, so they are the two transitions that can actually
+        // collide once money is held against an order.
+        List<Throwable> outcomes = race(
+                () -> payments.refund(SELLER, order.getId()),
+                () -> transitions.apply(SELLER, order.getId(), OrderAction.SHIP));
+
+        assertEquals(1, outcomes.stream().filter(java.util.Objects::nonNull).count(),
+                "exactly one of refund and ship must be refused: " + outcomes);
+
+        String status = orderMapper.selectById(order.getId()).getStatus();
+        if (OrderStatus.REFUNDED.name().equals(status)) {
+            assertEquals(0, buyerAfterPaying.add(PRICE).compareTo(balanceOf(BUYER)),
+                    "the refund gave the held money back");
+            assertEquals(1, stock(), "a refunded order puts its unit back");
+            assertEquals(0, countPayouts(order.getId()), "nobody was paid out");
+        } else {
+            assertEquals(OrderStatus.SHIPPED.name(), status,
+                    "the order must end up either refunded or shipped, nothing else");
+            assertEquals(0, buyerAfterPaying.compareTo(balanceOf(BUYER)),
+                    "a shipped order has not been refunded");
+            assertEquals(0, stock(), "the unit stays sold");
+        }
+        assertEquals(0, sellerBefore.compareTo(balanceOf(SELLER)),
+                "either way the seller is not paid until receipt is confirmed");
+    }
+
+    @Test
+    @DisplayName("Two confirmations of the same delivery: the seller is paid once")
+    void onlyOneConfirmationPaysTheSeller() throws Exception {
+        Order order = orders.checkoutDirect(BUYER, PRODUCT, 1);
+        payments.pay(BUYER, order.getId(), "balance", "123456");
+        transitions.apply(SELLER, order.getId(), OrderAction.SHIP);
+        BigDecimal sellerBefore = balanceOf(SELLER);
+
+        List<Throwable> outcomes = race(
+                () -> transitions.apply(BUYER, order.getId(), OrderAction.CONFIRM_RECEIPT),
+                () -> transitions.apply(BUYER, order.getId(), OrderAction.CONFIRM_RECEIPT));
+
+        assertEquals(1, outcomes.stream().filter(java.util.Objects::nonNull).count(),
+                "the second confirmation must be refused: " + outcomes);
+        assertEquals(OrderStatus.COMPLETED.name(), orderMapper.selectById(order.getId()).getStatus());
+        assertEquals(1, countPayouts(order.getId()), "one payout row, not two");
+        assertEquals(0, sellerBefore.add(PRICE).compareTo(balanceOf(SELLER)),
+                "the seller is paid once");
     }
 
     @Test
