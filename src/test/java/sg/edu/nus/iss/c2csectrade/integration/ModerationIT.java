@@ -164,6 +164,19 @@ class ModerationIT extends MySqlIntegrationTest {
     }
 
     @Test
+    void upholdingAReportAgainstAnAdministratorIsRefusedAndLeavesItOpen() throws Exception {
+        long id = reportId("seller_lvl2", "USER", 1, "HARASSMENT");     // admin is user 1
+        admin("/api/admin/reports/" + id + "/uphold", Map.of("note", "x"))
+                .andExpect(status().isBadRequest());
+        assertEquals("ACTIVE", userStatus(1));
+        assertEquals("OPEN", jdbc.queryForObject("SELECT status FROM report WHERE id=?", String.class, id));
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM admin_audit_log WHERE report_id=?", Integer.class, id));
+        admin("/api/admin/reports/" + id + "/dismiss", Map.of("note", "Not actionable"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DISMISSED"));
+    }
+
+    @Test
     void dismissingLeavesTheTargetAlone() throws Exception {
         long id = reportId("seller_lvl2", "USER", 103, "SPAM");
         admin("/api/admin/reports/" + id + "/dismiss", Map.of("note", "Not spam"))

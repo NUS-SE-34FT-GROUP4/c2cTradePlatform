@@ -15,6 +15,7 @@
           <div class="user-name-display">
             <span class="user-greeting">👋 Hello, {{ authStore.user?.displayName || authStore.user?.username }}</span>
           </div>
+          <CreditBadge v-if="userCredit" :credit="userCredit" />
           <div class="balance-display">
             <span class="balance-label">💰 Balance:</span>
             <span class="balance-amount">¥{{ userBalance.toFixed(2) }}</span>
@@ -135,6 +136,7 @@
                 :title="'Click to chat with ' + getSellerName(product)"
             />
             <span class="seller-name">{{ getSellerName(product) }}</span>
+            <CreditBadge :credit="product.sellerCredit" />
           </div>
         </div>
       </div>
@@ -194,6 +196,7 @@
   </div>
 </template>
 <script setup>
+import CreditBadge from '@/components/CreditBadge.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
@@ -510,11 +513,13 @@ const checkPaymentPasswordStatus = async () => {
 };
 
 // Get user balance
+const userCredit = ref(null);
 const fetchUserBalance = async () => {
   if (!isLoggedIn.value || isAdmin.value) return;
   try {
     const response = await axios.get('/api/users/me');
     userBalance.value = response.data.balance || 0;
+    userCredit.value = response.data.credit;
   } catch (error) {
     console.error('Failed to fetch user balance:', error);
   }

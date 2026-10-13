@@ -22,7 +22,16 @@ class RecommendationServiceTest {
 
     @Mock private ProductMapper productMapper;
     @Mock private ViewHistoryMapper viewHistoryMapper;
-    @InjectMocks private RecommendationService recommendationService;
+    private RecommendationService recommendationService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setup() {
+        var factory = new sg.edu.nus.iss.c2csectrade.service.recommendation.RecommendationStrategyFactory(List.of(
+                new sg.edu.nus.iss.c2csectrade.service.recommendation.SameCategoryStrategy(productMapper),
+                new sg.edu.nus.iss.c2csectrade.service.recommendation.MostRecentStrategy(productMapper)));
+        recommendationService = new RecommendationService(productMapper, viewHistoryMapper, factory);
+    }
+
 
     private Product product(Long id, int status, int stock, int reserved) {
         Product product = new Product();

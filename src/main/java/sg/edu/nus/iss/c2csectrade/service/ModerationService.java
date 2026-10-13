@@ -104,6 +104,9 @@ public class ModerationService {
         if (Report.TARGET_USER.equals(report.getTargetType())) {
             User target = users.selectById(report.getTargetId());
             if (target != null && !BANNED.equals(target.getStatus())) {
+                // Same rules as a direct ban: refuse before anything changes, so the report stays OPEN
+                // and can be dismissed instead.
+                checkBannable(admin, target);
                 String label = ReportReason.parse(report.getReason()).map(ReportReason::getLabel).orElse(report.getReason());
                 applyBan(admin, target, trimmed == null ? label : label + ": " + trimmed, report.getId());
             }
@@ -150,12 +153,7 @@ public class ModerationService {
         if (target == null) {
             throw ModerationException.notFound("User " + userId + " does not exist");
         }
-        if (target.getId().equals(admin.getId())) {
-            throw ModerationException.badRequest("You cannot ban yourself");
-        }
-        if (isAdmin(target)) {
-            throw ModerationException.badRequest("Administrators cannot be banned");
-        }
+        checkBannable(admin, target);
         if (BANNED.equals(target.getStatus())) {
             throw ModerationException.conflict(target.getUsername() + " is already banned");
         }
@@ -191,6 +189,15 @@ public class ModerationService {
     }
 
     // ------------------------------------------------------------ helpers
+
+    private void checkBannable(User admin, User target) {
+        if (target.getId().equals(admin.getId())) {
+            throw ModerationException.badRequest("You cannot ban yourself");
+        }
+        if (isAdmin(target)) {
+            throw ModerationException.badRequest("Administrators cannot be banned");
+        }
+    }
 
     private void applyBan(User admin, User target, String reason, Long reportId) {
         users.updateBan(target.getId(), BANNED, reason, Instant.now());
