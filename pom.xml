@@ -146,7 +146,10 @@
                         </goals>
                     </execution>
                     <!-- Fails mvn verify when line coverage drops below the floor. Main sits
-                         at 44.5% (Sprint 3); raise the floor as coverage grows. -->
+                         at 72.4% (Sprint 4), which is past the 70% the proposal asks for in
+                         NFR 6.3. The floor is deliberately some way below that, so adding a
+                         feature does not have to come with its tests in the same commit, but
+                         losing a test suite fails the build. Raise it as coverage grows. -->
                     <execution>
                         <id>check</id>
                         <goals>
@@ -160,7 +163,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.40</minimum>
+                                            <minimum>0.65</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
