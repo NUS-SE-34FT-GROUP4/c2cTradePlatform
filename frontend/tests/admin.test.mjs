@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import * as helpers from '../src/utils/admin.mjs';
-import { sessionErrorHandler } from '../src/utils/sessionErrors.mjs';
+import { bannedMessage, sessionErrorHandler } from '../src/utils/sessionErrors.mjs';
 
 const require = createRequire(import.meta.url);
 const vue = require('vue');
@@ -329,4 +329,16 @@ test('moderation API uses documented paths, body keys and shared JWT client', as
     ['GET', '/admin/reports', { params: { page: 1, size: 20 } }], ['GET', '/admin/users', { params: { q: 'alice' } }],
     ['GET', '/admin/audit-log', { params: { action: 'BAN_USER' } }],
   ]);
+});
+
+test('login shows the ban reason only for ACCOUNT_BANNED, not for other 403s', () => {
+  const banned = { status: 403, data: { error: 'ACCOUNT_BANNED', message: 'Your account is suspended: Repeated scam listings' } };
+  assert.equal(bannedMessage(banned), 'Your account is suspended: Repeated scam listings');
+  assert.equal(bannedMessage({ status: 403, data: { error: 'ACCOUNT_BANNED' } }), 'Your account is suspended.');
+  // The non-admin "administrator login" refusal is a plain string 403.
+  assert.equal(bannedMessage({ status: 403, data: '需要管理员权限，请取消勾选或使用管理员账号。' }), null);
+  assert.equal(bannedMessage({ status: 401, data: { error: 'ACCOUNT_BANNED' } }), null);
+  assert.equal(bannedMessage(undefined), null);
+  const login = readFileSync(new URL('views/LoginView.vue', root), 'utf8');
+  assert.match(login, /bannedMessage\(error\?\.response\)/);
 });

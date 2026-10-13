@@ -77,6 +77,7 @@ import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'vue-router';
 import { toast } from '@/services/toast';
+import { bannedMessage } from '@/utils/sessionErrors.mjs';
 
 const username = ref('');
 const password = ref('');
@@ -161,7 +162,10 @@ const handleLogin = async () => {
     } else if (status === 401) {
       errorMsg = '❌ Username or password incorrect, please try again';
     } else if (status === 403) {
-      errorMsg = '❌ Account disabled, please contact admin';
+      // A banned account gets its reason (#61); other 403s, such as ticking the
+      // administrator box on a member account, keep the generic message.
+      const banned = bannedMessage(error?.response);
+      errorMsg = banned ? '❌ ' + banned : '❌ Account disabled, please contact admin';
     } else if (status === 500) {
       errorMsg = '❌ Server error, please try later';
     } else if (typeof errorData === 'string' && errorData && !errorData.includes('status code')) {
