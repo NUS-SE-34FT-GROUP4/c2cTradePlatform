@@ -104,6 +104,16 @@
           <p>{{ product.description || 'No description available' }}</p>
         </div>
 
+        <!-- Seller: link to the account page, and the report action (#63) -->
+        <div class="seller-section" v-if="product.username">
+          <router-link class="seller-link" :to="{ name: 'user-profile', params: { username: product.username } }">
+            <img class="seller-avatar" :src="sellerAvatar" :alt="sellerName" />
+            <span class="seller-name">{{ sellerName }}</span>
+            <span class="seller-username">@{{ product.username }}</span>
+          </router-link>
+          <button v-if="canReport" class="btn btn-report" @click="showReport = true">🚩 Report this listing</button>
+        </div>
+
         <p v-if="reviewError" role="alert">{{ reviewError }}</p>
         <ProductReviews v-else :reviews="productReviews" :average-rating="averageRating" :total-reviews="productReviews.length" />
 
@@ -119,6 +129,13 @@
         </div>
       </div>
     </div>
+
+    <ReportDialog
+      v-if="showReport"
+      target-type="PRODUCT"
+      :target-id="product.id"
+      :target-name="product.name"
+      @close="showReport = false" />
 
 
 
@@ -140,17 +157,30 @@ import axios from 'axios';
 import ProductReviews from '@/components/ProductReviews.vue';
 import CampaignPanel from '@/components/bargain/CampaignPanel.vue';
 import OfferThread from '@/components/bargain/OfferThread.vue';
+import ReportDialog from '@/components/ReportDialog.vue';
 import { reviews } from '@/api/marketplaceService';
 import { money } from '@/utils/bargain.mjs';
+import { useAuthStore } from '@/store/auth';
 
 const route = useRoute();
 const router = useRouter();
+const auth = useAuthStore();
 const product = ref(null);
 const currentMediaIndex = ref(0);
 const similarProducts = ref([]);
 const productReviews = ref([]);
 const averageRating = ref(0);
 const reviewError = ref('');
+const showReport = ref(false);
+
+// Seller identity for the account-page link and the report action (#63)
+const sellerName = computed(() => product.value?.displayName || product.value?.username || '');
+const sellerAvatar = computed(() => {
+  if (product.value?.avatarUrl) return product.value.avatarUrl;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(sellerName.value || 'User')}&background=007bff&color=fff&size=100`;
+});
+// Reporting needs a login and your own listings cannot be reported
+const canReport = computed(() => auth.isLoggedIn && product.value && product.value.userId !== auth.user?.id);
 const fetchReviews = async () => {
   const id = route.params.id;
   productReviews.value = [];
@@ -621,15 +651,60 @@ onUnmounted(() => {
 }
 
 .seller-section {
-  margin: 40px 0;
-  padding: 20px;
+  margin: 24px 0;
+  padding: 14px 16px;
   background: #f8f9fa;
   border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .seller-section h2 {
   margin-bottom: 20px;
   color: #333;
+}
+
+.seller-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.seller-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+}
+
+.seller-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.seller-username {
+  color: #888;
+  font-size: 13px;
+}
+
+.seller-link:hover .seller-name {
+  color: #007bff;
+}
+
+.btn-report {
+  background: #fff;
+  color: #c0392b;
+  border: 1px solid #e5b8b3;
+}
+
+.btn-report:hover {
+  background: #fdf1f0;
 }
 
 .reviews-section {

@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test:bargain": "node --test tests/bargain*.test.mjs"
+    "test:bargain": "node --test tests/bargain*.test.mjs",
+    "test:admin": "node --test tests/admin*.test.mjs"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.2.1",

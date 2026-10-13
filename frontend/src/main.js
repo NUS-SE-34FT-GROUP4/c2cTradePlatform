@@ -5,6 +5,9 @@ import { createPinia } from 'pinia';
 import axios from 'axios';
 import { useAuthStore } from '@/store/auth';
 import { toast } from '@/services/toast';
+import { marketplaceClient } from '@/api/marketplaceService';
+import { productClient } from '@/api/productService';
+import { sessionErrorHandler } from '@/utils/sessionErrors.mjs';
 
 // ========== Create Vue App ==========
 const app = createApp(App);
@@ -16,7 +19,6 @@ app.use(router);
 
 // ========== Initialize Auth Store ==========
 const authStore = useAuthStore();
-authStore.init(); // 🔹 Restore login state (load user & token from localStorage)
 
 // ========== Set up Axios interceptors ==========
 
@@ -32,35 +34,12 @@ axios.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor: only handle 401 logout logic, don't show error messages (handled by components)
-axios.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        const status = error?.response?.status;
-        const url = error?.config?.url || '';
-        const currentPath = router.currentRoute.value.path;
-
-        // If it's a 401 API request, but not on login/register/forgot-password pages
-        if (status === 401 && url.startsWith('/api')) {
-            // Exclude public endpoints like login, register, forgot-password
-            const publicPaths = ['/login', '/register', '/forgot-password'];
-            const isPublicPage = publicPaths.some(path => currentPath.includes(path));
-            const isPublicApi = url.includes('/auth/login') ||
-                               url.includes('/auth/register') ||
-                               url.includes('/auth/forgot-password') ||
-                               url.includes('/auth/reset-password');
-
-            // Only show login-expired toast on private pages with private APIs
-            if (!isPublicPage && !isPublicApi) {
-                toast('❌ Session expired, please log in again', 'error');
-                authStore.logout();
-                router.push('/login');
-            }
-        }
-        // ⚠️ No longer auto-show error messages here; let components handle it to avoid duplicate toasts and error code exposure
-        return Promise.reject(error);
-    }
-);
+// Each created client needs its own response interceptor. Ordinary errors stay
+// inline in their pages; only an expired/banned current session is signed out.
+for (const client of [axios, marketplaceClient, productClient]) {
+    client.interceptors.response.use((response) => response, sessionErrorHandler(authStore, router, toast));
+}
+authStore.init();
 
 // ========== Mount app ==========
 app.mount('#app');

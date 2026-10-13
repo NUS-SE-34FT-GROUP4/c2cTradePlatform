@@ -3,6 +3,7 @@ import axios from 'axios';
 const apiBase = process.env.VUE_APP_API_BASE_URL || '/api';
 
 const client = axios.create({ baseURL: apiBase, headers: { 'Content-Type': 'application/json' } });
+export { client as marketplaceClient };
 
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem('jwt_token');
@@ -84,4 +85,27 @@ export const bargain = {
   acceptOffer: (offerId) => client.post(`/bargain/offers/${offerId}/accept`),
   rejectOffer: (offerId) => client.post(`/bargain/offers/${offerId}/reject`),
   offers: (productId) => client.get('/bargain/offers', { params: { productId } }),
+};
+
+// Public account profile (#63): safe fields only, backed by
+// GET /api/users/{username}/profile; /api/users/{username} leaks email/balance.
+export const users = {
+  profile: (username) => client.get(`/users/${encodeURIComponent(username)}/profile`),
+};
+
+// Reporting an item or a user (#63); contract in docs/api/moderation.md §2.
+export const reports = {
+  submit: (payload) => client.post('/reports', payload),
+  mine: (params) => client.get('/reports/mine', { params }),
+  reasons: () => client.get('/reports/reasons'),
+};
+
+export const adminModeration = {
+  reports: (params) => client.get('/admin/reports', { params }),
+  uphold: (id, note) => client.post(`/admin/reports/${id}/uphold`, { note }),
+  dismiss: (id, note) => client.post(`/admin/reports/${id}/dismiss`, { note }),
+  users: (params) => client.get('/admin/users', { params }),
+  ban: (id, reason) => client.post(`/admin/users/${id}/ban`, { reason }),
+  reinstate: (id, note) => client.post(`/admin/users/${id}/reinstate`, { note }),
+  auditLog: (params) => client.get('/admin/audit-log', { params }),
 };
