@@ -87,6 +87,19 @@ export const bargain = {
   offers: (productId) => client.get('/bargain/offers', { params: { productId } }),
 };
 
+// Public account profile (#63): safe fields only, backed by
+// GET /api/users/{username}/profile; /api/users/{username} leaks email/balance.
+export const users = {
+  profile: (username) => client.get(`/users/${encodeURIComponent(username)}/profile`),
+};
+
+// Reporting an item or a user (#63); contract in docs/api/moderation.md §2.
+export const reports = {
+  submit: (payload) => client.post('/reports', payload),
+  mine: (params) => client.get('/reports/mine', { params }),
+  reasons: () => client.get('/reports/reasons'),
+};
+
 export const adminModeration = {
   reports: (params) => client.get('/admin/reports', { params }),
   uphold: (id, note) => client.post(`/admin/reports/${id}/uphold`, { note }),
