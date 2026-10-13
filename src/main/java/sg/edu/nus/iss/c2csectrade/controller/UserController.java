@@ -40,6 +40,26 @@ public class UserController {
 
 
     /**
+     * Public profile for the account page (#63): only the fields another
+     * signed-in user may see. Never add email, balance or ban details here;
+     * those stay on /me.
+     */
+    @GetMapping("/{username}/profile")
+    public ResponseEntity<?> getPublicProfile(@PathVariable String username) {
+        User user = userMapper.selectByUsername(username);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("id", user.getId());
+        profile.put("username", user.getUsername());
+        profile.put("displayName", user.getDisplayName());
+        profile.put("avatarUrl", user.getAvatarUrl());
+        profile.put("createdAt", user.getCreatedAt());
+        return ResponseEntity.ok(profile);
+    }
+
+    /**
      * Change the caller's display name.
      */
     @PutMapping("/display-name")
