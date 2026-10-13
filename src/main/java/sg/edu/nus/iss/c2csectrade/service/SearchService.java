@@ -10,6 +10,9 @@ import sg.edu.nus.iss.c2csectrade.service.search.ProductSearchQuery;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,9 +20,9 @@ import java.util.regex.Pattern;
  * Keyword search over the catalogue.
  *
  * Elasticsearch supplies relevance ordering when a keyword is present. MySQL
- * remains authoritative and is also the fallback if the search projection is
- * unavailable. Highlighting stays engine-independent so both paths render the
- * same response shape.
+ * determines membership on every request; Elasticsearch only reorders those
+ * rows. This preserves the existing SQL matching contract even when tokenisation,
+ * index lag or the ES result window would otherwise hide or add listings.
  */
 @Service
 public class SearchService {
@@ -39,20 +42,44 @@ public class SearchService {
         ProductSearchCriteria criteria = new ProductSearchCriteria(
                 keyword, minPrice, maxPrice, conditionLevel, location, categories);
 
-        List<Product> products;
-        if (!criteria.hasKeyword()) {
-            products = sqlSearch(criteria);
-        } else {
+        // Keep database failures outside the ES fallback boundary. A failed
+        // authoritative query must not be reported as successful degradation.
+        List<Product> products = sqlSearch(criteria);
+        String path = "sql_browse";
+        int rankedCount = 0;
+        int missingCount = 0;
+        int ignoredCount = 0;
+        if (criteria.hasKeyword()) {
             List<Long> rankedIds;
             try {
                 rankedIds = searchQuery.search(criteria);
             } catch (RuntimeException exception) {
-                log.warn("Elasticsearch query unavailable; using SQL search: {}", exception.getMessage());
-                return highlight(productService.convertToDTOList(sqlSearch(criteria)), criteria.keyword());
+                // Do not log query text or client exception messages (which can
+                // include query bodies). Each request retries ES: no sticky outage.
+                log.warn("catalogue_search path=sql_fallback results={} reason={}",
+                        products.size(), exception.getClass().getSimpleName());
+                return highlight(productService.convertToDTOList(products), criteria.keyword());
             }
-            products = productService.listProductsByIdsInOrder(rankedIds);
+            Map<Long, Product> remaining = new LinkedHashMap<>();
+            products.forEach(product -> remaining.put(product.getId(), product));
+            List<Product> ordered = new ArrayList<>(products.size());
+            for (Long id : rankedIds) {
+                Product product = remaining.remove(id);
+                if (product != null) {
+                    ordered.add(product);
+                } else {
+                    ignoredCount++;
+                }
+            }
+            rankedCount = ordered.size();
+            missingCount = remaining.size();
+            // Append unindexed/tokenisation-missed rows in their SQL order.
+            ordered.addAll(remaining.values());
+            products = ordered;
+            path = "elasticsearch_ranked";
         }
-
+        log.info("catalogue_search path={} results={} ranked={} sql_only={} ignored_es_hits={}",
+                path, products.size(), rankedCount, missingCount, ignoredCount);
         return highlight(productService.convertToDTOList(products), criteria.keyword());
     }
 
