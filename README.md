@@ -116,6 +116,11 @@ storage is mocked; repositories and transaction management are real. A temporary
 key is generated per test JVM. Docker is required and missing Docker fails the suite.
 CI runs `mvn -B verify` and publishes both Surefire and Failsafe reports.
 
+`SearchParityIT` additionally starts isolated Elasticsearch 8.10.4 and verifies
+the same HTTP query set before, during and after an ES outage. SQL determines
+search membership; ES only changes ranking. See [search parity verification](docs/testing/search-parity.md)
+for the trade-off, path logs, stale-index cases and staging checklist.
+
 CI also retains Trivy JSON reports and commit-to-GHCR digest/deployment evidence.
 See [release evidence and CLI export](docs/testing/release-evidence.md) for the
 slide-ready summary, advisory-scan limitations and real-release acceptance checklist.
