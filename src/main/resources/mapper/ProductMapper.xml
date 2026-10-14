@@ -50,7 +50,7 @@
             0 as relevance_score
         </if>
         FROM pms_product
-        WHERE status = 1 AND stock > 0
+        WHERE status = 1 AND stock - reserved_stock > 0
         <if test="keyword != null and keyword != ''">
             AND (
                 <!-- 名称模糊搜索 -->

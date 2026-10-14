@@ -116,6 +116,11 @@ storage is mocked; repositories and transaction management are real. A temporary
 key is generated per test JVM. Docker is required and missing Docker fails the suite.
 CI runs `mvn -B verify` and publishes both Surefire and Failsafe reports.
 
+`SearchParityIT` additionally starts isolated Elasticsearch 8.10.4 and verifies
+the same HTTP query set before, during and after an ES outage. SQL determines
+search membership; ES only changes ranking. See [search parity verification](docs/testing/search-parity.md)
+for the trade-off, path logs, stale-index cases and staging checklist.
+
 ## Post-transaction reviews (#42)
 
 Ported from the supplied `c2csectrade-main.zip`: review DTOs/entity, the buyer/completed-order
