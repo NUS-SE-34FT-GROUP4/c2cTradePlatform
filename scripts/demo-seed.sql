@@ -50,7 +50,7 @@ ON DUPLICATE KEY UPDATE user_id = VALUES(user_id);
 -- clause updates only name/price/description -- rerunning it does NOT
 -- put the stock back. One rehearsal purchase would otherwise leave the
 -- item unbuyable.
-UPDATE `pms_product` SET `stock` = 999 WHERE `id` BETWEEN 1 AND 12;
+UPDATE `pms_product` SET `stock` = 20 WHERE `id` BETWEEN 1 AND 12;
 
 -- -----------------------------------------------------------------
 -- 3. The seller used by the main transaction line
@@ -61,7 +61,56 @@ UPDATE `pms_product` SET `stock` = 999 WHERE `id` BETWEEN 1 AND 12;
 UPDATE `users` SET `balance` = 2000.00 WHERE `id` = 102;
 
 -- -----------------------------------------------------------------
--- 4. Readback -- paste this output into the rehearsal notes
+-- 4. English demo data
+-- -----------------------------------------------------------------
+-- The presentation is in English and the catalogue is on screen for most
+-- of it, so every string an examiner can read is English here. init.sql
+-- is left alone: it is shared by the whole team and other suites may
+-- match on its strings. Locations are Singapore districts, which also
+-- makes the S$ prices on the product page coherent.
+
+UPDATE `users` SET `display_name` = 'System Administrator' WHERE `id` = 1;
+UPDATE `users` SET `display_name` = 'Demo Buyer'           WHERE `id` = 201;
+
+UPDATE `pms_product` SET `name` = 'iPhone 13 128GB Midnight',
+    `description` = 'Used for one year. No dents, battery health 91%, original charging cable included.',
+    `location` = 'Clementi' WHERE `id` = 1;
+UPDATE `pms_product` SET `name` = 'ThinkPad X1 Carbon 2021 i7/16GB',
+    `description` = 'Spare machine for business trips. No screen scratches, keyboard in good condition, sleeve included.',
+    `location` = 'Clementi' WHERE `id` = 2;
+UPDATE `pms_product` SET `name` = 'Sony WH-1000XM4 Noise Cancelling Headphones',
+    `description` = 'Noise cancelling still excellent. Ear pads replaced with new ones.',
+    `location` = 'Bukit Timah' WHERE `id` = 3;
+UPDATE `pms_product` SET `name` = 'Introduction to Algorithms, 3rd Edition',
+    `description` = 'Used for exam revision. A few pencil notes inside, all erasable.',
+    `location` = 'Bukit Timah' WHERE `id` = 4;
+UPDATE `pms_product` SET `name` = 'Computer Systems: A Programmer''s Perspective, 3rd Edition',
+    `description` = 'The classic CSAPP, almost new. Only the first three chapters were opened.',
+    `location` = 'Bukit Timah' WHERE `id` = 5;
+UPDATE `pms_product` SET `name` = 'Kindle Paperwhite 4 8GB',
+    `description` = 'Fully working. Comes with a cover, no dead pixels.',
+    `location` = 'Jurong East' WHERE `id` = 6;
+UPDATE `pms_product` SET `name` = 'University English Past Papers, 10-Year Set (6 books)',
+    `description` = 'Ten years of past papers with worked answers, six books, no annotations.',
+    `location` = 'Jurong East' WHERE `id` = 7;
+UPDATE `pms_product` SET `name` = 'Nike Air Force 1 White, UK 8',
+    `description` = 'Worn three times. Box and spare insoles included, soles barely worn.',
+    `location` = 'Jurong East' WHERE `id` = 8;
+UPDATE `pms_product` SET `name` = 'iPad Air 4 64GB Sky Blue',
+    `description` = 'Comes with an original Apple Pencil 2. Privacy screen protector fitted.',
+    `location` = 'Tampines' WHERE `id` = 9;
+UPDATE `pms_product` SET `name` = 'Uniqlo Ultra Light Down Jacket, Men''s L',
+    `description` = 'Bought last winter, worn only a few times. No tears or stains.',
+    `location` = 'Tampines' WHERE `id` = 10;
+UPDATE `pms_product` SET `name` = 'Logitech MX Master 3 Wireless Mouse',
+    `description` = 'Office workhorse. Scroll wheel works, receiver and charging cable included.',
+    `location` = 'Punggol' WHERE `id` = 11;
+UPDATE `pms_product` SET `name` = 'Sapiens and Homo Deus Boxed Set',
+    `description` = 'Genuine copies. Slight crease on the spines, pages clean.',
+    `location` = 'Punggol' WHERE `id` = 12;
+
+-- -----------------------------------------------------------------
+-- 5. Readback -- paste this output into the rehearsal notes
 -- -----------------------------------------------------------------
 -- A row reading MISSING means init.sql has not been applied to this
 -- database, so the UPDATEs above matched nothing.

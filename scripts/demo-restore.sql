@@ -12,12 +12,12 @@
 -- rows and reviews stay, because the demo is designed to tolerate
 -- them (see docs/demo/demo-script.md). Redis and Elasticsearch are
 -- deliberately untouched -- clearing them is what makes a reset
--- risky, and with stock at 999 a leftover reservation blocks nobody.
+-- risky, and with stock at 20 a leftover reservation blocks nobody.
 -- =================================================================
 
 UPDATE `users`       SET `balance` = 99999.00 WHERE `id` = 201;  -- demo_buyer
 UPDATE `users`       SET `balance` = 2000.00  WHERE `id` = 102;  -- seller_lvl2
-UPDATE `pms_product` SET `stock`   = 999      WHERE `id` BETWEEN 1 AND 12;
+UPDATE `pms_product` SET `stock`   = 20       WHERE `id` BETWEEN 1 AND 12;
 
 -- Readback. A row that reads MISSING means the UPDATE above matched
 -- nothing: re-running init.sql drops and recreates `users`, which deletes
