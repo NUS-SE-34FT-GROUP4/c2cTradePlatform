@@ -50,3 +50,7 @@ minio/data/
 frontend/dist/
 frontend/node_modules/
 
+# Generated release evidence and Python tooling caches
+.evidence/
+__pycache__/
+
