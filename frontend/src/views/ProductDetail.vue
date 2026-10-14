@@ -104,6 +104,8 @@
           <p>{{ product.description || 'No description available' }}</p>
         </div>
 
+        <AddToCartAction :key="`cart-${product.id}`" :product="product" />
+
         <!-- Seller: link to the account page, and the report action (#63) -->
         <div class="seller-section" v-if="product.username">
           <router-link class="seller-link" :to="{ name: 'user-profile', params: { username: product.username } }">
@@ -155,6 +157,7 @@ import { getCategoryLabel } from '@/utils/categoryData';
 import productService from '@/api/productService';
 import axios from 'axios';
 import ProductReviews from '@/components/ProductReviews.vue';
+import AddToCartAction from '@/components/AddToCartAction.vue';
 import CampaignPanel from '@/components/bargain/CampaignPanel.vue';
 import OfferThread from '@/components/bargain/OfferThread.vue';
 import ReportDialog from '@/components/ReportDialog.vue';
@@ -172,6 +175,7 @@ const productReviews = ref([]);
 const averageRating = ref(0);
 const reviewError = ref('');
 const showReport = ref(false);
+let productRequest = 0;
 
 // Seller identity for the account-page link and the report action (#63)
 const sellerName = computed(() => product.value?.displayName || product.value?.username || '');
@@ -231,12 +235,15 @@ const handleKeydown = (event) => {
 };
 
 const fetchProduct = async () => {
+  const id = route.params.id;
+  const request = ++productRequest;
   try {
-    const response = await productService.getProductById(route.params.id);
+    const response = await productService.getProductById(id);
+    if (request !== productRequest) return;
     product.value = response.data;
     currentMediaIndex.value = 0; // Reset media index
   } catch (error) {
-    console.error('Failed to fetch product detail:', error);
+    if (request === productRequest) console.error('Failed to fetch product detail:', error);
   }
 };
 
@@ -299,6 +306,8 @@ watch(
   () => route.params.id,
   (newId) => {
     if (newId) {
+      // Do not leave the previous listing's purchase button active while loading.
+      product.value = null;
       fetchProduct();
       fetchReviews();
       trackProductView();
@@ -311,6 +320,7 @@ watch(
 
 // Clean up event listeners
 onUnmounted(() => {
+  productRequest++;
   window.removeEventListener('keydown', handleKeydown);
 });
 </script>

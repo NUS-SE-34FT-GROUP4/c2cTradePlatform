@@ -6,7 +6,7 @@
         <div class="user-menu" @click="toggleUserMenu">
           <img :src="userAvatar" :alt="userDisplayName" class="user-avatar" />
           <div class="user-name-section">
-            <span class="username">{{ userDisplayName }}</span>
+            <span class="username" :title="userDisplayName">{{ userDisplayName }}</span>
           </div>
           <div v-if="showUserMenu" class="dropdown-menu" @click.stop>
             <div class="dropdown-item" v-if="accountCredit"><CreditBadge :credit="accountCredit" /></div>
@@ -38,6 +38,7 @@
             </div>
           </div>
         </div>
+        <router-link class="cart-nav-link" to="/cart" @click="showUserMenu = false">Cart</router-link>
       </div>
     </nav>
     <router-view />
@@ -576,9 +577,15 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
+.cart-nav-link { flex-shrink: 0; padding: 10px 16px; border: 1px solid #2f5d7c; border-radius: 6px; color: #2f5d7c; text-decoration: none; font-weight: 600; }
+.cart-nav-link:hover, .cart-nav-link.router-link-active { background: #edf4f9; }
+
 .user-menu {
+  min-width: 0;
+  max-width: calc(100% - 90px);
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -601,12 +608,16 @@ onUnmounted(() => {
 }
 
 .user-name-section {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .username {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-weight: 500;
   color: #333;
   font-size: 14px;

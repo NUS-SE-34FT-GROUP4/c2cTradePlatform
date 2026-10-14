@@ -10,9 +10,12 @@ on:
 permissions:
   contents: read
 
+# A newer push supersedes a pull request's checks, but a run on main may be in the
+# middle of a deployment: cancelling it between the migrations and the restart
+# left staging half-updated on 14 October. Runs on main therefore queue instead.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   backend-test:
@@ -31,6 +34,9 @@ jobs:
 
       - name: Run unit and Testcontainers integration tests
         run: mvn -B verify
+
+      - name: Test release evidence tooling
+        run: python3 -m unittest discover -s scripts/ci/tests -v
 
       - name: Upload JaCoCo coverage report
         if: always()
@@ -76,6 +82,10 @@ jobs:
         working-directory: frontend
         run: npm run test:admin
 
+      - name: Test cart entry points
+        working-directory: frontend
+        run: npm run test:cart
+
       # vue-cli-service runs ESLint as part of the build, so a lint error fails this step
       - name: Build
         working-directory: frontend
@@ -85,15 +95,16 @@ jobs:
     name: Secret scanning (advisory)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Advisory until Sprint 2: the JWT signing secret is still hard-coded in
-    # application.properties and is scheduled to move to a GitHub Actions secret.
-    # This job is switched to blocking once that migration is complete.
+    # Keep the current advisory policy. A green job is not a clean-scan claim.
+    outputs:
+      scan_outcome: ${{ steps.gitleaks.outcome }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Run Gitleaks
+        id: gitleaks
         continue-on-error: true
         run: |
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
@@ -103,18 +114,39 @@ jobs:
     name: Dependency vulnerability scan (advisory)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      scan_outcome: ${{ steps.repository_scan.outcome }}
     steps:
       - uses: actions/checkout@v7
 
+      - name: Prepare scan evidence
+        run: mkdir -p .evidence
+
       - name: Run Trivy against the repository
+        id: repository_scan
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: fs
           scan-ref: .
+          # Gitleaks handles secrets separately. Do not retain code/secret excerpts.
+          scanners: vuln
+          format: json
+          output: .evidence/trivy-repository.json
+          skip-dirs: .evidence
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
+
+      - name: Upload dependency scan evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-scan-evidence-${{ github.run_attempt }}
+          path: .evidence/trivy-repository.json
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: warn
 
   docker-build:
     name: Docker image build
@@ -124,8 +156,15 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      backend_scan_outcome: ${{ steps.backend_scan.outcome }}
+      frontend_scan_outcome: ${{ steps.frontend_scan.outcome }}
+      publish_outcome: ${{ steps.publish.outcome }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Prepare image evidence
+        run: mkdir -p .evidence
 
       - name: Validate Docker Compose topology
         env:
@@ -139,25 +178,35 @@ jobs:
           docker compose -f compose.staging.yaml config --quiet
 
       - name: Build backend image
+        id: backend_build
         run: docker build -t c2c-sectrade-backend:${{ github.sha }} .
 
       - name: Build frontend image
+        id: frontend_build
         run: docker build -t c2c-sectrade-frontend:${{ github.sha }} ./frontend
 
       - name: Scan backend image for vulnerabilities
+        id: backend_scan
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: c2c-sectrade-backend:${{ github.sha }}
+          scanners: vuln
+          format: json
+          output: .evidence/trivy-backend.json
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
 
       - name: Scan frontend image for vulnerabilities
+        id: frontend_scan
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: c2c-sectrade-frontend:${{ github.sha }}
+          scanners: vuln
+          format: json
+          output: .evidence/trivy-frontend.json
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
@@ -172,6 +221,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push images
+        id: publish
         if: github.ref == 'refs/heads/main'
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
@@ -181,6 +231,26 @@ jobs:
             docker push ghcr.io/$OWNER/c2c-sectrade-$app:${{ github.sha }}
             docker push ghcr.io/$OWNER/c2c-sectrade-$app:latest
           done
+
+      - name: Record image identities and published registry digests
+        if: always()
+        env:
+          BACKEND_BUILD: ${{ steps.backend_build.outcome }}
+          FRONTEND_BUILD: ${{ steps.frontend_build.outcome }}
+          PUBLISH_OUTCOME: ${{ steps.publish.outcome }}
+        run: |
+          python3 scripts/ci/release_evidence.py images --directory .evidence \
+            --backend-build "$BACKEND_BUILD" --frontend-build "$FRONTEND_BUILD" --publish "$PUBLISH_OUTCOME"
+
+      - name: Upload image and release evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: image-release-evidence-${{ github.run_attempt }}
+          path: .evidence/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: warn
 
   deploy-staging:
     name: Deploy to staging
@@ -222,6 +292,7 @@ jobs:
           target: "~/c2c-sectrade"
 
       - name: Pull and restart
+        id: restart
         if: steps.configured.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -261,6 +332,7 @@ jobs:
             docker compose -f compose.staging.yaml up -d
 
       - name: Smoke test
+        id: smoke
         if: steps.configured.outputs.ready == 'true'
         run: |
           for attempt in $(seq 1 30); do
@@ -275,6 +347,7 @@ jobs:
 
       # .live-backend is what rollback.yml reads; deploy-history.log is the audit trail.
       - name: Record the live version
+        id: record_live
         if: steps.configured.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -291,6 +364,7 @@ jobs:
         run: echo "Staging is live on \`${{ github.sha }}\`." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Roll back if the smoke test failed
+        id: rollback
         if: failure() && steps.configured.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -313,6 +387,64 @@ jobs:
             echo "$IMAGE_TAG" > .live-backend
             echo "$(date -u +%FT%TZ) auto-rollback $IMAGE_TAG run=${{ github.run_id }} (smoke test failed for ${{ github.sha }})" >> deploy-history.log
             echo "Rolled back to $IMAGE_TAG"
+
+      - name: Record staging deployment evidence
+        if: always()
+        env:
+          CONFIGURED: ${{ steps.configured.outputs.ready }}
+          RESTART: ${{ steps.restart.outcome }}
+          SMOKE: ${{ steps.smoke.outcome }}
+          RECORD_LIVE: ${{ steps.record_live.outcome }}
+          ROLLBACK: ${{ steps.rollback.outcome }}
+        run: |
+          python3 scripts/ci/release_evidence.py deployment --directory .evidence \
+            --configured "$CONFIGURED" --restart "$RESTART" --smoke "$SMOKE" \
+            --record "$RECORD_LIVE" --rollback "$ROLLBACK"
+
+      - name: Upload staging deployment evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: staging-deployment-evidence-${{ github.run_attempt }}
+          path: .evidence/staging-deployment.json
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: warn
+
+  # Does not wait for production approval. Captures failure/skips as well as success.
+  release-evidence:
+    name: Release evidence summary
+    needs: [ backend-test, frontend-build, secret-scan, dependency-scan, docker-build, deploy-staging ]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download available evidence for this attempt
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          pattern: '*-evidence-${{ github.run_attempt }}'
+          path: .evidence
+          merge-multiple: true
+
+      - name: Summarize actual outcomes
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 scripts/ci/release_evidence.py summary --directory .evidence
+          cat .evidence/release-evidence.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload slide-ready release evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-evidence-${{ github.run_attempt }}
+          path: .evidence/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
 
   # Promotes the commit staging just verified. The production environment
   # requires a reviewer, so this job waits for a manual approval. Production
