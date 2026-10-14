@@ -60,7 +60,12 @@ Two findings behind that file, both worth knowing because they bite silently:
 | Buyer | `demo_buyer` | `admin123` | `123456` | balance seeded high on purpose |
 | Seller | `seller_lvl2` | `admin123` | `123456` | owns product 4; its balance is the figure the audience watches |
 
-Item under demo: **product 4, 《算法导论》第三版, 55.00**, seller 102.
+Item under demo: **product 4, "Introduction to Algorithms, 3rd Edition", S$55.00**, seller 102.
+
+All seeded strings are English — product names, descriptions, locations (Singapore
+districts) and display names — because the catalogue is on screen for most of the
+presentation. `demo-seed.sql` rewrites them; `init.sql` is left alone, since it is
+shared by the whole team and other suites may match on its strings.
 
 > Coordination: product 4 and 5 are reserved for this segment. Other
 > segments please use a different seller's catalogue so two people are not
@@ -79,7 +84,7 @@ both already on the pages act 1 begins from. Logging in on stage wastes
 
 ### 2.4 Repeatability — read this before writing any narration
 
-The data is **never reset between runs**. Stock is 999 and the buyer's
+The data is **never reset between runs**. Stock is 20 and the buyer's
 balance is 99999 so the flow simply works again; orders, ledger rows and
 reviews accumulate, which makes the system look used rather than empty.
 
@@ -103,6 +108,46 @@ touches neither Redis nor Elasticsearch.
 
 ---
 
+## 2.5 Verified on 14 Oct — one blocker, three cosmetic issues
+
+The stack was brought up locally (`docker compose up`, six services) and the
+script was walked through the real UI. What that found:
+
+**Blocker — the main transaction line cannot be started by clicking.**
+The product detail page has no "add to cart" and no "buy now" control, and
+nothing in the frontend links to `/cart`:
+
+- `ProductDetail.vue` lines 244–252 are nine orphaned comments — `// Add to
+  cart`, `// Buy now`, `// Toggle favorite status`, `// Contact seller`,
+  `// Start a negotiation`, `// Delete product` — with no code under them.
+- `marketplaceService.js` defines `cart.add(productId, quantity)`; nothing in
+  the frontend calls it.
+- Nothing links to the `/cart` route; the page is reachable only by typing
+  the URL.
+
+The backend is fine (`CartController` has `@PostMapping("/api/cart")`) and
+`CartView.vue` lists, edits and checks out correctly. The gap is exactly two
+frontend controls. **Acts 1 to 5 cannot run until they exist.** Owner: the
+frontend pair; raised 14 Oct, three days before the 17 Oct feature freeze.
+
+**Cosmetic, but all three are on screen during the demo:**
+
+| Issue | Where | Note |
+|---|---|---|
+| Currency symbol is inconsistent | list card `¥55`, detail page `S$55.00`, header balance `¥99999.00` | pick one before the 25th |
+| `7% New` | list card only | condition level 7/10 rendered as a percentage; the detail page gets it right |
+| Product photos are unrelated stock images | all cards | a book listing shows a seaside cliff |
+
+**Login carries a CAPTCHA.** That turns "both windows logged in before the
+session" from advice into a hard requirement: on stage it is not just 40
+seconds, it is reading a CAPTCHA correctly in front of the room.
+
+**Why stock is 20 and not higher.** The detail page prints `Stock: N
+available`. A secondhand book offered in the hundreds reads as fake, so the
+figure is kept to the smallest number that still covers every rehearsal.
+
+---
+
 ## 3. The run
 
 Every row: what you click, what must appear, what you say. If the screen
@@ -113,7 +158,7 @@ on stage.
 
 | Do | Screen must show | Say |
 |---|---|---|
-| Buyer window: home → search 《算法导论》 → open product 4 | detail page, price 55.00, in stock | — |
+| Buyer window: home → search `Algorithms` → open product 4 | detail page, S$55.00, 20 available | — |
 | Add to cart → `/cart` | the book, quantity 1 | — |
 | Checkout | order detail `/orders/:id`, status **PENDING_PAYMENT** | "The order exists, but nothing has been paid and nothing has been deducted. The stock is *reserved*, not removed — the reservation is held in Redis with an expiry, so an order nobody pays for releases its stock by itself instead of needing a clean-up job to notice." |
 
