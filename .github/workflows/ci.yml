@@ -10,9 +10,12 @@ on:
 permissions:
   contents: read
 
+# A newer push supersedes a pull request's checks, but a run on main may be in the
+# middle of a deployment: cancelling it between the migrations and the restart
+# left staging half-updated on 14 October. Runs on main therefore queue instead.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   backend-test:
