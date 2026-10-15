@@ -43,6 +43,7 @@ export const orders = {
     client.post(`/orders/${orderId}/pay`, { paymentMethod, paymentPassword }),
   ship: (orderId) => client.post(`/orders/${orderId}/ship`),
   confirmReceipt: (orderId) => client.post(`/orders/${orderId}/confirm-receipt`),
+  refund: (orderId) => client.post(`/orders/${orderId}/refund`),
 };
 
 export const wallet = {
