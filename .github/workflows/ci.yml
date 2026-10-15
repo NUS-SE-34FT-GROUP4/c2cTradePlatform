@@ -86,6 +86,10 @@ jobs:
         working-directory: frontend
         run: npm run test:cart
 
+      - name: Test order times and the held amount
+        working-directory: frontend
+        run: npm run test:order-time
+
       # vue-cli-service runs ESLint as part of the build, so a lint error fails this step
       - name: Build
         working-directory: frontend
