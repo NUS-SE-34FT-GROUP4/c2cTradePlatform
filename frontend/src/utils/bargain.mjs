@@ -1,20 +1,12 @@
-// The current container API returns UTC timestamps without a zone suffix.
-// Keep explicit offsets intact; interpret legacy zone-less responses as UTC.
-export function timestamp(value) {
-  if (!value) return NaN;
-  const text = String(value);
-  return Date.parse(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(text) ? text : `${text}Z`);
-}
+// Reading the API's zone-less timestamps now lives in utils/time.mjs, so the
+// order pages can share it. Re-exported here: these two names were part of this
+// module's surface first, and the bargain pages still import them from it.
+import { dateTime, timestamp } from './time.mjs';
+
+export { dateTime, timestamp };
 
 export const sameId = (a, b) => a != null && b != null && String(a) === String(b);
 export const money = (value) => `S$${Number(value ?? 0).toFixed(2)}`;
-
-export function dateTime(value) {
-  const time = timestamp(value);
-  return Number.isFinite(time)
-    ? new Intl.DateTimeFormat('en-SG', { dateStyle: 'medium', timeStyle: 'short' }).format(time)
-    : 'Time unavailable';
-}
 
 export function countdown(deadline, now) {
   const end = timestamp(deadline);

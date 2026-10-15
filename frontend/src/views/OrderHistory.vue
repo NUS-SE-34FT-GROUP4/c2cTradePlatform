@@ -55,6 +55,7 @@
 
 <script>
 import { orders, reviews } from '@/api/marketplaceService';
+import { countdownClock, millisUntil } from '@/utils/time.mjs';
 
 export default {
   name: 'OrderHistory',
@@ -89,11 +90,10 @@ export default {
     },
     remaining(order) {
       if (!order.expireAt) return '';
-      const left = new Date(order.expireAt).getTime() - this.now;
+      const left = millisUntil(order.expireAt, this.now);
+      if (!Number.isFinite(left)) return '';
       if (left <= 0) return 'Payment window closed';
-      const minutes = Math.floor(left / 60000);
-      const seconds = Math.floor((left % 60000) / 1000);
-      return `${minutes}:${String(seconds).padStart(2, '0')} left to pay`;
+      return `${countdownClock(left)} left to pay`;
     },
     async switchRole(role) {
       this.role = role;
