@@ -79,6 +79,7 @@
 <script>
 import { orders, wallet } from '@/api/marketplaceService';
 import { useAuthStore } from '@/store/auth';
+import { countdownClock, millisUntil } from '@/utils/time.mjs';
 
 export default {
   name: 'PaymentView',
@@ -114,11 +115,10 @@ export default {
     },
     remaining() {
       if (!this.order || !this.order.expireAt) return '';
-      const left = new Date(this.order.expireAt).getTime() - this.now;
+      const left = millisUntil(this.order.expireAt, this.now);
+      if (!Number.isFinite(left)) return '';
       if (left <= 0) return 'Payment window closed — the order will expire.';
-      const minutes = Math.floor(left / 60000);
-      const seconds = Math.floor((left % 60000) / 1000);
-      return `${minutes}:${String(seconds).padStart(2, '0')} left to pay`;
+      return `${countdownClock(left)} left to pay`;
     },
     canPay() {
       return !this.busy
