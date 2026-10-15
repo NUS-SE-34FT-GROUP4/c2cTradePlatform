@@ -23,6 +23,11 @@
       <p v-else-if="order.status === 'SHIPPED' && isBuyer">Your items are on the way. Confirming receipt releases the held payment to the seller.</p>
       <p v-else-if="order.status === 'SHIPPED'">Waiting for the buyer to confirm receipt, which releases the held payment to you.</p>
       <p v-else-if="order.status === 'COMPLETED'">Order completed{{ isBuyer ? ' — you can review it from your order history.' : '.' }}</p>
+      <p v-else-if="order.status === 'REFUNDED'">
+        {{ isBuyer
+          ? 'Refunded. The held payment went back to your balance; the original payment stays on the ledger beside it.'
+          : 'Refunded. The held payment went back to the buyer — it was never in your balance to take out.' }}
+      </p>
       <p v-else>This order is closed. No further action is needed.</p>
     </section>
 
@@ -32,6 +37,7 @@
         class="primary" :to="`/orders/${order.id}/pay`">Pay now</router-link>
       <button v-if="isBuyer && order.status === 'PENDING_PAYMENT'" class="secondary" @click="cancel">Cancel order</button>
       <button v-if="!isBuyer && order.status === 'PAID'" class="primary" :disabled="busy" @click="dispatch">Dispatch</button>
+      <button v-if="!isBuyer && order.status === 'PAID'" class="secondary" :disabled="busy" @click="refund">Refund instead</button>
       <button v-if="isBuyer && order.status === 'SHIPPED'" class="primary" :disabled="busy" @click="confirmReceipt">Confirm receipt</button>
       <router-link class="ghost" to="/orders">Back to orders</router-link>
     </section>
@@ -138,6 +144,7 @@ export default {
         COMPLETED: 'Completed',
         CANCELLED: 'Cancelled',
         EXPIRED: 'Expired',
+        REFUNDED: 'Refunded',
       }[status] || status;
     },
     methodLabel(code) {
@@ -182,6 +189,18 @@ export default {
         this.busy = false;
       }
     },
+    async refund() {
+      this.busy = true;
+      try {
+        await orders.refund(this.order.id);
+        this.actionError = '';
+        await this.load();
+      } catch (e) {
+        this.actionError = e.response?.data?.message || 'Could not refund this order.';
+      } finally {
+        this.busy = false;
+      }
+    },
     async confirmReceipt() {
       this.busy = true;
       try {
@@ -206,7 +225,7 @@ h1 { font-size: 22px; margin: 0 0 4px; font-family: ui-monospace, Menlo, monospa
 .status { padding: 3px 10px; border-radius: 10px; font-size: 12px; background: #eceef2; white-space: nowrap; }
 .status.pending_payment { background: #f6eeda; color: #9a6b23; }
 .status.paid, .status.shipped { background: #e3edf4; color: #2f5d7c; }
-.status.cancelled, .status.expired { background: #f7e6e5; color: #96393c; }
+.status.cancelled, .status.expired, .status.refunded { background: #f7e6e5; color: #96393c; }
 .next { border-radius: 8px; padding: 12px 14px; font-size: 14px; background: #f5f7fa; color: #4b5563; margin-bottom: 14px; }
 .next.pending_payment { background: #f6eeda; color: #9a6b23; }
 .next.paid, .next.shipped { background: #e3edf4; color: #2f5d7c; }
