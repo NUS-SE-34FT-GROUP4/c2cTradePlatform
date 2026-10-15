@@ -18,10 +18,10 @@
         Pay within the window, or the order expires and the reserved stock is released.
       </p>
       <p v-else-if="order.status === 'PENDING_PAYMENT'">Waiting for the buyer to pay.</p>
-      <p v-else-if="order.status === 'PAID' && isBuyer">Payment received. The seller will dispatch your items.</p>
-      <p v-else-if="order.status === 'PAID'">The buyer has paid. Dispatch when you are ready.</p>
-      <p v-else-if="order.status === 'SHIPPED' && isBuyer">Your items are on the way. Confirm receipt once they arrive.</p>
-      <p v-else-if="order.status === 'SHIPPED'">Waiting for the buyer to confirm receipt.</p>
+      <p v-else-if="order.status === 'PAID' && isBuyer">Payment received and held. The seller will dispatch your items.</p>
+      <p v-else-if="order.status === 'PAID'">The buyer has paid and the money is held. Dispatch when you are ready.</p>
+      <p v-else-if="order.status === 'SHIPPED' && isBuyer">Your items are on the way. Confirming receipt releases the held payment to the seller.</p>
+      <p v-else-if="order.status === 'SHIPPED'">Waiting for the buyer to confirm receipt, which releases the held payment to you.</p>
       <p v-else-if="order.status === 'COMPLETED'">Order completed{{ isBuyer ? ' — you can review it from your order history.' : '.' }}</p>
       <p v-else>This order is closed. No further action is needed.</p>
     </section>
@@ -62,6 +62,15 @@
         <span>Total</span>
         <strong class="total">{{ money(order.totalAmount) }}</strong>
       </div>
+      <div v-if="held > 0" class="held">
+        <span>Held against this order</span>
+        <strong class="held-amount">{{ money(held) }}</strong>
+      </div>
+      <p v-if="held > 0" class="held-note">
+        {{ isBuyer
+          ? 'Your payment is held against this order. It reaches the seller only when you confirm receipt.'
+          : 'The buyer has paid, but the money is held against this order until they confirm receipt.' }}
+      </p>
     </section>
   </div>
 
@@ -75,6 +84,7 @@
 <script>
 import { orders } from '@/api/marketplaceService';
 import { useAuthStore } from '@/store/auth';
+import { countdownClock, dateTime, millisUntil } from '@/utils/time.mjs';
 
 export default {
   name: 'OrderDetailView',
@@ -98,11 +108,15 @@ export default {
     },
     remaining() {
       if (!this.order || this.order.status !== 'PENDING_PAYMENT' || !this.order.expireAt) return '';
-      const left = new Date(this.order.expireAt).getTime() - this.now;
+      const left = millisUntil(this.order.expireAt, this.now);
+      if (!Number.isFinite(left)) return '';
       if (left <= 0) return 'Payment window closed.';
-      const minutes = Math.floor(left / 60000);
-      const seconds = Math.floor((left % 60000) / 1000);
-      return `${minutes}:${String(seconds).padStart(2, '0')} left to pay.`;
+      return `${countdownClock(left)} left to pay.`;
+    },
+    // The amount the order itself is holding. PAID and SHIPPED hold the
+    // buyer's money; it reaches the seller only on confirm-receipt.
+    held() {
+      return Number(this.order?.heldAmount || 0);
     },
   },
   created() {
@@ -135,7 +149,7 @@ export default {
       }[code] || code;
     },
     shortDate(value) {
-      return value ? new Date(value).toLocaleString() : '';
+      return value ? dateTime(value) : '';
     },
     async load() {
       try {
@@ -225,6 +239,9 @@ h1 { font-size: 22px; margin: 0 0 4px; font-family: ui-monospace, Menlo, monospa
 .summary div { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
 .summary span { color: #6b7280; }
 .total { font-size: 16px; }
+.summary .held { border-top: 1px solid #e5e7eb; margin-top: 4px; padding-top: 10px; }
+.held-amount { font-size: 16px; color: #92400e; }
+.held-note { color: #6b7280; font-size: 12px; margin: 6px 0 0; }
 .error { color: #96393c; }
 .empty { color: #6b7280; }
 </style>
