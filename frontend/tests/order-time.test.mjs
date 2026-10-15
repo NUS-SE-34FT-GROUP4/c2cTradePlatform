@@ -33,12 +33,23 @@ function evaluate(source, imports = {}) {
 const nodes = (node) => [node, ...(node.children || []).flatMap(nodes)];
 const content = (node) => [node.text || '', ...(node.children || []).map(content)].join('');
 
-async function mount(t, order) {
-  const auth = vue.reactive({ token: 'session-one', user: { id: 201 } });
+async function mount(t, order, options = {}) {
+  const auth = vue.reactive({ token: 'session-one', user: { id: options.viewerId ?? 201 } });
+  const calls = [];
+  let current = order;
+  const api = {
+    get: async () => ({ data: current }),
+    refund: async (id) => {
+      calls.push(['refund', id]);
+      if (options.refundFails) throw { response: { data: { message: 'Cannot refund an order that is refunded' } } };
+      current = { ...current, status: 'REFUNDED', heldAmount: 0 };
+      return { data: current };
+    },
+  };
   const { descriptor } = parse(readFileSync(new URL('views/OrderDetailView.vue', root), 'utf8'));
   const component = evaluate(compileScript(descriptor, { id: 'order-detail' }).content, {
     vue, '@/store/auth': { useAuthStore: () => auth }, '@/utils/time.mjs': time,
-    '@/api/marketplaceService': { orders: { get: async () => ({ data: order }) } },
+    '@/api/marketplaceService': { orders: api },
   }).default;
   const template = compileTemplate({ source: descriptor.template.content, id: 'order-detail', filename: 'OrderDetailView.vue' });
   component.render = evaluate(template.code, { vue }).render;
@@ -66,7 +77,14 @@ async function mount(t, order) {
   app.mount(container);
   t.after(() => app.unmount());
   await flush();
-  return { text: () => content(container) };
+  const all = () => nodes(container);
+  return {
+    calls,
+    text: () => content(container),
+    button: (label) => all().find((n) => n.tag === 'button' && content(n).includes(label)),
+    buttons: () => all().filter((n) => n.tag === 'button').map((n) => content(n).trim()),
+    flush,
+  };
 }
 
 const order = (extra) => ({
@@ -130,4 +148,44 @@ test('an order holding nothing shows no hold at all', async (t) => {
     const page = await mount(t, order({ expireAt: serverTime(Date.now() + 60000), ...extra }));
     assert.doesNotMatch(page.text(), /Held against this order/);
   }
+});
+
+test('only the seller of a paid order is offered the refund', async (t) => {
+  const seller = await mount(t, order({ status: 'PAID', heldAmount: 55 }), { viewerId: 102 });
+  assert.ok(seller.buttons().includes('Dispatch'));
+  assert.ok(seller.buttons().includes('Refund instead'));
+
+  const buyer = await mount(t, order({ status: 'PAID', heldAmount: 55 }));
+  assert.ok(!buyer.buttons().includes('Refund instead'));
+});
+
+test('the refund is not offered once the order has left PAID', async (t) => {
+  for (const status of ['PENDING_PAYMENT', 'SHIPPED', 'COMPLETED', 'REFUNDED', 'CANCELLED']) {
+    const page = await mount(t, order({ status, heldAmount: status === 'SHIPPED' ? 55 : 0, expireAt: serverTime(Date.now() + 60000) }), { viewerId: 102 });
+    assert.ok(!page.buttons().includes('Refund instead'), `offered at ${status}`);
+  }
+});
+
+test('refunding calls the endpoint once and reloads into the refunded state', async (t) => {
+  const page = await mount(t, order({ status: 'PAID', heldAmount: 55 }), { viewerId: 102 });
+  await page.button('Refund instead').props.onClick();
+  await page.flush();
+  assert.deepEqual(page.calls, [['refund', 1]]);
+  assert.match(page.text(), /Refunded/);
+  assert.match(page.text(), /never in your balance to take out/);
+  assert.doesNotMatch(page.text(), /Held against this order/);
+});
+
+test('a refused refund shows the reason and leaves the order alone', async (t) => {
+  const page = await mount(t, order({ status: 'PAID', heldAmount: 55 }), { viewerId: 102, refundFails: true });
+  await page.button('Refund instead').props.onClick();
+  await page.flush();
+  assert.match(page.text(), /Cannot refund an order that is refunded/);
+  assert.match(page.text(), /Held against this order/);
+});
+
+test('the buyer reads the refund from their own side', async (t) => {
+  const page = await mount(t, order({ status: 'REFUNDED', heldAmount: 0 }));
+  assert.match(page.text(), /went back to your balance/);
+  assert.match(page.text(), /original payment stays on the ledger/);
 });
