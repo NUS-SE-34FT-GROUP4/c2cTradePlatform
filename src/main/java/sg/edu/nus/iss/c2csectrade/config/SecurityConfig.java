@@ -69,12 +69,12 @@ public class SecurityConfig {
                    }
                    response.setContentType("application/json;charset=UTF-8");
                    response.setStatus(401);
-                   response.getWriter().write("{\"error\":\"未授权访问\"}");
+                   response.getWriter().write("{\"error\":\"Please sign in to continue.\"}");
                })
                .accessDeniedHandler((request, response, accessDeniedException) -> {
                    response.setContentType("application/json;charset=UTF-8");
                    response.setStatus(403);
-                   response.getWriter().write("{\"error\":\"访问被拒绝\"}");
+                   response.getWriter().write("{\"error\":\"Your account cannot access this.\"}");
                })
            );
         // use the injected component instead of creating a new instance
