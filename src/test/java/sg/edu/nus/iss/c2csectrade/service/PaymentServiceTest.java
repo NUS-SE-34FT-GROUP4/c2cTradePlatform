@@ -12,6 +12,7 @@ import sg.edu.nus.iss.c2csectrade.exception.InsufficientBalanceException;
 import sg.edu.nus.iss.c2csectrade.mapper.*;
 import sg.edu.nus.iss.c2csectrade.service.payment.AlipayPaymentStrategy;
 import sg.edu.nus.iss.c2csectrade.service.payment.BalancePaymentStrategy;
+import sg.edu.nus.iss.c2csectrade.service.payment.PayNowPaymentStrategy;
 import sg.edu.nus.iss.c2csectrade.service.payment.PaymentStrategy;
 
 import java.math.BigDecimal;
@@ -366,6 +367,44 @@ class PaymentServiceTest {
         verify(walletService).verifyPaymentPassword(BUYER, "123456");
         verify(walletService, never()).credit(anyLong(), any());
         verify(walletService, never()).pay(anyLong(), anyString(), any());
+    }
+
+    // ---- Sprint 4: a fifth payment method is a class, not a branch ----
+
+    private PaymentService withPayNow() {
+        return new PaymentService(orderMapper, orderItemMapper, productMapper,
+                transactionMapper, event -> { },
+                List.of(new PayNowPaymentStrategy(walletService)));
+    }
+
+    @Test
+    @DisplayName("PayNow settles outside this system, like the other external methods")
+    void payNowSettlesOffPlatform() {
+        PaymentService withGateway = withPayNow();
+        stubPayableOrder();
+
+        withGateway.pay(BUYER, ORDER, "paynow", "123456");
+
+        verify(walletService).verifyPaymentPassword(BUYER, "123456");
+        verify(walletService, never()).pay(anyLong(), anyString(), any());
+        verify(walletService, never()).credit(anyLong(), any());
+
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionMapper).insert(captor.capture());
+        assertEquals("paynow", captor.getValue().getPaymentMethod());
+    }
+
+    @Test
+    @DisplayName("A PayNow refund comes back as account balance: the transfer cannot be reversed")
+    void payNowRefundLandsInTheBuyersBalance() {
+        PaymentService withGateway = withPayNow();
+        stubRefundableOrder("paynow", "30.00");
+
+        withGateway.refund(SELLER, ORDER);
+
+        verify(walletService).credit(BUYER, new BigDecimal("30.00"));
+        // Nothing is taken from the seller here either; they were never paid.
+        verify(walletService, never()).debit(anyLong(), any());
     }
 
     @Test

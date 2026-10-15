@@ -99,6 +99,7 @@ export default {
         { code: 'alipay', name: 'Alipay' },
         { code: 'wechat', name: 'WeChat Pay' },
         { code: 'bank', name: 'Bank card' },
+        { code: 'paynow', name: 'PayNow' },
       ],
     };
   },
@@ -162,9 +163,11 @@ export default {
         alipay: 'Alipay',
         wechat: 'WeChat Pay',
         bank: 'bank card',
+        paynow: 'PayNow',
       }[code] || code;
     },
     methodNote(m) {
+      if (m.code === 'paynow') return 'Simulated transfer — refunds come back as balance';
       if (m.code !== 'balance') return 'Simulated gateway — no real money moves';
       if (this.wallet.balance == null) return 'Settled inside this system';
       const note = `Balance ${this.money(this.wallet.balance)}`;

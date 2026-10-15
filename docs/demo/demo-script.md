@@ -199,20 +199,37 @@ deliberately, and let the unchanged number sit on screen for a beat.
 
 ### Act 6 — A fifth payment method *(cuttable)*
 
+The branch exists: `m3/fifth-payment-method`, built and tested, **PayNow**.
 Do **not** write code or restart the backend on stage. A backend restart is
 over 40 seconds and a compile error ends the demo. Show the change instead:
 
 | Do | Screen must show | Say |
 |---|---|---|
-| Editor/terminal: `git diff --stat` for the prepared branch | three files touched | "Here is everything a fifth payment method costs." |
-| Open the new strategy class | one class implementing `PaymentStrategy` | "A class that answers three questions: take the money, hand it to the seller, give it back." |
-| `git diff` on `PaymentService` and the order flow | **no changes** | "The order flow and the payment service are untouched. Spring collects every strategy into a map keyed by its method, so the new one registers itself." |
+| Editor/terminal: `git diff --stat` for the branch | six files — five of code: the enum, one new class, two Vue views, one test; the sixth is this script | "Here is everything a fifth payment method cost." |
+| Open `PayNowPaymentStrategy` | one class, ~20 lines of code | "Three questions: take the money, hand it to the seller, give it back. PayNow answers two of them exactly as the other external methods do, so it inherits those. It differs in one: a PayNow transfer cannot be pulled back, so the refund comes back as account balance instead." |
+| `git diff` on `PaymentService` and the order flow | **no changes** | "The order flow and the payment service are untouched, and there is no database migration — the method is a token the ledger stores. Spring collects every strategy into a map keyed by its method, so the new one registers itself." |
 
-Say the limitation before you are asked it in Q&A: the `PaymentMethod`
-enum gains a value, and the payment page gains an option, so this is not
-purely additive — the extension point removes the branching from the
-*order flow*, which is where a fifth branch would have done real damage,
-not from the identifier list.
+Say the limitations before you are asked in Q&A — all three are visible in
+that same diff, so claiming it is purely additive would not survive a look:
+
+- the `PaymentMethod` enum gains a value, and the payment page gains an option;
+- the human-readable label for a method is written out **twice**, in
+  `PaymentView.vue` and `OrderDetailView.vue`, so a fifth method has to be
+  added to both or the order page prints the raw token;
+- the extension point removes the branching from the *order flow*, which is
+  where a fifth branch would have done real damage — not from the identifier
+  list and not from the two label maps.
+
+The column comment in `init.sql` still lists four methods. It is documentation
+that went stale, and it was left alone on purpose: the migration has already
+run everywhere, and editing an applied migration to fix a comment is worse
+than the stale comment. The enum is the source of truth.
+
+**If this branch is merged before the 26th** the option is simply there, and
+act 6 can show PayNow being *used* — pay by PayNow, then refund, and the
+buyer's balance moves — with the diff as the follow-up rather than the whole
+act. That is the better version of this act, and it is the reason to merge it
+rather than keep it parked as a demo prop.
 
 ---
 
