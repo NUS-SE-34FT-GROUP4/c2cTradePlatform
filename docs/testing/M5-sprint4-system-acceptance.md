@@ -7,13 +7,18 @@ Closed GitHub issues and automated tests do not establish staging acceptance.
 
 ## Entry checklist
 
-- [ ] Record the c2cTradePlatform staging URL (pending from deployment owner), deployed SHA/image digest and deployment run. Do not use the 5001/ass CloudFront endpoint.
+- [x] Record the c2cTradePlatform staging URL: frontend http://178.128.107.99/ ; backend http://178.128.107.99:8080 (provided by CUI on 15 October). Do not use the 5001/ass CloudFront endpoint.
+- [ ] Record the deployed SHA/image digest and deployment run; endpoint availability does not establish the deployed version.
 - [ ] Confirm backend health and UI access. Latest observed main run [38576777677](https://github.com/NUS-SE-34FT-GROUP4/c2cTradePlatform/actions/runs/38576777677) was waiting on 15 October; this does not prove the latest SHA is deployed.
 - [ ] Confirm dedicated test data with module owners. Use buyer A, buyer B, seller, friend/helper, administrator, fresh unrated user and a disposable moderation target. Keep login and payment secrets outside this document.
 - [ ] Provision active stock, a last-unit item, multiple categories, insufficient-balance buyer, pending/paid/shipped/completed/refunded orders and expiring campaigns. Record initial balances, stock, reservations and IDs.
 - [ ] Reserve demo products 4 and 5 for the agreed demo runs; use separate listings for negative/concurrency tests. Do not reset shared data or execute init.sql during QA.
 - [ ] Use separate browser profiles for buyer, seller and admin; tabs share authentication state.
 - [ ] Agree service-outage/restart/multi-instance checks with M1 and M3. QA records evidence; service owners operate the shared deployment.
+
+## Connectivity precheck — 15 October 2026
+
+Read-only HTTP checks: frontend `/` on port 80 returned 200 with the SecTrade marketplace application shell. Backend `/actuator/health` on port 8080 returned 200 and UP, including MySQL and Redis. Backend `/` returned 401 (unauthenticated access); it is not the frontend entry. This verifies connectivity and reported health only, not browser rendering, login, deployed SHA or business acceptance. No accounts or business data were changed.
 
 ## Execution and evidence rules
 
