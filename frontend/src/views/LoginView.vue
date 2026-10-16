@@ -189,7 +189,7 @@ const handleLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url('@/assets/1.jpg') center center / cover no-repeat;
+  background: url('@/assets/login-bg.svg') center center / cover no-repeat;
   padding: 20px;
   position: relative;
 }

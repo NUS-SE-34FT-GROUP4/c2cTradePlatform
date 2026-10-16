@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- Campus secondhand-marketplace backdrop: brand gradient + flat trading items
+       kept low-contrast so the white auth card stays the focal point -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="55%" stop-color="#764ba2"/>
+      <stop offset="100%" stop-color="#5b3d8f"/>
+    </linearGradient>
+    <linearGradient id="tag" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+
+  <!-- soft ambient blobs -->
+  <circle cx="240" cy="180" r="260" fill="#ffffff" opacity="0.06"/>
+  <circle cx="1380" cy="840" r="300" fill="#ffffff" opacity="0.05"/>
+  <circle cx="1450" cy="120" r="180" fill="#ffffff" opacity="0.05"/>
+  <circle cx="120" cy="880" r="200" fill="#ffffff" opacity="0.04"/>
+
+  <!-- floating sparkles -->
+  <g fill="#ffffff" opacity="0.35">
+    <circle cx="520" cy="140" r="4"/><circle cx="700" cy="90" r="3"/>
+    <circle cx="980" cy="150" r="4"/><circle cx="1180" cy="90" r="3"/>
+    <circle cx="420" cy="880" r="3"/><circle cx="1080" cy="900" r="4"/>
+    <circle cx="1240" cy="760" r="3"/><circle cx="300" cy="480" r="3"/>
+  </g>
+
+  <!-- top-left: price tag -->
+  <g transform="translate(150 120) rotate(-12)" opacity="0.85">
+    <path d="M0 24 L96 0 L168 0 L168 72 L96 96 Z" fill="url(#tag)"/>
+    <circle cx="150" cy="36" r="10" fill="#764ba2" opacity="0.5"/>
+    <rect x="28" y="30" width="70" height="8" rx="4" fill="#ffffff" opacity="0.5"/>
+    <rect x="28" y="50" width="46" height="8" rx="4" fill="#ffffff" opacity="0.35"/>
+  </g>
+
+  <!-- top-right: potted plant -->
+  <g transform="translate(1360 90)" opacity="0.85">
+    <path d="M60 130 C30 90 20 50 45 20 C70 50 75 95 60 130 Z" fill="url(#tag)"/>
+    <path d="M66 130 C96 95 106 55 82 22 C56 52 51 98 66 130 Z" fill="url(#tag)"/>
+    <path d="M63 110 C63 70 63 45 63 30" stroke="#ffffff" stroke-opacity="0.4" stroke-width="5" fill="none"/>
+    <path d="M28 132 L98 132 L88 196 L38 196 Z" fill="url(#tag)"/>
+  </g>
+
+  <!-- mid-left: paper plane -->
+  <g transform="translate(120 560) rotate(8)" opacity="0.8">
+    <path d="M0 30 L150 0 L96 78 L70 52 Z" fill="url(#tag)"/>
+    <path d="M70 52 L150 0 L78 40 Z" fill="#ffffff" opacity="0.14"/>
+  </g>
+
+  <!-- bottom-left: stack of books -->
+  <g transform="translate(120 760)" opacity="0.9">
+    <rect x="0" y="86" width="200" height="34" rx="8" fill="url(#tag)"/>
+    <rect x="18" y="50" width="176" height="32" rx="8" fill="#ffffff" opacity="0.20"/>
+    <rect x="34" y="16" width="152" height="30" rx="8" fill="url(#tag)"/>
+    <rect x="52" y="58" width="60" height="7" rx="3.5" fill="#ffffff" opacity="0.4"/>
+    <rect x="66" y="24" width="48" height="7" rx="3.5" fill="#ffffff" opacity="0.35"/>
+  </g>
+
+  <!-- bottom-right: shopping bag -->
+  <g transform="translate(1290 700)" opacity="0.9">
+    <path d="M0 40 L150 40 L136 190 L14 190 Z" fill="url(#tag)"/>
+    <path d="M45 40 C45 10 105 10 105 40" stroke="#ffffff" stroke-opacity="0.5" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <circle cx="45" cy="46" r="6" fill="#ffffff" opacity="0.5"/>
+    <circle cx="105" cy="46" r="6" fill="#ffffff" opacity="0.5"/>
+  </g>
+
+  <!-- bottom-center-left: bicycle silhouette -->
+  <g transform="translate(520 800)" opacity="0.55" stroke="#ffffff" stroke-opacity="0.55" stroke-width="7" fill="none" stroke-linecap="round">
+    <circle cx="60" cy="120" r="52"/>
+    <circle cx="250" cy="120" r="52"/>
+    <path d="M60 120 L120 40 L200 40 M120 40 L150 120 L60 120 M150 120 L250 120 M186 40 L214 78 L150 120"/>
+    <path d="M104 30 L142 30 M226 22 L252 22 L236 78"/>
+  </g>
+</svg>
