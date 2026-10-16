@@ -18,7 +18,7 @@
           <CreditBadge v-if="userCredit" :credit="userCredit" />
           <div class="balance-display">
             <span class="balance-label">💰 Balance:</span>
-            <span class="balance-amount">¥{{ userBalance.toFixed(2) }}</span>
+            <span class="balance-amount">{{ money(userBalance) }}</span>
           </div>
         </div>
       </div>
@@ -83,10 +83,10 @@
               <label class="filter-label">✨ Condition</label>
               <select v-model.number="filters.conditionLevel" class="filter-select">
                 <option :value="null">All</option>
-                <option :value="10">Brand New</option>
-                <option :value="9">90% New</option>
-                <option :value="8">80% New</option>
-                <option :value="7">70% New</option>
+                <option :value="10">Brand new</option>
+                <option :value="9">Like new (9/10)</option>
+                <option :value="8">Good (8/10)</option>
+                <option :value="7">Fair (7/10)</option>
               </select>
             </div>
 
@@ -121,9 +121,9 @@
         </div>
         <div class="product-info">
           <h3 class="product-name" v-html="product.highlightedName || product.name"></h3>
-          <div class="product-price">¥{{ product.price }}</div>
+          <div class="product-price">{{ money(product.price) }}</div>
           <div class="product-meta">
-            <span v-if="product.conditionLevel">{{ product.conditionLevel }}% New</span>
+            <span v-if="product.conditionLevel">Condition {{ product.conditionLevel }}/10</span>
             <span v-if="product.location" class="location">📍{{ product.location }}</span>
           </div>
           <div class="seller-info">
@@ -202,6 +202,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
 import productService from '@/api/productService';
 import { categories } from '@/utils/categoryData';
+import { money } from '@/utils/bargain.mjs';
 import axios from 'axios';
 
 const router = useRouter();
