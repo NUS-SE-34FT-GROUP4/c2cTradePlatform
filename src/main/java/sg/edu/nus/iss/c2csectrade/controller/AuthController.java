@@ -42,7 +42,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         if (!captchaService.verifyAndConsume(registerRequest.getCaptchaId(), registerRequest.getCaptchaCode())) {
-            return ResponseEntity.badRequest().body("验证码错误或已过期");
+            return ResponseEntity.badRequest().body("That security code is wrong or has expired. Please try the new one.");
         }
 
         User user = authService.registerUser(registerRequest);
@@ -52,7 +52,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         if (!captchaService.verifyAndConsume(loginRequest.getCaptchaId(), loginRequest.getCaptchaCode())) {
-            return ResponseEntity.badRequest().body("验证码错误或已过期");
+            return ResponseEntity.badRequest().body("That security code is wrong or has expired. Please try the new one.");
         }
 
         Authentication authentication;
@@ -67,9 +67,9 @@ public class AuthController {
                 String reason = account instanceof BannedAccount.AccountUser banned ? banned.getBanReason() : null;
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BannedAccount.body(reason));
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用户名或密码错误");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect username or password.");
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用户名或密码错误");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect username or password.");
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -78,7 +78,7 @@ public class AuthController {
                 .anyMatch(a -> a.equals("ROLE_ADMIN"));
         boolean wantAdmin = Boolean.TRUE.equals(loginRequest.getIsAdmin());
         if (wantAdmin && !isAdmin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("需要管理员权限，请取消勾选或使用管理员账号。");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This account is not an administrator. Clear the administrator option, or sign in with an administrator account.");
         }
 
         String token = jwtTokenProvider.generateToken(authentication);
@@ -99,23 +99,21 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest request) {
-        // 验证验证码
+        // The code is single-use; verifying it also consumes it.
         if (!captchaService.verifyAndConsume(request.getCaptchaId(), request.getCaptchaCode())) {
-            return ResponseEntity.badRequest().body("验证码错误或已过期");
+            return ResponseEntity.badRequest().body("That security code is wrong or has expired. Please try the new one.");
         }
 
-        // 验证新密码长度
         if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
-            return ResponseEntity.badRequest().body("新密码长度至少为6位");
+            return ResponseEntity.badRequest().body("The new password must be at least 6 characters long.");
         }
 
-        // 执行密码重置
         boolean success = authService.resetPassword(request);
 
         if (success) {
-            return ResponseEntity.ok("密码重置成功，请使用新密码登录");
+            return ResponseEntity.ok("Password reset. Please sign in with your new password.");
         } else {
-            return ResponseEntity.badRequest().body("用户名或邮箱不匹配，请检查后重试");
+            return ResponseEntity.badRequest().body("That username and email address do not match. Please check them and try again.");
         }
     }
 
