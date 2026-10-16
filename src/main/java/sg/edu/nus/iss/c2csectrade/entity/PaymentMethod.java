@@ -1,9 +1,12 @@
 package sg.edu.nus.iss.c2csectrade.entity;
 
 /**
- * The four simulated payment methods from the proposal. Each becomes a strategy
- * implementation in Sprint 3; the enum is only the identifier the request
- * carries and the ledger stores.
+ * The simulated payment methods. The proposal named four; PayNow, the local
+ * bank transfer, was added in Sprint 4 — and adding it took a strategy class
+ * and this value, with no change to the order flow or the payment service.
+ *
+ * Each value has a strategy implementation behind it; the enum itself is only
+ * the identifier the request carries and the ledger stores.
  *
  * The stored token is lower case ("balance", "alipay", ...) because that is
  * what the payment page sends.
@@ -12,7 +15,8 @@ public enum PaymentMethod {
     BALANCE,
     ALIPAY,
     WECHAT,
-    BANK;
+    BANK,
+    PAYNOW;
 
     /** Only the account balance is settled inside this system. */
     public boolean isInternal() {

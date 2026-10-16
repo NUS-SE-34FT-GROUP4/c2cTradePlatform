@@ -153,6 +153,7 @@ export default {
         alipay: 'Alipay',
         wechat: 'WeChat Pay',
         bank: 'Bank card',
+        paynow: 'PayNow',
       }[code] || code;
     },
     shortDate(value) {
