@@ -86,6 +86,7 @@ export default {
         COMPLETED: 'Completed',
         CANCELLED: 'Cancelled',
         EXPIRED: 'Expired',
+        REFUNDED: 'Refunded',
       }[status] || status;
     },
     remaining(order) {
@@ -141,7 +142,7 @@ h1 { font-size: 24px; }
 .seller { font-weight: 600; }
 .status { padding: 2px 9px; border-radius: 10px; font-size: 12px; background: #eceef2; }
 .status.pending_payment { background: #f6eeda; color: #9a6b23; }
-.status.cancelled, .status.expired { background: #f7e6e5; color: #96393c; }
+.status.cancelled, .status.expired, .status.refunded { background: #f7e6e5; color: #96393c; }
 ul { list-style: none; margin: 0; padding: 0; }
 li { display: flex; gap: 12px; padding: 9px 14px; border-top: 1px solid #eef0f4; font-size: 14px; }
 .name { flex: 1; }
