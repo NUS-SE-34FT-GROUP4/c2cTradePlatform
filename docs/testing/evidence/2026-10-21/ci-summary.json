@@ -1,0 +1,74 @@
+{
+  "repository": "NUS-SE-34FT-GROUP4/c2cTradePlatform",
+  "run_id": 39598700575,
+  "commit": "7a590400a394d2198c478332e62f74cdb736dbd2",
+  "scope": "JaCoCo report root counters; not service-layer-only",
+  "coverage": {
+    "INSTRUCTION": {
+      "covered": 10147,
+      "missed": 13457,
+      "percent": 42.99
+    },
+    "BRANCH": {
+      "covered": 624,
+      "missed": 2638,
+      "percent": 19.13
+    },
+    "LINE": {
+      "covered": 2036,
+      "missed": 773,
+      "percent": 72.48
+    }
+  },
+  "tests": {
+    "integration": {
+      "tests": 59,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "unit": {
+      "tests": 161,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "source_files": {
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.BargainMigrationIT.xml": "97b93d911de8f889bc77d2d98c2ba41829ef296b9543e233cf68ced70d802af8",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.CheckoutIT.xml": "b43b301504bb712b48b31ea871a96bd665681b5a912fdb1f80e9381fb3d9e6d6",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.CreditRecommendationIT.xml": "36c1cd4e7c1e329ec6168ed8289acbc77ed0ee053a4394441da56e234d22eb15",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.EscrowIT.xml": "ecb459d2bcd7f5756cad9cd754677ff564256cf26ffbba8bc80e21e5b2068753",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.ModerationIT.xml": "9e982072bd46d71eb46d9726cdeeee33dd7b1833ee4b7496f984f615b642d1b8",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.ModerationMigrationIT.xml": "07f4f94b79b8047f5dcfcd309f3bdffe9e55830efd57f03c51d9fc74a209f294",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.PaymentConcurrencyIT.xml": "1facd00fe62823f59d97d7b8fa680d1b6022b231604c73a6d3c8f89ad1eb5f96",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.PaymentsMigrationIT.xml": "490ef44490933854abc679eacb8bc0f5c4eb507cd3fff3c4a83156e97485b4d9",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.RefundIT.xml": "88038b71cdae6075e9ae0d522cf8db6a78a93d4bca36696b86de5e4cc4ed2508",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.ReviewIT.xml": "e7067d83406addd1a536a88b4a0cc71d101586f2b4ca48cb7aefc9afad2fccf6",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.ReviewMigrationIT.xml": "524af6cdb09cbcbcb2626ac8f54a8900f66d4e79a777dda5b2da61a2b03138f3",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.SearchParityIT.xml": "82643ff365cae3eb49f9668d48caaf1f14f2d377381b2f5bce422e8769259f86",
+    "surefire-test-results/failsafe-reports/TEST-sg.edu.nus.iss.c2csectrade.integration.TransactionLifecycleIT.xml": "09a5720b5e98df0d12a2e383de7c597f6419fbeea83d70c2a12021acad942ebb",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.event.OrderNotificationListenerTest.xml": "8af33aec210749f98d734a86e8de961817f11b25b8f49019f73462bad6390293",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.scheduled.OrderExpiryJobTest.xml": "e21372befadb94e626ff4c164160ce33513a05b79372468cb2064e01665eca69",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.security.JwtTokenProviderTest.xml": "8b75e3fffc1cac675d58f304c12a4f251fb7745daa1591ad5007b431f2c1b602",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.CartServiceTest.xml": "b56f41e5fe9abd7ae13371b1d1596365d9be3834815f1e03625d4e5f0601d1e2",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.CreditServiceTest.xml": "0a594e3b3fe489d76c6720423268e4ed05a714717ecfd8b60d75316f5f71b40b",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.NotificationServiceTest.xml": "20760127875cb2344c830d54afad66c470fdc9ace0a8ef05290ee6d4ce62bf5f",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.OrderServiceTest.xml": "c1cda59e6d9f90d329d139879e0003481f908a052107def816abfde979e082ed",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.OrderStateServiceTest.xml": "c1d590de1609833c6eaa77128e1c37df0b45144cead6f43cb38f802c4b0fece5",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.PaymentServiceTest.xml": "c445cd1da15f92a07c32f5d82e85ca8aad99fe6e51e7f21d6d59f2d04ac32d8b",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.ProductPublishServiceTest.xml": "29ab8416f177a21ff72f1f97621f0ef57a8366a7401814adf3a4c9b2ba274728",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.ProductServiceTest.xml": "ffee09801b4a654edb943bbe920ea189ac03627f645a69055606851d6e252ef6",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.RecommendationServiceTest.xml": "fadb5adab8141a98a1199cecbcfa72ebed1d45be513a67a83e57446c56a59eb9",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.SearchServiceTest.xml": "ebb219aef57ba7e404fdc561e5a62519d39dcb2944a099064f65ac58c14540dc",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.WalletServiceTest.xml": "e1fb084c3c83fdfa4e75ef2db5bbf7f08f11017c79ebf48f9b345d0aace7ba98",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.impl.MinioFileStorageServiceTest.xml": "9b252b96818adfc80189f890f76ed83aeef85db85517991da01c5a4765bb4cd6",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.recommendation.RecommendationStrategyFactoryTest.xml": "3e6834742873f89ecfc5795b11119ac368ac65ee095d3ac802560836a6385506",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.recommendation.RecommendationStrategyTest.xml": "d8286afb183aa6438c2b833f702dc8368b7ef4188ce3bf73b5ce06923d2497b7",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.search.ElasticsearchProductSearchIndexTest.xml": "637af11d0428a56147e536a52153d718fa2d0b44d0b51b5a9c597ca2d2932c08",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.search.ElasticsearchProductSearchQueryTest.xml": "e6eeab97f0a6213d84f97f9c2ee5d754cedf9c193e0e460b45acc0df946416ed",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.search.ProductIndexCoordinatorTest.xml": "bf190b14048aa944243611eee059bb443c07ad37c20dfb196bfa3b0ce7678404",
+    "surefire-test-results/surefire-reports/TEST-sg.edu.nus.iss.c2csectrade.service.search.ProductSearchDocumentTest.xml": "50c6723af601852c698979c244f5b176ed8e9fb5349df5eb3e895fa29d0f2f21",
+    "jacoco-coverage-report/jacoco.xml": "d3e8574f585d579af4a23b018cd9e37949adc26dad814df10117c6168a0550eb"
+  }
+}
