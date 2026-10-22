@@ -481,14 +481,10 @@ const startChat = (product) => {
     return;
   }
 
-  window.dispatchEvent(new CustomEvent('open-chat', {
-    detail: {
-      username: product.username || product.displayName,
-      displayName: product.displayName || product.username,
-      userId: product.userId,
-      avatarUrl: product.avatarUrl || null
-    }
-  }));
+  router.push({
+    path: '/chat',
+    query: { withUserId: String(product.userId), productId: String(product.id) }
+  });
 };
 
 const goToProduct = (productId) => {
