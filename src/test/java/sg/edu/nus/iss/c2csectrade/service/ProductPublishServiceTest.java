@@ -151,7 +151,7 @@ class ProductPublishServiceTest {
         Product higherRanked = new Product();
         higherRanked.setId(2L);
         when(productMapper.selectByIds(List.of(2L, 1L))).thenReturn(List.of(lowerRanked, higherRanked));
-        when(productMediaMapper.selectByProductId(anyLong())).thenReturn(List.of());
+        when(productMediaMapper.selectByProductIds(List.of(2L, 1L))).thenReturn(List.of());
 
         List<Product> result = productService.listProductsByIdsInOrder(List.of(2L, 1L));
 

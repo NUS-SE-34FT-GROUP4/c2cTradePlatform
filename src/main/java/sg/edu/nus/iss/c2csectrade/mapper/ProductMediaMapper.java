@@ -9,6 +9,8 @@ import java.util.List;
 public interface ProductMediaMapper {
     ProductMedia selectById(@Param("id") Long id);
     List<ProductMedia> selectByProductId(@Param("productId") Long productId);
+    /** Media of several listings in one query; callers group by product and never pass an empty list. */
+    List<ProductMedia> selectByProductIds(@Param("productIds") java.util.Collection<Long> productIds);
     int insert(ProductMedia media);
     int update(ProductMedia media);
     int deleteById(@Param("id") Long id);
