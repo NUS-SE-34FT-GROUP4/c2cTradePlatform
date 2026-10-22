@@ -114,6 +114,20 @@
             <span class="seller-username">@{{ product.username }}</span>
           </router-link>
           <button v-if="canReport" class="btn btn-report" @click="showReport = true">🚩 Report this listing</button>
+          <button
+            v-if="canFavourite"
+            class="btn btn-secondary"
+            :class="{ 'is-favorite': isFavorite }"
+            :disabled="favouriteBusy"
+            @click="toggleFavourite"
+          >
+            {{ isFavorite ? '★ Saved' : '☆ Save to favourites' }}
+          </button>
+          <router-link
+            v-if="isOwner"
+            class="btn btn-secondary"
+            :to="`/products/${product.id}/edit`"
+          >✏️ Edit this listing</router-link>
         </div>
 
         <p v-if="reviewError" role="alert">{{ reviewError }}</p>
@@ -161,7 +175,7 @@ import AddToCartAction from '@/components/AddToCartAction.vue';
 import CampaignPanel from '@/components/bargain/CampaignPanel.vue';
 import OfferThread from '@/components/bargain/OfferThread.vue';
 import ReportDialog from '@/components/ReportDialog.vue';
-import { reviews } from '@/api/marketplaceService';
+import { reviews, favorites } from '@/api/marketplaceService';
 import { money } from '@/utils/bargain.mjs';
 import { useAuthStore } from '@/store/auth';
 
@@ -175,6 +189,8 @@ const productReviews = ref([]);
 const averageRating = ref(0);
 const reviewError = ref('');
 const showReport = ref(false);
+const isFavorite = ref(false);
+const favouriteBusy = ref(false);
 let productRequest = 0;
 
 // Seller identity for the account-page link and the report action (#63)
@@ -185,6 +201,38 @@ const sellerAvatar = computed(() => {
 });
 // Reporting needs a login and your own listings cannot be reported
 const canReport = computed(() => auth.isLoggedIn && product.value && product.value.userId !== auth.user?.id);
+// The seller sees their own listing differently: no favourite, but an edit link
+const isOwner = computed(() => auth.isLoggedIn && product.value && product.value.userId === auth.user?.id);
+const canFavourite = computed(() => auth.isLoggedIn && product.value && !isOwner.value);
+
+const checkFavourite = async () => {
+  isFavorite.value = false;
+  if (!canFavourite.value) return;
+  try {
+    const { data } = await favorites.check(product.value.id);
+    isFavorite.value = Boolean(data.favorited ?? data);
+  } catch (e) {
+    // An unreadable favourite state is not worth blocking the page for.
+  }
+};
+
+const toggleFavourite = async () => {
+  if (favouriteBusy.value) return;
+  favouriteBusy.value = true;
+  const wanted = !isFavorite.value;
+  try {
+    if (wanted) {
+      await favorites.add(product.value.id);
+    } else {
+      await favorites.remove(product.value.id);
+    }
+    isFavorite.value = wanted;
+  } catch (e) {
+    // Leave the button showing what the server still holds.
+  } finally {
+    favouriteBusy.value = false;
+  }
+};
 const fetchReviews = async () => {
   const id = route.params.id;
   productReviews.value = [];
@@ -242,6 +290,7 @@ const fetchProduct = async () => {
     if (request !== productRequest) return;
     product.value = response.data;
     currentMediaIndex.value = 0; // Reset media index
+    checkFavourite();
   } catch (error) {
     if (request === productRequest) console.error('Failed to fetch product detail:', error);
   }
