@@ -31,17 +31,27 @@ class ProductListQueriesIT extends MySqlIntegrationTest {
 
     private List<Long> listedIds;
 
+    // Media is inserted through JdbcTemplate before any MyBatis query runs: the
+    // test is one transaction, so a MyBatis query made earlier would be served
+    // from the session cache and never see these rows.
     @BeforeEach
     void giveTwoListingsMedia() {
-        listedIds = products.listProductsWithFilters(null, null, null, null, null, null)
-                .stream().map(Product::getId).toList();
-        assertTrue(listedIds.size() >= 2, "init.sql seeds active listings");
-        Long first = listedIds.get(0);
-        Long second = listedIds.get(1);
+        List<Long> active = jdbc.queryForList(
+                "SELECT id FROM pms_product WHERE status = 1 AND stock > 0 ORDER BY id", Long.class);
+        assertTrue(active.size() >= 2, "init.sql seeds active listings");
+        Long first = active.get(0);
+        Long second = active.get(1);
         jdbc.update("INSERT INTO pms_product_media (url, media_type, sort_order, product_id) VALUES (?, 1, 0, ?)", "/it/a.jpg", first);
         jdbc.update("INSERT INTO pms_product_media (url, media_type, sort_order, product_id) VALUES (?, 1, 1, ?)", "/it/b.jpg", first);
         jdbc.update("INSERT INTO pms_product_media (url, media_type, sort_order, product_id) VALUES (?, 2, 0, ?)", "/it/c.mp4", second);
+        listedIds = products.listProductsWithFilters(null, null, null, null, null, null)
+                .stream().map(Product::getId).toList();
+        firstWithMedia = first;
+        secondWithMedia = second;
     }
+
+    private Long firstWithMedia;
+    private Long secondWithMedia;
 
     @Test
     @DisplayName("Batched media query returns each listing's own rows, linked to the right listing")
@@ -83,7 +93,9 @@ class ProductListQueriesIT extends MySqlIntegrationTest {
             assertEquals(detail.getCoverImage(), listed.getCoverImage());
         }
         // init.sql seeds media too, so check ours are among them rather than all of them
-        assertTrue(page.get(0).getImageUrls().containsAll(List.of("/it/a.jpg", "/it/b.jpg")));
-        assertTrue(page.get(1).getVideoUrls().contains("/it/c.mp4"));
+        ProductDTO first = page.stream().filter(p -> p.getId().equals(firstWithMedia)).findFirst().orElseThrow();
+        ProductDTO second = page.stream().filter(p -> p.getId().equals(secondWithMedia)).findFirst().orElseThrow();
+        assertTrue(first.getImageUrls().containsAll(List.of("/it/a.jpg", "/it/b.jpg")));
+        assertTrue(second.getVideoUrls().contains("/it/c.mp4"));
     }
 }
