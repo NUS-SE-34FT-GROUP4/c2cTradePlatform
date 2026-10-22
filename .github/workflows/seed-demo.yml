@@ -1,0 +1,96 @@
+name: Seed demo data
+
+# Loads the demo data into a running stack without SSH access from a laptop:
+# Actions -> Seed demo data -> Run workflow, pick the environment and the script.
+#
+#   demo-seed     the demo buyer, stock and English listings (rerunnable;
+#                 every statement is an UPDATE or an upsert)
+#   demo-restore  puts balances and stock back after a messy rehearsal run.
+#                 Rehearsal only - not on the day (docs/demo/demo-script.md)
+#
+# Run it after a deployment or a rollback, never before: the data then
+# survives the drill. The scripts change MySQL directly, so the search index
+# would keep the old listing names; the backend rebuilds the index from MySQL
+# when it starts, so the job restarts it and waits until it is healthy.
+#
+# The job uses the same GitHub environment as the deployment, so it waits for
+# the same approval, and the same concurrency group, so it never overlaps a
+# deployment or a rollback.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment to seed
+        type: choice
+        options: [ staging, production ]
+        default: staging
+      script:
+        description: Which script to run
+        type: choice
+        options: [ demo-seed, demo-restore ]
+        default: demo-seed
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    name: Run ${{ inputs.script }} on ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.target }}
+    concurrency:
+      group: deploy-${{ inputs.target }}
+      cancel-in-progress: false
+    env:
+      # Staging and production share the Droplet; production is the second stack.
+      DIR: ${{ inputs.target == 'production' && '~/c2c-sectrade-prod' || '~/c2c-sectrade' }}
+      STACK: ${{ inputs.target == 'production' && 'c2csectrade-prod' || 'c2csectrade' }}
+      API_PORT: ${{ inputs.target == 'production' && '8081' || '8080' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Warn about demo-restore outside rehearsal
+        if: inputs.script == 'demo-restore'
+        run: echo "::warning::demo-restore is for rehearsals only; do not run it on the day of the demo."
+
+      - name: Copy the SQL scripts to the server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          source: "scripts/demo-seed.sql,scripts/demo-restore.sql"
+          target: ${{ env.DIR }}
+
+      - name: Run the script, then restart the backend to rebuild the index
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ env.DIR }}
+            # The MySQL container already holds its user and password, so no
+            # database secret leaves GitHub for this job.
+            docker exec -i ${{ env.STACK }}-mysql sh -c 'exec mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" trade' \
+              < scripts/${{ inputs.script }}.sql
+            docker restart ${{ env.STACK }}-backend
+            echo "$(date -u +%FT%TZ) ${{ inputs.script }} run=${{ github.run_id }} by=${{ github.actor }}" >> deploy-history.log
+
+      - name: Wait until the backend is healthy again
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS "http://${{ secrets.STAGING_HOST }}:${{ env.API_PORT }}/actuator/health" | grep -q '"status":"UP"'; then
+              echo "${{ inputs.target }} is up."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "${{ inputs.target }} did not become healthy within 150s."
+          exit 1
+
+      - name: Summary
+        run: echo "Ran \`${{ inputs.script }}\` on ${{ inputs.target }}; the backend restarted and rebuilt the search index." >> "$GITHUB_STEP_SUMMARY"
