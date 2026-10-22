@@ -46,11 +46,7 @@ public class ProductService {
 
     public List<Product> listAllProducts() {
         List<Product> products = productMapper.selectAll();
-        // 为每个商品加载媒体和用户信息
-        for (Product product : products) {
-            List<ProductMedia> media = productMediaMapper.selectByProductId(product.getId());
-            product.setMedia(media);
-        }
+        attachMedia(products);
         return products;
     }
 
@@ -62,11 +58,7 @@ public class ProductService {
             String location, String category) {
         List<Product> products = productMapper.selectWithFilters(keyword, minPrice, maxPrice, conditionLevel, location,
                 category);
-        // 为每个商品加载媒体
-        for (Product product : products) {
-            List<ProductMedia> media = productMediaMapper.selectByProductId(product.getId());
-            product.setMedia(media);
-        }
+        attachMedia(products);
         return products;
     }
 
@@ -81,22 +73,52 @@ public class ProductService {
         Map<Long, Product> productsById = productMapper.selectByIds(rankedIds).stream()
                 .collect(Collectors.toMap(Product::getId, product -> product,
                         (first, ignored) -> first, LinkedHashMap::new));
-        return rankedIds.stream()
+        List<Product> ordered = rankedIds.stream()
                 .distinct()
                 .map(productsById::get)
                 .filter(java.util.Objects::nonNull)
-                .peek(product -> product.setMedia(productMediaMapper.selectByProductId(product.getId())))
                 .toList();
+        attachMedia(ordered);
+        return ordered;
+    }
+
+    /**
+     * Loads the media of every listing in one query instead of one per listing.
+     * A page of n listings used to cost n media queries on top of the list itself;
+     * under load that multiplied the time each request held a pooled connection.
+     */
+    private void attachMedia(List<Product> products) {
+        List<Long> ids = products.stream()
+                .filter(java.util.Objects::nonNull)
+                .map(Product::getId)
+                .distinct()
+                .toList();
+        if (ids.isEmpty()) {
+            return;
+        }
+        Map<Long, List<ProductMedia>> byProduct = productMediaMapper.selectByProductIds(ids).stream()
+                .filter(media -> media.getProduct() != null)
+                .collect(Collectors.groupingBy(media -> media.getProduct().getId()));
+        for (Product product : products) {
+            if (product != null) {
+                product.setMedia(new ArrayList<>(byProduct.getOrDefault(product.getId(), List.of())));
+            }
+        }
     }
 
     /**
      * Convert Product entity to ProductDTO
      */
     public ProductDTO convertToDTO(Product product) {
-        return product == null ? null : convertToDTO(product, creditService.forSeller(product.getUserId()));
+        if (product == null) {
+            return null;
+        }
+        User seller = product.getUserId() == null ? null : userMapper.selectById(product.getUserId());
+        return convertToDTO(product, creditService.forSeller(product.getUserId()), seller);
     }
 
-    private ProductDTO convertToDTO(Product product, sg.edu.nus.iss.c2csectrade.dto.CreditSummary credit) {
+    private ProductDTO convertToDTO(Product product, sg.edu.nus.iss.c2csectrade.dto.CreditSummary credit,
+            User user) {
         if (product == null) {
             return null;
         }
@@ -116,9 +138,8 @@ public class ProductService {
         dto.setCreateTime(product.getCreatedAt());
         dto.setUpdateTime(product.getUpdatedAt());
 
-        // Get user info
+        // Seller info, loaded by the caller (one query per page in convertToDTOList)
         if (product.getUserId() != null) {
-            User user = userMapper.selectById(product.getUserId());
             if (user != null) {
                 dto.setUsername(user.getUsername());
                 dto.setDisplayName(user.getDisplayName());
@@ -177,11 +198,17 @@ public class ProductService {
         if (products == null) {
             return new ArrayList<>();
         }
-        var credits = creditService.forSellers(products.stream().filter(java.util.Objects::nonNull)
-                .map(Product::getUserId).toList());
+        List<Long> sellerIds = products.stream().filter(java.util.Objects::nonNull)
+                .map(Product::getUserId).filter(java.util.Objects::nonNull).distinct().toList();
+        var credits = creditService.forSellers(sellerIds);
+        // One query for every seller on the page, not one per listing
+        Map<Long, User> sellers = sellerIds.isEmpty() ? Map.of()
+                : userMapper.selectByIds(sellerIds).stream()
+                        .collect(Collectors.toMap(User::getId, user -> user, (first, ignored) -> first));
         return products.stream()
                 .map(product -> product == null ? null : convertToDTO(product,
-                        credits.getOrDefault(product.getUserId(), CreditService.UNRATED)))
+                        credits.getOrDefault(product.getUserId(), CreditService.UNRATED),
+                        sellers.get(product.getUserId())))
                 .collect(Collectors.toList());
     }
 
@@ -196,9 +223,7 @@ public class ProductService {
     /** Listings owned by one seller, including delisted ones, for the seller's own view. */
     public List<Product> listBySeller(Long sellerId) {
         List<Product> products = productMapper.selectByUserId(sellerId);
-        for (Product product : products) {
-            product.setMedia(productMediaMapper.selectByProductId(product.getId()));
-        }
+        attachMedia(products);
         return products;
     }
 

@@ -17,6 +17,14 @@
     <select id="selectByProductId" resultMap="ProductMediaResultMap">
         SELECT * FROM pms_product_media WHERE product_id = #{productId}
     </select>
+    <select id="selectByProductIds" resultMap="ProductMediaResultMap">
+        SELECT * FROM pms_product_media
+        WHERE product_id IN
+        <foreach item="productId" collection="productIds" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+        ORDER BY id
+    </select>
     <insert id="insert" parameterType="sg.edu.nus.iss.c2csectrade.entity.ProductMedia" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO pms_product_media (url, media_type, sort_order, product_id)
         VALUES (#{url}, #{mediaType}, #{sortOrder}, #{product.id})

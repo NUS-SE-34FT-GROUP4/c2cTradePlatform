@@ -15,6 +15,8 @@ public interface UserMapper {
     User selectByUsernameWithRoles(@Param("username") String username);
     // 加载所有用户（包含角色）
     List<User> selectAllWithRoles();
+    /** Several users in one query, for list views; callers never pass an empty list. */
+    List<User> selectByIds(@Param("ids") java.util.Collection<Long> ids);
     List<User> selectAll();
     int insert(User user);
     int update(User user);
