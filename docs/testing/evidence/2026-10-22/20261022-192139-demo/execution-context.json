@@ -1,0 +1,15 @@
+{
+  "environment": "5006 staging",
+  "base": "http://178.128.107.99",
+  "timezone": "Asia/Singapore",
+  "keywords": [
+    "QA Test Book",
+    "iPhone"
+  ],
+  "list_items_at_preflight": 12,
+  "search_items_at_preflight": 1,
+  "deployed_sha": "unverified",
+  "server_instance_count": "unverified",
+  "script_sha256": "a624682f2bfeaa03db620c69a150e01ee11ccd2eb896aa596ff46b4170146eb9",
+  "k6_image": "grafana/k6:2.3.0"
+}

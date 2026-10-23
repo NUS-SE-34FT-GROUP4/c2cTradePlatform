@@ -1,0 +1,15 @@
+{
+  "deployment_sha": "ce6212ab7eba6cf06dd74c0c86a6cb39bbc3485f",
+  "deployment_id": 7256999762,
+  "provenance": "GitHub staging success; same latest deployment after test; container digest not independently read",
+  "script_sha256": "a624682f2bfeaa03db620c69a150e01ee11ccd2eb896aa596ff46b4170146eb9",
+  "list_products": 13,
+  "list_response_characters": 10090,
+  "baseline_products": 12,
+  "baseline_response_characters": 8523,
+  "load_search_keyword": "iPhone",
+  "preflight_search_keyword": "QA Test Book",
+  "exit_code": 0,
+  "recovery_list_http": 200,
+  "recovery_seconds": 0.073803
+}
