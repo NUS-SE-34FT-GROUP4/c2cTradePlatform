@@ -39,27 +39,39 @@ public class SearchService {
 
     public List<ProductDTO> search(String keyword, BigDecimal minPrice, BigDecimal maxPrice,
             Integer conditionLevel, String location, String categories) {
+        long started = System.nanoTime();
         ProductSearchCriteria criteria = new ProductSearchCriteria(
                 keyword, minPrice, maxPrice, conditionLevel, location, categories);
 
         // Keep database failures outside the ES fallback boundary. A failed
         // authoritative query must not be reported as successful degradation.
+        long sqlStarted = System.nanoTime();
         List<Product> products = sqlSearch(criteria);
+        long sqlNanos = System.nanoTime() - sqlStarted;
+        long esNanos = 0;
         String path = "sql_browse";
         int rankedCount = 0;
         int missingCount = 0;
         int ignoredCount = 0;
-        if (criteria.hasKeyword()) {
+        if (criteria.hasKeyword() && products.size() <= 1) {
+            // Ranking cannot change zero or one SQL match. Still hydrate and
+            // highlight the authoritative result through the usual path below.
+            path = "sql_no_ranking_needed";
+        } else if (criteria.hasKeyword()) {
             List<Long> rankedIds;
+            long esStarted = System.nanoTime();
             try {
                 rankedIds = searchQuery.search(criteria);
             } catch (RuntimeException exception) {
+                esNanos = System.nanoTime() - esStarted;
                 // Do not log query text or client exception messages (which can
                 // include query bodies). Each request retries ES: no sticky outage.
                 log.warn("catalogue_search path=sql_fallback results={} reason={}",
                         products.size(), exception.getClass().getSimpleName());
-                return highlight(productService.convertToDTOList(products), criteria.keyword());
+                return finish(products, criteria, "sql_fallback", 0, products.size(), 0,
+                        started, sqlNanos, esNanos);
             }
+            esNanos = System.nanoTime() - esStarted;
             Map<Long, Product> remaining = new LinkedHashMap<>();
             products.forEach(product -> remaining.put(product.getId(), product));
             List<Product> ordered = new ArrayList<>(products.size());
@@ -78,9 +90,25 @@ public class SearchService {
             products = ordered;
             path = "elasticsearch_ranked";
         }
-        log.info("catalogue_search path={} results={} ranked={} sql_only={} ignored_es_hits={}",
-                path, products.size(), rankedCount, missingCount, ignoredCount);
-        return highlight(productService.convertToDTOList(products), criteria.keyword());
+        return finish(products, criteria, path, rankedCount, missingCount, ignoredCount,
+                started, sqlNanos, esNanos);
+    }
+
+    private List<ProductDTO> finish(List<Product> products, ProductSearchCriteria criteria,
+            String path, int rankedCount, int missingCount, int ignoredCount,
+            long started, long sqlNanos, long esNanos) {
+        long dtoStarted = System.nanoTime();
+        List<ProductDTO> result = highlight(productService.convertToDTOList(products), criteria.keyword());
+        long dtoNanos = System.nanoTime() - dtoStarted;
+        // SQL timing includes media hydration; DTO timing includes credit/seller
+        // queries and highlighting. ES timing includes client-side waiting.
+        // Never log keyword, location, query bodies or client exception messages.
+        log.info("catalogue_search path={} results={} ranked={} sql_only={} ignored_es_hits={} "
+                        + "sql_media_ms={} es_ms={} dto_highlight_ms={} total_ms={}",
+                path, products.size(), rankedCount, missingCount, ignoredCount,
+                sqlNanos / 1_000_000.0, esNanos / 1_000_000.0,
+                dtoNanos / 1_000_000.0, (System.nanoTime() - started) / 1_000_000.0);
+        return result;
     }
 
     private List<Product> sqlSearch(ProductSearchCriteria criteria) {

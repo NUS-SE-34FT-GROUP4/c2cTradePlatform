@@ -1,0 +1,13 @@
+{
+  "latest_successful_github_staging_sha": "3e816c9fe9a30c5c080d05a3d4ea022094f0cccc",
+  "deployment_id": 7248310901,
+  "live_container_digest": "not independently verified",
+  "PR142": "OPEN before and after",
+  "pending_deployment_id": 7255660996,
+  "pending_deployment_statuses": "empty before and after",
+  "script_sha256": "a624682f2bfeaa03db620c69a150e01ee11ccd2eb896aa596ff46b4170146eb9",
+  "effective_load_search_keyword": "iPhone",
+  "preflight_keyword": "QA Test Book",
+  "products": 12,
+  "exit_code": 0
+}

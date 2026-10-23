@@ -126,14 +126,17 @@ class SearchParityIT extends MySqlIntegrationTest {
         jdbc.update("UPDATE pms_product SET reserved_stock=stock WHERE id=9002");
         jdbc.update("UPDATE pms_product SET status=0 WHERE id=9003");
         insert(9010, "Parity campus phone new", "Written during outage", 25, 9, "Electronics", 1, 0, 1, "Kent Ridge");
-        assertResults(new DemoQuery("campus phone", null, "50", null, "Parity", null, Set.of(9010L)));
-        assertTrue(output.getOut().contains("sql_only=1"));
+        // Keep multiple SQL matches so this regression still exercises ES
+        // reconciliation instead of the zero/one-match ranking shortcut.
+        insert(9011, "Parity campus phone newer", "Also not indexed", 30, 9, "Electronics", 1, 0, 1, "Kent Ridge");
+        assertResults(new DemoQuery("campus phone", null, "50", null, "Parity", null, Set.of(9010L, 9011L)));
+        assertTrue(output.getOut().contains("sql_only=2"));
 
         // Even total index loss/recreation must not empty the catalogue.
         var indexOps = operations.indexOps(ProductSearchDocument.class);
         assertTrue(indexOps.delete());
         assertTrue(indexOps.createWithMapping());
-        assertResults(new DemoQuery("campus phone", null, "50", null, "Parity", null, Set.of(9010L)));
+        assertResults(new DemoQuery("campus phone", null, "50", null, "Parity", null, Set.of(9010L, 9011L)));
     }
 
     private void assertResults(DemoQuery demo) throws Exception {

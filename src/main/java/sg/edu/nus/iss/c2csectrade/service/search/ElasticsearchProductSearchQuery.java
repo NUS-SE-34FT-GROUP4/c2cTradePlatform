@@ -6,6 +6,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -87,6 +88,9 @@ public class ElasticsearchProductSearchQuery implements ProductSearchQuery {
                     }
                     return bool;
                 }))
+                // Filtering/ranking still use the full indexed document. Only
+                // the ID is needed in the response; display data comes from SQL.
+                .withSourceFilter(new FetchSourceFilter(new String[]{"id"}, null))
                 .withPageable(PageRequest.of(0, MAX_RESULTS))
                 .build();
     }
