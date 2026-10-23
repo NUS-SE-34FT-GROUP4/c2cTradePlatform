@@ -94,6 +94,9 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
       # The backend has no fallback key, so this must be set or it will not boot.
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      # The image tag is the commit it was built from, so the running container
+      # can report which commit is live on /actuator/info.
+      APP_VERSION: ${IMAGE_TAG:-latest}
     ports:
       - "${API_PORT:-8080}:8080"
     depends_on:
