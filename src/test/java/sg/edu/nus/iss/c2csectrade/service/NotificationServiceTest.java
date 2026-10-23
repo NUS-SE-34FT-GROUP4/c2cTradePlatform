@@ -19,6 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Delivery guarantees: one row per user, one push per user, and a failing
  * notification never propagates — the order flow that raised it must not care.
@@ -88,6 +97,89 @@ class NotificationServiceTest {
     @DisplayName("Marking read with an empty id list writes nothing")
     void markReadWithNoIdsIsNoop() {
         notificationService.markRead(USER_ID, List.of());
+        verify(notificationMapper, never()).markRead(anyLong(), anyList());
+    }
+
+    @Test
+    @DisplayName("When the user cannot be resolved we still persist but skip the push")
+    void deliverWithMissingUserSkipsPush() {
+        when(userMapper.selectById(USER_ID)).thenReturn(null);
+
+        notificationService.deliver(USER_ID, 500L, "Order A is now PAID.");
+
+        verify(notificationMapper).insert(any(SystemNotification.class));
+        verify(messagingTemplate, never()).convertAndSendToUser(anyString(), anyString(), any());
+    }
+
+    @Test
+    @DisplayName("History maps each row into the frontend toast contract")
+    void historyMapsRows() {
+        SystemNotification n = new SystemNotification();
+        n.setId(1L);
+        n.setOrderId(500L);
+        n.setContent("Order paid");
+        n.setReadFlag(1);
+        n.setCreatedAt(LocalDateTime.of(2026, 10, 22, 10, 0));
+
+        when(notificationMapper.selectForUser(USER_ID, 20)).thenReturn(List.of(n));
+
+        List<Map<String, Object>> items = notificationService.history(USER_ID, 20);
+
+        assertEquals(1, items.size());
+        Map<String, Object> item = items.get(0);
+        assertEquals(1L, item.get("id"));
+        assertEquals(500L, item.get("orderId"));
+        assertEquals("Order paid", item.get("content"));
+        assertTrue((Boolean) item.get("isSystemMessage"));
+        assertTrue((Boolean) item.get("isRead"));
+        assertEquals("2026-10-22T10:00", item.get("timestamp").toString());
+    }
+
+    @Test
+    @DisplayName("History falls back to now for a missing timestamp and treats non-1 readFlag as unread")
+    void historyFallsBackForNullTimestampAndReadFlag() {
+        SystemNotification n = new SystemNotification();
+        n.setId(2L);
+        n.setContent("Order shipped");
+        n.setReadFlag(0);
+        n.setCreatedAt(null);
+
+        when(notificationMapper.selectForUser(USER_ID, 20)).thenReturn(List.of(n));
+
+        List<Map<String, Object>> items = notificationService.history(USER_ID, 20);
+
+        assertEquals(1, items.size());
+        Map<String, Object> item = items.get(0);
+        assertFalse((Boolean) item.get("isRead"));
+        assertNotNull(item.get("timestamp"));
+        assertDoesNotThrow(() -> Instant.parse(item.get("timestamp").toString()));
+    }
+
+    @Test
+    @DisplayName("History with no rows returns an empty list")
+    void historyEmpty() {
+        when(notificationMapper.selectForUser(USER_ID, 20)).thenReturn(List.of());
+
+        List<Map<String, Object>> items = notificationService.history(USER_ID, 20);
+
+        assertTrue(items.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Marking read with ids delegates to the mapper")
+    void markReadWithIdsDelegates() {
+        when(notificationMapper.markRead(USER_ID, List.of(1L, 2L))).thenReturn(2);
+
+        int updated = notificationService.markRead(USER_ID, List.of(1L, 2L));
+
+        assertEquals(2, updated);
+        verify(notificationMapper).markRead(USER_ID, List.of(1L, 2L));
+    }
+
+    @Test
+    @DisplayName("Marking read with a null id list writes nothing")
+    void markReadWithNullIdsIsNoop() {
+        notificationService.markRead(USER_ID, null);
         verify(notificationMapper, never()).markRead(anyLong(), anyList());
     }
 }
