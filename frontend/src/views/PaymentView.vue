@@ -41,7 +41,7 @@
             placeholder="6-digit payment password"
             autocomplete="off"
           />
-          <p class="hint">All four methods verify the same payment password; the external ones are simulated and move no real money.</p>
+          <p class="hint">Every method verifies the same payment password; the external ones are simulated and move no real money.</p>
         </template>
       </section>
 

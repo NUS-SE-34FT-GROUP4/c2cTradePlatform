@@ -25,6 +25,13 @@
     <select id="selectById" resultMap="UserResultMap">
         SELECT * FROM users WHERE id = #{id}
     </select>
+    <select id="selectByIds" resultMap="UserResultMap">
+        SELECT * FROM users
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
     <select id="selectByUsername" resultMap="UserResultMap">
         SELECT * FROM users WHERE username = #{username}
     </select>

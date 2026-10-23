@@ -138,7 +138,7 @@ class ProductServiceTest {
     void listProductsWithFiltersDelegatesCriteria() {
         when(productMapper.selectWithFilters(eq("iPhone"), any(), any(), eq(9), eq("北京市"), eq("electronics")))
                 .thenReturn(List.of(sampleProduct()));
-        when(productMediaMapper.selectByProductId(1L)).thenReturn(List.of());
+        when(productMediaMapper.selectByProductIds(List.of(1L))).thenReturn(List.of());
 
         List<Product> products = productService.listProductsWithFilters(
                 "iPhone", null, null, 9, "北京市", "electronics");
@@ -153,12 +153,93 @@ class ProductServiceTest {
         Product second = sampleProduct();
         second.setId(2L);
         second.setName("ThinkPad X1 Carbon");
-        when(userMapper.selectById(101L)).thenReturn(null);
+        when(userMapper.selectByIds(List.of(101L))).thenReturn(List.of());
 
         List<ProductDTO> dtos = productService.convertToDTOList(List.of(sampleProduct(), second));
 
         assertEquals(2, dtos.size());
         assertEquals(1L, dtos.get(0).getId());
         assertEquals("ThinkPad X1 Carbon", dtos.get(1).getName());
+    }
+
+    // ---- One query per page, not one per listing (N+1 fix) ----
+
+    private Product productOf(long id, long sellerId) {
+        Product p = sampleProduct();
+        p.setId(id);
+        p.setUserId(sellerId);
+        return p;
+    }
+
+    private ProductMedia mediaOf(long id, long productId, String url) {
+        ProductMedia m = new ProductMedia();
+        m.setId(id);
+        m.setUrl(url);
+        m.setMediaType(1);
+        Product owner = new Product();
+        owner.setId(productId);
+        m.setProduct(owner);
+        return m;
+    }
+
+    @Test
+    @DisplayName("A page of listings loads all its media in one query and gives each listing its own")
+    void listingMediaIsLoadedOnceAndGroupedPerListing() {
+        when(productMapper.selectWithFilters(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(productOf(1, 101), productOf(2, 102), productOf(3, 101)));
+        when(productMediaMapper.selectByProductIds(List.of(1L, 2L, 3L))).thenReturn(List.of(
+                mediaOf(10, 1, "/a.jpg"), mediaOf(11, 2, "/b.jpg"), mediaOf(12, 1, "/c.jpg")));
+
+        List<Product> products = productService.listProductsWithFilters(null, null, null, null, null, null);
+
+        assertEquals(List.of("/a.jpg", "/c.jpg"), products.get(0).getMedia().stream().map(ProductMedia::getUrl).toList());
+        assertEquals(List.of("/b.jpg"), products.get(1).getMedia().stream().map(ProductMedia::getUrl).toList());
+        assertTrue(products.get(2).getMedia().isEmpty(), "a listing without media gets an empty list, not null");
+        verify(productMediaMapper, times(1)).selectByProductIds(any());
+        verify(productMediaMapper, never()).selectByProductId(any());
+    }
+
+    @Test
+    @DisplayName("Converting a page loads every seller in one query, once per distinct seller")
+    void sellersAreLoadedOncePerPage() {
+        User alice = new User();
+        alice.setId(101L);
+        alice.setUsername("alice");
+        User bob = new User();
+        bob.setId(102L);
+        bob.setUsername("bob");
+        when(userMapper.selectByIds(List.of(101L, 102L))).thenReturn(List.of(alice, bob));
+
+        List<ProductDTO> dtos = productService.convertToDTOList(
+                List.of(productOf(1, 101), productOf(2, 102), productOf(3, 101)));
+
+        assertEquals(List.of("alice", "bob", "alice"), dtos.stream().map(ProductDTO::getUsername).toList());
+        verify(userMapper, times(1)).selectByIds(any());
+        verify(userMapper, never()).selectById(any());
+    }
+
+    @Test
+    @DisplayName("Search results keep their relevance order and load media in one query")
+    void rankedListingsKeepOrderWithOneMediaQuery() {
+        when(productMapper.selectByIds(List.of(3L, 1L))).thenReturn(List.of(productOf(1, 101), productOf(3, 101)));
+        when(productMediaMapper.selectByProductIds(List.of(3L, 1L))).thenReturn(List.of(mediaOf(30, 3, "/x.jpg")));
+
+        List<Product> products = productService.listProductsByIdsInOrder(List.of(3L, 1L));
+
+        assertEquals(List.of(3L, 1L), products.stream().map(Product::getId).toList());
+        assertEquals("/x.jpg", products.get(0).getMedia().get(0).getUrl());
+        verify(productMediaMapper, times(1)).selectByProductIds(any());
+    }
+
+    @Test
+    @DisplayName("An empty page sends no media or seller query at all (IN () is invalid SQL)")
+    void emptyPageSendsNoBatchQueries() {
+        when(productMapper.selectWithFilters(any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+
+        List<Product> products = productService.listProductsWithFilters(null, null, null, null, null, null);
+        productService.convertToDTOList(products);
+
+        assertTrue(products.isEmpty());
+        verifyNoInteractions(productMediaMapper, userMapper);
     }
 }

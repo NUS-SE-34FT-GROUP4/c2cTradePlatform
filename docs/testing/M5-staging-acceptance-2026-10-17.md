@@ -5,6 +5,8 @@ Timezone: Asia/Singapore. Execution: manual browser walkthrough with dedicated b
 
 This is partial UI acceptance, not a complete sign-off against the Sprint 4 acceptance plan. Results below describe visible behavior; database ledger correctness, concurrency and API authorization require separate evidence. Account secrets and raw transaction identifiers are excluded.
 
+Follow-up execution: [21 October results](M5-staging-followup-2026-10-21.md). The original observations below remain historical.
+
 ## Summary
 
 Core purchase, refund, review, negotiated purchase and tested campaign paths passed their observed UI checks. Parent-category filtering failed. This report is not full system acceptance: administrator workflows, concurrency, ledger invariants, operational recovery and deployed-version verification remain outstanding. PASS applies only to the stated steps. Evidence consists of live browser observations recorded during the session; screenshots, network traces and database extracts are not included.

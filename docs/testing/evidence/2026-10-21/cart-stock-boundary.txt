@@ -1,0 +1,30 @@
+Browser tab: 90, Title: "SecTrade - C2C Marketplace", URL: "http://178.128.107.99/cart".
+0 AXWebArea SecTrade - C2C Marketplace, URL: 178.128.107.99/cart
+	1 container app
+		2 container
+			3 image cui_qa_buyer
+			4 text cui_qa_buyer
+			5 link Description: Cart, Value: 178.128.107.99/cart
+		6 heading Cart, Value: 1
+			7 text Cart
+		8 container
+			9 container
+				10 checkbox (settable, integer) Description: Seller #107, Value: 1
+				11 text Seller #107
+			12 text becomes 1 order
+			13 content list
+				14 container
+					15 checkbox (settable, integer) 1
+					16 link Description: QA Test Book - CUI, Value: 178.128.107.99/products/13
+					17 text 7 available
+					18 button -
+					26 text 7
+					20 button +
+					27 text S$7.00
+					22 button Remove
+		29 text Only 7 left of QA Test Book - CUI
+		23 container
+			28 text S$7.00 1 item(s) across 1 seller(s)
+			25 button Checkout (1 order(s))
+
+The focused UI element is 20 button +

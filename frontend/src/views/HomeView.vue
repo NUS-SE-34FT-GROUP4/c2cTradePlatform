@@ -255,11 +255,12 @@ const getCategoryFilter = () => {
   if (filters.value.subCategory) {
     return filters.value.subCategory;
   }
-  // If only main category selected, return comma-separated string of all subcategories
+  // If only main category selected, match the main category itself as well as
+  // its subcategories: a listing is stored under whichever one it was published with
   if (filters.value.mainCategory) {
     const mainCat = categories.find(cat => cat.value === filters.value.mainCategory);
     if (mainCat) {
-      return mainCat.subcategories.map(sub => sub.value).join(',');
+      return [mainCat.value, ...mainCat.subcategories.map(sub => sub.value)].join(',');
     }
   }
   return '';
@@ -480,14 +481,7 @@ const startChat = (product) => {
     return;
   }
 
-  window.dispatchEvent(new CustomEvent('open-chat', {
-    detail: {
-      username: product.username || product.displayName,
-      displayName: product.displayName || product.username,
-      userId: product.userId,
-      avatarUrl: product.avatarUrl || null
-    }
-  }));
+  router.push({ path: '/chat', query: { withUserId: product.userId, productId: product.id } });
 };
 
 const goToProduct = (productId) => {

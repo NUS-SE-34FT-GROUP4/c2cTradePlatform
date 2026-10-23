@@ -9,7 +9,8 @@
     "test:bargain": "node --test tests/bargain*.test.mjs",
     "test:admin": "node --test tests/admin*.test.mjs",
     "test:cart": "node --test tests/cart*.test.mjs",
-    "test:order-time": "TZ=Asia/Singapore node --test tests/order-time.test.mjs"
+    "test:order-time": "TZ=Asia/Singapore node --test tests/order-time.test.mjs",
+    "test:entries": "node --test tests/entry-points.test.mjs"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.2.1",
