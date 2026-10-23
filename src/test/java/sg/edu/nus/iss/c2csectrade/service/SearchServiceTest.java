@@ -1,10 +1,13 @@
 package sg.edu.nus.iss.c2csectrade.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import sg.edu.nus.iss.c2csectrade.dto.ProductDTO;
@@ -28,9 +31,20 @@ class SearchServiceTest {
 
     private SearchService searchService;
 
+    // The per-search timing line is DEBUG; the tests that read it switch it on.
+    private final Logger searchLog = (Logger) LoggerFactory.getLogger(SearchService.class);
+    private Level previousLevel;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
         searchService = new SearchService(searchQuery, productService);
+        previousLevel = searchLog.getLevel();
+        searchLog.setLevel(Level.DEBUG);
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void restoreLogLevel() {
+        searchLog.setLevel(previousLevel);
     }
 
     private ProductDTO dto(String name, String description) {
@@ -208,6 +222,27 @@ class SearchServiceTest {
         assertThrows(IllegalStateException.class,
                 () -> searchService.search("phone", null, null, null, null, null));
         verify(productService).listProductsWithFilters("phone", null, null, null, null, null);
+    }
+
+    @Test
+    @DisplayName("At INFO, a search writes no per-request line, but a fallback still warns")
+    void timingLineIsDebugOnly(CapturedOutput output) {
+        searchLog.setLevel(Level.INFO);
+        List<Product> sqlProducts = List.of(product(3L), product(4L));
+        when(productService.listProductsWithFilters(null, null, null, null, null, null))
+                .thenReturn(sqlProducts);
+        when(productService.listProductsWithFilters("charger", null, null, null, null, null))
+                .thenReturn(sqlProducts);
+        when(productService.convertToDTOList(sqlProducts)).thenReturn(new ArrayList<>());
+        when(searchQuery.search(any(ProductSearchCriteria.class)))
+                .thenThrow(new IllegalStateException("connection refused"));
+
+        searchService.search(null, null, null, null, null, null);
+        assertFalse(output.getOut().contains("catalogue_search"));
+
+        searchService.search("charger", null, null, null, null, null);
+        assertTrue(output.getOut().contains("path=sql_fallback"));
+        assertFalse(output.getOut().contains("total_ms="));
     }
 
     @Test
