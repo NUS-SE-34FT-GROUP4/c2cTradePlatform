@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,6 +64,7 @@ class ElasticsearchProductSearchQueryTest {
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
         verify(operations).search(captor.capture(), eq(ProductSearchDocument.class));
         NativeQuery nativeQuery = captor.getValue();
+        assertArrayEquals(new String[]{"id"}, nativeQuery.getSourceFilter().getIncludes());
         BoolQuery bool = nativeQuery.getQuery().bool();
         assertEquals(List.of("name^4", "category^2", "description"),
                 bool.must().get(0).multiMatch().fields());
