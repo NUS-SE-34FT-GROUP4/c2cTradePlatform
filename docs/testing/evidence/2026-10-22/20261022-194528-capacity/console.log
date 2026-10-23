@@ -1,0 +1,397 @@
+
+         /\      Grafana   /‾‾/
+    /\  /  \     |\  __   /  /
+   /  \/    \    | |/ /  /   ‾‾\
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/
+
+
+     execution: local
+        script: /scripts/read-workload.js
+        output: json (/results/timeseries.json)
+
+     scenarios: (100.00%) 1 scenario, 200 max VUs, 3m10s max duration (incl. graceful stop):
+              * reads: 200 looping VUs for 3m0s (gracefulStop: 10s)
+
+time="2026-10-22T11:45:30Z" level=info msg="{\"base\":\"http://178.128.107.99\",\"profile\":\"capacity\",\"vus\":200,\"duration\":\"3m\",\"keywords\":[\"QA Test Book\",\"iPhone\"],\"thinkTimeSeconds\":1,\"note\":\"Read-only; VUs are clients, not requests/second; two setup requests excluded from read_ms.\"}" source=console
+time="2026-10-22T11:45:30Z" level=info msg="{\"event\":\"preflight\",\"operation\":\"list\",\"status\":200,\"items\":12,\"bodyCharacters\":8523}" source=console
+time="2026-10-22T11:45:30Z" level=info msg="{\"event\":\"preflight\",\"operation\":\"search\",\"status\":200,\"items\":1,\"bodyCharacters\":783}" source=console
+
+running (0m01.0s), 200/200 VUs, 0 complete and 0 interrupted iterations
+reads   [   0% ] 200 VUs  0m00.9s/3m0s
+
+running (0m02.0s), 200/200 VUs, 16 complete and 0 interrupted iterations
+reads   [   1% ] 200 VUs  0m01.9s/3m0s
+
+running (0m03.0s), 200/200 VUs, 58 complete and 0 interrupted iterations
+reads   [   2% ] 200 VUs  0m02.9s/3m0s
+
+running (0m04.0s), 200/200 VUs, 84 complete and 0 interrupted iterations
+reads   [   2% ] 200 VUs  0m03.9s/3m0s
+
+running (0m05.0s), 200/200 VUs, 105 complete and 0 interrupted iterations
+reads   [   3% ] 200 VUs  0m04.9s/3m0s
+
+running (0m06.0s), 200/200 VUs, 128 complete and 0 interrupted iterations
+reads   [   3% ] 200 VUs  0m05.9s/3m0s
+
+running (0m07.0s), 200/200 VUs, 143 complete and 0 interrupted iterations
+reads   [   4% ] 200 VUs  0m06.9s/3m0s
+
+running (0m08.0s), 200/200 VUs, 171 complete and 0 interrupted iterations
+reads   [   4% ] 200 VUs  0m07.9s/3m0s
+
+running (0m09.0s), 200/200 VUs, 203 complete and 0 interrupted iterations
+reads   [   5% ] 200 VUs  0m08.9s/3m0s
+
+running (0m10.0s), 200/200 VUs, 229 complete and 0 interrupted iterations
+reads   [   5% ] 200 VUs  0m09.9s/3m0s
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:40Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+
+running (0m11.0s), 200/200 VUs, 262 complete and 0 interrupted iterations
+reads   [   6% ] 200 VUs  0m10.9s/3m0s
+time="2026-10-22T11:45:41Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:41Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+
+running (0m12.0s), 200/200 VUs, 309 complete and 0 interrupted iterations
+reads   [   7% ] 200 VUs  0m11.9s/3m0s
+time="2026-10-22T11:45:42Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:42Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+time="2026-10-22T11:45:42Z" level=warning msg="Request Failed" error="Get \"http://178.128.107.99/api/products?keyword=iPhone\": request timeout"
+time="2026-10-22T11:45:42Z" level=warning msg="{\"operation\":\"search\",\"status\":0,\"error\":\"request timeout\"}" source=console
+
+running (0m13.0s), 200/200 VUs, 329 complete and 0 interrupted iterations
+reads   [   7% ] 200 VUs  0m12.9s/3m0s
+
+running (0m14.0s), 200/200 VUs, 371 complete and 0 interrupted iterations
+reads   [   8% ] 200 VUs  0m13.9s/3m0s
+
+running (0m15.0s), 200/200 VUs, 421 complete and 0 interrupted iterations
+reads   [   8% ] 200 VUs  0m14.9s/3m0s
+
+running (0m16.0s), 200/200 VUs, 451 complete and 0 interrupted iterations
+reads   [   9% ] 200 VUs  0m15.9s/3m0s
+
+running (0m17.0s), 200/200 VUs, 505 complete and 0 interrupted iterations
+reads   [   9% ] 200 VUs  0m16.9s/3m0s
+
+running (0m18.0s), 200/200 VUs, 523 complete and 0 interrupted iterations
+reads   [  10% ] 200 VUs  0m17.9s/3m0s
+
+running (0m19.0s), 200/200 VUs, 578 complete and 0 interrupted iterations
+reads   [  10% ] 200 VUs  0m18.9s/3m0s
+
+running (0m20.0s), 200/200 VUs, 604 complete and 0 interrupted iterations
+reads   [  11% ] 200 VUs  0m19.9s/3m0s
+
+running (0m21.0s), 200/200 VUs, 648 complete and 0 interrupted iterations
+reads   [  12% ] 200 VUs  0m20.9s/3m0s
+
+running (0m22.0s), 200/200 VUs, 671 complete and 0 interrupted iterations
+reads   [  12% ] 200 VUs  0m21.9s/3m0s
+{
+  "profile": "capacity",
+  "metrics": {
+    "data_sent": {
+      "values": {
+        "count": 78691,
+        "rate": 3574.6749788885145
+      },
+      "type": "counter",
+      "contains": "data"
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.975103734439834,
+        "passes": 705,
+        "fails": 18
+      }
+    },
+    "http_req_tls_handshaking": {
+      "contains": "time",
+      "values": {
+        "max": 0,
+        "min": 0,
+        "med": 0,
+        "p(95)": 0,
+        "p(99)": 0
+      },
+      "type": "trend"
+    },
+    "business_errors": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.024896265560165973,
+        "passes": 18,
+        "fails": 705
+      },
+      "thresholds": {
+        "rate<0.01": {
+          "ok": false
+        }
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 36.475083,
+        "med": 4003.150085,
+        "p(95)": 8548.025557899999,
+        "p(99)": 9416.187357499999,
+        "max": 9602.688838
+      }
+    },
+    "vus_max": {
+      "values": {
+        "max": 200,
+        "value": 200,
+        "min": 200
+      },
+      "type": "gauge",
+      "contains": "default"
+    },
+    "iterations": {
+      "values": {
+        "count": 671,
+        "rate": 30.4813372664497
+      },
+      "type": "counter",
+      "contains": "default"
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.02482758620689655,
+        "passes": 18,
+        "fails": 707
+      }
+    },
+    "read_ms{operation:list}": {
+      "contains": "time",
+      "values": {
+        "p(95)": 6554.0451867,
+        "p(99)": 8008.4860014999995,
+        "max": 8946.986338,
+        "min": 225.832417,
+        "med": 1607.872959
+      },
+      "thresholds": {
+        "med<1000": {
+          "ok": false
+        },
+        "p(95)<2000": {
+          "ok": false
+        }
+      },
+      "type": "trend"
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0,
+        "med": 41.051958,
+        "p(95)": 178.727142,
+        "p(99)": 341.8659468399998,
+        "max": 796.066875
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "rate": 32.93438080205072,
+        "count": 725
+      }
+    },
+    "read_ms{operation:search}": {
+      "values": {
+        "min": 280.437208,
+        "med": 7221.663441,
+        "p(95)": 9932.90365075,
+        "p(99)": 9946.81736115,
+        "max": 10003.893255
+      },
+      "thresholds": {
+        "med<1000": {
+          "ok": false
+        },
+        "p(95)<2000": {
+          "ok": false
+        }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 4244440,
+        "rate": 192811.03896752573
+      }
+    },
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(99)": 9944.47065616,
+        "max": 10003.893255,
+        "min": 36.475083,
+        "med": 4328.549294,
+        "p(95)": 8948.7858716
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 200,
+        "min": 200,
+        "max": 200
+      }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0,
+        "med": 0,
+        "p(95)": 55.5792498,
+        "p(99)": 62.963562079999996,
+        "max": 69.616958
+      }
+    },
+    "failed_requests": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 18,
+        "rate": 0.8176811785336731
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0.001625,
+        "med": 0.009875,
+        "p(95)": 55.597592,
+        "p(99)": 62.993581999999996,
+        "max": 69.949333
+      }
+    },
+    "response_chars": {
+      "type": "trend",
+      "contains": "default",
+      "values": {
+        "max": 8523,
+        "min": 0,
+        "med": 8523,
+        "p(95)": 8523,
+        "p(99)": 8523
+      }
+    },
+    "returned_items": {
+      "type": "trend",
+      "contains": "default",
+      "values": {
+        "max": 12,
+        "min": 1,
+        "med": 12,
+        "p(95)": 12,
+        "p(99)": 12
+      }
+    },
+    "read_ms": {
+      "values": {
+        "min": 225.832417,
+        "med": 4348.878419,
+        "p(95)": 8949.0108133,
+        "p(99)": 9944.54352198,
+        "max": 10003.893255
+      },
+      "thresholds": {
+        "med<1000": {
+          "ok": false
+        },
+        "p(95)<2000": {
+          "ok": false
+        }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0.002916,
+        "med": 0.026083,
+        "p(95)": 0.08125859999999997,
+        "p(99)": 0.12071115999999998,
+        "max": 0.2575
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(99)": 9944.46434616,
+        "max": 10003.847422,
+        "min": 36.385625,
+        "med": 4237.308252,
+        "p(95)": 8942.192578799999
+      }
+    },
+    "iteration_duration": {
+      "values": {
+        "min": 1227.09525,
+        "med": 4985.414085,
+        "p(95)": 10046.2579425,
+        "p(99)": 11002.969113699999,
+        "max": 11006.112672
+      },
+      "type": "trend",
+      "contains": "time"
+    }
+  }
+}
+
+running (0m22.0s), 000/200 VUs, 671 complete and 1905 interrupted iterations
+reads ✗ [  12% ] 200 VUs  0m21.9s/3m0s
+time="2026-10-22T11:45:52Z" level=error msg="thresholds on metrics 'business_errors, read_ms, read_ms{operation:list}, read_ms{operation:search}' were crossed; at least one has abortOnFail enabled, stopping test prematurely"
