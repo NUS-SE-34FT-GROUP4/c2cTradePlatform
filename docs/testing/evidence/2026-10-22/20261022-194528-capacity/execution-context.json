@@ -1,0 +1,17 @@
+{
+  "base_url": "http://178.128.107.99",
+  "profile": "capacity",
+  "vus": 200,
+  "planned_duration": "3m",
+  "observed_duration_seconds": 22.013469886,
+  "exit_code": 99,
+  "script_sha256": "a624682f2bfeaa03db620c69a150e01ee11ccd2eb896aa596ff46b4170146eb9",
+  "deployed_sha": "unverified",
+  "instance_count": "unverified",
+  "dataset_products": 12,
+  "recovery_probe": {
+    "http_status": 200,
+    "duration_seconds": 0.053986
+  },
+  "note": "18 search request timeouts; error guard aborted. No steady-state capacity established."
+}
