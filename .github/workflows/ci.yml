@@ -343,15 +343,32 @@ jobs:
         id: smoke
         if: steps.configured.outputs.ready == 'true'
         run: |
+          healthy=
           for attempt in $(seq 1 30); do
             if curl -fsS "http://${{ secrets.STAGING_HOST }}:8080/actuator/health" | grep -q '"status":"UP"'; then
-              echo "Staging is up."
-              exit 0
+              healthy=yes
+              break
             fi
             sleep 5
           done
-          echo "Staging did not become healthy within 150s."
-          exit 1
+          if [ -z "$healthy" ]; then
+            echo "Staging did not become healthy within 150s."
+            exit 1
+          fi
+          echo "Staging is up."
+          # The image is tagged with the commit, and the application reports that
+          # tag back, so the run can show which commit is live instead of assuming.
+          VERSION=$(curl -fsS "http://${{ secrets.STAGING_HOST }}:8080/actuator/info" \
+            | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
+          if [ -z "$VERSION" ]; then
+            echo "::warning::Staging did not report a version, so the live commit is unconfirmed."
+          elif [ "$VERSION" != "${{ github.sha }}" ]; then
+            echo "Staging reports $VERSION, but this run deployed ${{ github.sha }}."
+            exit 1
+          else
+            echo "Staging is running ${{ github.sha }}." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
 
       # .live-backend is what rollback.yml reads; deploy-history.log is the audit trail.
       - name: Record the live version
@@ -538,15 +555,32 @@ jobs:
       - name: Smoke test
         if: steps.configured.outputs.ready == 'true'
         run: |
+          healthy=
           for attempt in $(seq 1 30); do
             if curl -fsS "http://${{ secrets.STAGING_HOST }}:${{ env.API_PORT }}/actuator/health" | grep -q '"status":"UP"'; then
-              echo "Production is up."
-              exit 0
+              healthy=yes
+              break
             fi
             sleep 5
           done
-          echo "Production did not become healthy within 150s."
-          exit 1
+          if [ -z "$healthy" ]; then
+            echo "Production did not become healthy within 150s."
+            exit 1
+          fi
+          echo "Production is up."
+          # The image is tagged with the commit, and the application reports that
+          # tag back, so the run can show which commit is live instead of assuming.
+          VERSION=$(curl -fsS "http://${{ secrets.STAGING_HOST }}:${{ env.API_PORT }}/actuator/info" \
+            | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
+          if [ -z "$VERSION" ]; then
+            echo "::warning::Production did not report a version, so the live commit is unconfirmed."
+          elif [ "$VERSION" != "${{ github.sha }}" ]; then
+            echo "Production reports $VERSION, but this run deployed ${{ github.sha }}."
+            exit 1
+          else
+            echo "Production is running ${{ github.sha }}." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
 
       - name: Record the live version
         if: steps.configured.outputs.ready == 'true'
