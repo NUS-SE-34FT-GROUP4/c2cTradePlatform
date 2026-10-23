@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import sg.edu.nus.iss.c2csectrade.dto.ProductDTO;
 import sg.edu.nus.iss.c2csectrade.entity.Product;
 import sg.edu.nus.iss.c2csectrade.service.search.ProductSearchCriteria;
@@ -18,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 class SearchServiceTest {
 
     @Mock private ProductSearchQuery searchQuery;
@@ -90,10 +92,11 @@ class SearchServiceTest {
 
     @Test
     @DisplayName("An Elasticsearch outage falls back to the existing SQL query")
-    void fallsBackToSqlWhenElasticsearchIsUnavailable() {
+    void fallsBackToSqlWhenElasticsearchIsUnavailable(CapturedOutput output) {
         Product product = product(3L);
-        List<Product> sqlProducts = List.of(product);
-        List<ProductDTO> sqlDtos = new ArrayList<>(List.of(dto("Phone charger", "USB-C charger")));
+        List<Product> sqlProducts = List.of(product, product(4L));
+        List<ProductDTO> sqlDtos = new ArrayList<>(List.of(
+                dto("Phone charger", "USB-C charger"), dto("Spare charger", "Travel charger")));
         when(searchQuery.search(any(ProductSearchCriteria.class)))
                 .thenThrow(new IllegalStateException("connection refused"));
         when(productService.listProductsWithFilters(
@@ -106,8 +109,14 @@ class SearchServiceTest {
                 "charger", new BigDecimal("5.00"), new BigDecimal("50.00"),
                 8, "Kent Ridge", "electronics");
 
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
         assertEquals("Phone <mark>charger</mark>", result.get(0).getHighlightedName());
+        assertTrue(output.getOut().contains("path=sql_fallback"));
+        assertTrue(output.getOut().contains("sql_media_ms="));
+        assertTrue(output.getOut().contains("es_ms="));
+        assertTrue(output.getOut().contains("dto_highlight_ms="));
+        assertTrue(output.getOut().contains("total_ms="));
+        assertFalse(output.getAll().contains("connection refused"));
         verify(productService).listProductsWithFilters(
                 "charger", new BigDecimal("5.00"), new BigDecimal("50.00"),
                 8, "Kent Ridge", "electronics");
@@ -142,7 +151,7 @@ class SearchServiceTest {
 
     @Test
     void anEmptyIndexCannotHideSqlMatches() {
-        List<Product> products = List.of(product(4L));
+        List<Product> products = List.of(product(4L), product(5L));
         when(productService.listProductsWithFilters("C++", null, null, null, null, null))
                 .thenReturn(products);
         when(searchQuery.search(any())).thenReturn(List.of());
@@ -190,15 +199,51 @@ class SearchServiceTest {
 
     @Test
     void dtoConversionFailureIsNotCaughtAsAnEsFailure() {
-        List<Product> products = List.of(product(1L));
+        List<Product> products = List.of(product(1L), product(2L));
         when(productService.listProductsWithFilters("phone", null, null, null, null, null))
                 .thenReturn(products);
-        when(searchQuery.search(any())).thenReturn(List.of(1L));
+        when(searchQuery.search(any())).thenReturn(List.of(1L, 2L));
         when(productService.convertToDTOList(products)).thenThrow(new IllegalStateException("credit unavailable"));
 
         assertThrows(IllegalStateException.class,
                 () -> searchService.search("phone", null, null, null, null, null));
         verify(productService).listProductsWithFilters("phone", null, null, null, null, null);
+    }
+
+    @Test
+    void noSqlMatchesSkipEsEvenWithAKeyword(CapturedOutput output) {
+        when(productService.listProductsWithFilters("private-term", null, null, null, null, null))
+                .thenReturn(List.of());
+        when(productService.convertToDTOList(List.of())).thenReturn(List.of());
+
+        assertTrue(searchService.search("private-term", null, null, null, null, null).isEmpty());
+
+        verifyNoInteractions(searchQuery);
+        assertTrue(output.getOut().contains("path=sql_no_ranking_needed"));
+        assertTrue(output.getOut().contains("es_ms=0.0"));
+        assertFalse(output.getAll().contains("private-term"));
+    }
+
+    @Test
+    void singleSqlMatchSkipsEsAndPreservesDetailsAndHighlighting() {
+        List<Product> products = List.of(product(7L));
+        ProductDTO detail = dto("Phone charger", "USB-C charger");
+        detail.setId(7L);
+        detail.setPrice(new BigDecimal("12.50"));
+        List<ProductDTO> hydrated = new ArrayList<>(List.of(detail));
+        when(productService.listProductsWithFilters("charger", null, null, null, null, null))
+                .thenReturn(products);
+        when(productService.convertToDTOList(products)).thenReturn(hydrated);
+
+        List<ProductDTO> result = searchService.search("charger", null, null, null, null, null);
+
+        verifyNoInteractions(searchQuery);
+        assertSame(hydrated, result);
+        assertEquals(7L, result.get(0).getId());
+        assertEquals(new BigDecimal("12.50"), result.get(0).getPrice());
+        assertEquals("Phone charger", result.get(0).getName());
+        assertEquals("Phone <mark>charger</mark>", result.get(0).getHighlightedName());
+        assertEquals("USB-C <mark>charger</mark>", result.get(0).getHighlightedDescription());
     }
 
     @Test
