@@ -113,3 +113,15 @@ knows the other's name.
 - Hand-check on staging: pay an order as the buyer; the seller's browser shows the toast
   without a refresh; a user who logs in later sees the unread message from
   `/api/chat/history/system`.
+
+## Diagrams
+
+The diagrams the report template counts are delivered with this document:
+
+- `diagrams/m4-notification/` — the design problem, before and after the pattern:
+  class (`01-before-class`, `02-after-class`) and sequence (`03-before-sequence`,
+  `04-after-sequence`), each as native `.drawio` next to its exported `.png`.
+- `diagrams/m4-bargain/` — the bargain-for-an-item use case (§3.4): analysis class
+  (`01-analysis-class`), analysis sequence (`02-analysis-sequence`), design class
+  (`03-design-class`) and design sequence (`04-design-sequence`). Every box names a
+  class that exists in main today.
