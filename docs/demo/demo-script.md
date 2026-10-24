@@ -160,7 +160,7 @@ on stage.
 |---|---|---|
 | Buyer window: home → search `Algorithms` → open product 4 | detail page, S$55.00, 20 available | — |
 | Add to cart → `/cart` | the book, quantity 1 | — |
-| Checkout | order detail `/orders/:id`, status **PENDING_PAYMENT** | "The order exists, but nothing has been paid and nothing has been deducted. The stock is *reserved*, not removed — the reservation is held in Redis with an expiry, so an order nobody pays for releases its stock by itself instead of needing a clean-up job to notice." |
+| Checkout | order detail `/orders/:id`, status **PENDING_PAYMENT** | "The order exists, but nothing has been paid and nothing has been deducted. The stock is *reserved*, not removed — the reservation is a column on the product, and a scheduled job sweeps every minute and expires anything past its fifteen-minute payment window. It releases the reservation through the same conditional update as every other transition, so an unpaid order cannot hold stock indefinitely, and two instances sweeping at once cannot release it twice." |
 
 Point at the status. It is the first of four states the audience will see.
 
