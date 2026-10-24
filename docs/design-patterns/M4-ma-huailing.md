@@ -113,3 +113,8 @@ knows the other's name.
 - Hand-check on staging: pay an order as the buyer; the seller's browser shows the toast
   without a refresh; a user who logs in later sees the unread message from
   `/api/chat/history/system`.
+
+## Diagrams
+
+UML diagrams for this design problem are deferred to the Sprint 5 UML pack (#99),
+which pairs the notification design problem with the bargain-for-an-item flow.
