@@ -106,7 +106,7 @@ class JwtTokenProviderTest {
     @DisplayName("Startup fails when the secret is too short for HS512")
     void shortSecretFailsStartup() {
         // 32 bytes: enough for HS256, too short for the HS512 this provider signs with
-        ReflectionTestUtils.setField(jwtTokenProvider, "jwtSecret", "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=");
+        ReflectionTestUtils.setField(jwtTokenProvider, "jwtSecret", "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=");  // gitleaks:allow - deliberately short test fixture, not a credential
 
         IllegalStateException error = assertThrows(IllegalStateException.class, jwtTokenProvider::validateSecret);
         assertTrue(error.getMessage().contains("at least 64 bytes"));
