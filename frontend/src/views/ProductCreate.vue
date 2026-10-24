@@ -2,7 +2,12 @@
   <div class="publish">
     <h1>{{ isEditing ? 'Edit listing' : 'List an item' }}</h1>
 
-    <form class="form" @submit.prevent="submit">
+    <p v-if="denied" class="error">
+      You can only edit your own listings.
+      <router-link :to="`/products/${$route.params.id}`">Back to the listing</router-link>
+    </p>
+
+    <form v-else class="form" @submit.prevent="submit">
       <label>
         <span>Title</span>
         <input v-model="form.name" type="text" maxlength="255" required />
@@ -75,6 +80,7 @@
 <script>
 import { listings } from '@/api/marketplaceService';
 import productService from '@/api/productService';
+import { useAuthStore } from '@/store/auth';
 
 export default {
   name: 'ProductCreate',
@@ -92,6 +98,7 @@ export default {
       },
       dragFrom: null,
       busy: false,
+      denied: false,
       error: '',
     };
   },
@@ -103,6 +110,12 @@ export default {
   async created() {
     if (this.isEditing) {
       const { data } = await productService.getProductById(this.$route.params.id);
+      // The backend refuses a save from anyone but the seller; say so before
+      // the form is filled in rather than after it is submitted.
+      if (data.userId !== useAuthStore().user?.id) {
+        this.denied = true;
+        return;
+      }
       Object.assign(this.form, {
         name: data.name,
         description: data.description,
