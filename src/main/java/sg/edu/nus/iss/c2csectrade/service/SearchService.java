@@ -103,11 +103,15 @@ public class SearchService {
         // SQL timing includes media hydration; DTO timing includes credit/seller
         // queries and highlighting. ES timing includes client-side waiting.
         // Never log keyword, location, query bodies or client exception messages.
-        log.info("catalogue_search path={} results={} ranked={} sql_only={} ignored_es_hits={} "
-                        + "sql_media_ms={} es_ms={} dto_highlight_ms={} total_ms={}",
-                path, products.size(), rankedCount, missingCount, ignoredCount,
-                sqlNanos / 1_000_000.0, esNanos / 1_000_000.0,
-                dtoNanos / 1_000_000.0, (System.nanoTime() - started) / 1_000_000.0);
+        // DEBUG, not INFO: one synchronous console line per request queued request
+        // threads on logback's lock under load (docs/testing/search-ranking-overhead.md).
+        if (log.isDebugEnabled()) {
+            log.debug("catalogue_search path={} results={} ranked={} sql_only={} ignored_es_hits={} "
+                            + "sql_media_ms={} es_ms={} dto_highlight_ms={} total_ms={}",
+                    path, products.size(), rankedCount, missingCount, ignoredCount,
+                    sqlNanos / 1_000_000.0, esNanos / 1_000_000.0,
+                    dtoNanos / 1_000_000.0, (System.nanoTime() - started) / 1_000_000.0);
+        }
         return result;
     }
 

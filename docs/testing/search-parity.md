@@ -32,7 +32,8 @@ not implement an indexing retry queue, but missed rows remain discoverable.
 
 ## Observable paths
 
-SearchService writes one path event per successful membership/ranking selection:
+SearchService writes one path event per successful membership/ranking selection (DEBUG
+level; see `search-ranking-overhead.md` for how to enable it):
 
 - `catalogue_search path=elasticsearch_ranked results=... ranked=... sql_only=... ignored_es_hits=...`
 - `catalogue_search path=sql_fallback results=... reason=...`
