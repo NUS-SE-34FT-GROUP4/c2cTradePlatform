@@ -6,7 +6,13 @@ and highlighting still run. Multi-match ordering, SQL-only matches, the 1,000-hi
 ES limit and outage fallback are unchanged. ES responses include only the `id`
 source field; indexed fields still participate in filtering and scoring.
 
-Each completed search logs its path and monotonic elapsed milliseconds:
+Each completed search logs its path and monotonic elapsed milliseconds at DEBUG.
+The line used to be INFO, but on the one-vCPU staging host the 24 October capacity run
+found 13 of 62 busy request threads queued on logback's console lock behind it. Turn it on
+only while diagnosing, e.g. `LOGGING_LEVEL_SG_EDU_NUS_ISS_C2CSECTRADE_SERVICE_SEARCHSERVICE=DEBUG`
+on the backend container. `sql_fallback` stays a WARN and is always logged.
+
+Fields:
 
 - `sql_media_ms`: SQL membership query and media hydration.
 - `es_ms`: ES adapter wall time, including client waiting; zero when skipped.

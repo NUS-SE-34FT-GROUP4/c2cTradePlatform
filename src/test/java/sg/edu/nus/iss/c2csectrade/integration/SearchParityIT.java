@@ -1,11 +1,15 @@
 package sg.edu.nus.iss.c2csectrade.integration;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -64,8 +68,14 @@ class SearchParityIT extends MySqlIntegrationTest {
     @Autowired ElasticsearchOperations operations;
     @Autowired SearchService service;
 
+    // The assertions read the per-search path line, which is DEBUG.
+    private final Logger searchLog = (Logger) LoggerFactory.getLogger(SearchService.class);
+    private Level previousLevel;
+
     @BeforeEach
     void fixtures() {
+        previousLevel = searchLog.getLevel();
+        searchLog.setLevel(Level.DEBUG);
         insert(9001, "Parity campus phone", "Budget device", 100, 9, "Electronics", 1, 0, 1, "Kent Ridge");
         insert(9002, "Parity campus phone case", "Protects a phone", 20, 8, "Electronics", 2, 0, 1, "West Coast");
         insert(9003, "Parity textbook", "A campus phone comparison", 40, 9, "Books", 1, 0, 1, "Kent Ridge");
@@ -77,6 +87,11 @@ class SearchParityIT extends MySqlIntegrationTest {
         insert(9009, "Parity campus phone sold", "No stock", 10, 9, "Electronics", 0, 0, 1, "Kent Ridge");
         index.rebuild(products.selectAllActive());
         operations.indexOps(ProductSearchDocument.class).refresh();
+    }
+
+    @AfterEach
+    void restoreLogLevel() {
+        searchLog.setLevel(previousLevel);
     }
 
     @Test
