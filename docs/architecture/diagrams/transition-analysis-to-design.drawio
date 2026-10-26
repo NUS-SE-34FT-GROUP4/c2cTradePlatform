@@ -1,0 +1,36 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Transition" id="trans">
+    <mxGraphModel dx="1000" dy="800" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="730" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+        <mxCell id="hA" value="Analysis model" style="text;html=1;fontSize=15;fontStyle=1;align=center;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="40" y="24" width="300" height="24" as="geometry"/></mxCell>
+        <mxCell id="hD" value="Design model — classes that exist in the repository" style="text;html=1;fontSize=15;fontStyle=1;align=center;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="470" y="24" width="490" height="24" as="geometry"/></mxCell>
+
+        <mxCell id="r1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFBFD;strokeColor=#D7DCE5;" vertex="1" parent="1"><mxGeometry x="30" y="62" width="940" height="196" as="geometry"/></mxCell>
+        <mxCell id="n1" value="1 · Entity objects lose their persistence" style="text;html=1;fontSize=14;fontStyle=1;align=left;fontColor=#1F3864;" vertex="1" parent="1"><mxGeometry x="46" y="72" width="500" height="22" as="geometry"/></mxCell>
+        <mxCell id="a1" value="Product&#10;&#10;— price, stock&#10;— save(), find()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#9E9E9E;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="60" y="104" width="190" height="110" as="geometry"/></mxCell>
+        <mxCell id="d1a" value="Product (entity)&#10;&#10;state only" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0FB;strokeColor=#6E8FC4;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="500" y="104" width="190" height="72" as="geometry"/></mxCell>
+        <mxCell id="d1b" value="ProductMapper&#10;&#10;MyBatis interface + XML" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F2E8F5;strokeColor=#9B7FB0;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="730" y="104" width="210" height="72" as="geometry"/></mxCell>
+        <mxCell id="w1" value="Why: the entity stays a plain object the whole team can reason about, and every query sits in one place — the mapper — where it can be read, tuned and tested." style="text;html=1;whiteSpace=wrap;overflow=hidden;fontSize=11;align=left;verticalAlign=top;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="500" y="186" width="450" height="46" as="geometry"/></mxCell>
+        <mxCell id="t1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="a1" target="d1a"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="r2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFBFD;strokeColor=#D7DCE5;" vertex="1" parent="1"><mxGeometry x="30" y="276" width="940" height="196" as="geometry"/></mxCell>
+        <mxCell id="n2" value="2 · Control objects become services that own the transaction" style="text;html=1;fontSize=14;fontStyle=1;align=left;fontColor=#1F3864;" vertex="1" parent="1"><mxGeometry x="46" y="286" width="560" height="22" as="geometry"/></mxCell>
+        <mxCell id="a2" value="PaymentHandler&#10;&#10;— takes the money&#10;— updates the order&#10;— tells both parties" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#9E9E9E;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="60" y="318" width="190" height="120" as="geometry"/></mxCell>
+        <mxCell id="d2a" value="PaymentController&#10;&#10;protocol only" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0FB;strokeColor=#6E8FC4;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="500" y="318" width="190" height="64" as="geometry"/></mxCell>
+        <mxCell id="d2b" value="PaymentService&#10;&#10;@Transactional&#10;one use case = one boundary" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E4F2E8;strokeColor=#6BA87F;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="730" y="318" width="210" height="88" as="geometry"/></mxCell>
+        <mxCell id="w2" value="Why: the boundary is where money must not half-move. Keeping it in one service method means a failure rolls the whole use case back, and the controller has nothing to get wrong." style="text;html=1;whiteSpace=wrap;overflow=hidden;fontSize=11;align=left;verticalAlign=top;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="500" y="416" width="450" height="46" as="geometry"/></mxCell>
+        <mxCell id="t2" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="a2" target="d2a"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="r3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFBFD;strokeColor=#D7DCE5;" vertex="1" parent="1"><mxGeometry x="30" y="500" width="940" height="206" as="geometry"/></mxCell>
+        <mxCell id="n3" value="3 · A status attribute becomes an explicit state machine" style="text;html=1;fontSize=14;fontStyle=1;align=left;fontColor=#1F3864;" vertex="1" parent="1"><mxGeometry x="46" y="510" width="560" height="22" as="geometry"/></mxCell>
+        <mxCell id="a3" value="Order&#10;&#10;— status : String&#10;— if/else in every&#10;   method that moves it" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#9E9E9E;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="60" y="542" width="190" height="120" as="geometry"/></mxCell>
+        <mxCell id="d3a" value="OrderStateService&#10;&#10;applies the move through&#10;one guarded UPDATE" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E4F2E8;strokeColor=#6BA87F;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="500" y="542" width="190" height="88" as="geometry"/></mxCell>
+        <mxCell id="d3b" value="OrderStatus&#10;&#10;PENDING_PAYMENT → PAID&#10;→ SHIPPED → COMPLETED&#10;REFUNDED · EXPIRED · CANCELLED" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FDF1E3;strokeColor=#D9A05B;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="730" y="542" width="210" height="88" as="geometry"/></mxCell>
+        <mxCell id="w3" value="Why: legality is declared once, on the state, instead of being re-checked in five methods. This is the design problem written up as the State pattern." style="text;html=1;whiteSpace=wrap;overflow=hidden;fontSize=11;align=left;verticalAlign=top;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="500" y="640" width="450" height="46" as="geometry"/></mxCell>
+        <mxCell id="t3" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="a3" target="d3a"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
