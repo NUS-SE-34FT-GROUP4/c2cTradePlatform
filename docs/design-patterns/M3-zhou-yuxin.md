@@ -158,8 +158,11 @@ refactor.
 
 ## Diagrams
 
-`diagrams/M3-state-problem-solution-class.drawio` and its PNG export: the problem class diagram
-(the Sprint 2 shape, with the four questions answered per call site) beside the solution class
-diagram (`OrderStatus` with its overrides, `OrderAction`, `OrderStateService`, the conditional
-update and the event). The two sequence diagrams the report template asks for are not written
-yet.
+All four are in `diagrams/m3-state/`, each as a `.drawio` source with its PNG export.
+
+| Diagram | Shows |
+|---|---|
+| `01-before-class` | The problem: `OrderService` with one method per action, each checking the status with an `if` and repeating its own side effects; `Order.status` is a plain string |
+| `02-after-class` | The solution: `OrderStateService.apply`, `OrderStatus` with `after`, `actor`, `holdsReservation`, `holdsPayment` and `isTerminal`, `OrderAction`, the conditional `transition`, and `OrderStateChangedEvent` |
+| `03-before-sequence` | The problem in motion: a buyer cancels while the expiry job expires the same unpaid order, using `OrderService` as at commit `4b765b0^`. Both paths release the reservation and the later unconditional `updateStatus` overwrites the earlier one |
+| `04-after-sequence` | The same race after the pattern: `OrderStatus` decides the move and the actor, the `transition` naming `PENDING_PAYMENT` lets exactly one writer through, and the stock is released once |
