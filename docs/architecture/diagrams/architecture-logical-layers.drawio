@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Logical layers" id="layers">
+    <mxGraphModel dx="1100" dy="760" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0" /><mxCell id="1" parent="0" />
+
+        <mxCell id="t1" value="C2C SecTrade — logical architecture (modular monolith)" style="text;html=1;fontSize=20;fontStyle=1;align=left;verticalAlign=middle;fontColor=#1F2A44;" vertex="1" parent="1"><mxGeometry x="40" y="24" width="760" height="30" as="geometry"/></mxCell>
+        <mxCell id="t2" value="One Spring Boot deployable. Boundaries are packages, not network calls. Supporting infrastructure runs as separate containers." style="text;html=1;fontSize=12;align=left;verticalAlign=middle;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="40" y="52" width="860" height="22" as="geometry"/></mxCell>
+
+        <mxCell id="browser" value="Browser — Vue 3 SPA&#10;served by nginx (own container)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2F8;strokeColor=#9AA8C0;fontSize=12;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="410" y="96" width="250" height="56" as="geometry"/></mxCell>
+
+        <mxCell id="app" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#44546A;dashed=0;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="40" y="176" width="620" height="440" as="geometry"/></mxCell>
+        <mxCell id="appt" value="Spring Boot application — one deployable unit" style="text;html=1;fontSize=13;fontStyle=1;align=left;fontColor=#44546A;" vertex="1" parent="1"><mxGeometry x="56" y="184" width="420" height="20" as="geometry"/></mxCell>
+
+        <mxCell id="sec" value="security  ·  JWT filter, SecurityConfig, role checks&#10;Every protected endpoint is authorised here, server side" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FDF1E3;strokeColor=#D9A05B;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1"><mxGeometry x="60" y="212" width="580" height="48" as="geometry"/></mxCell>
+
+        <mxCell id="ctrl" value="controller  ·  16 classes&#10;REST endpoints. Protocol translation only: no business rules" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E8F0FB;strokeColor=#6E8FC4;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1"><mxGeometry x="60" y="272" width="580" height="48" as="geometry"/></mxCell>
+
+        <mxCell id="svc" value="service  ·  46 classes  —  business logic and the transaction boundary" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E4F2E8;strokeColor=#6BA87F;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="60" y="332" width="580" height="120" as="geometry"/></mxCell>
+        <mxCell id="svc1" value="service.payment&#10;5 strategies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6BA87F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="74" y="362" width="128" height="44" as="geometry"/></mxCell>
+        <mxCell id="svc2" value="service.search&#10;index + query" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6BA87F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="214" y="362" width="128" height="44" as="geometry"/></mxCell>
+        <mxCell id="svc3" value="service.recommendation&#10;strategy + factory" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6BA87F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="354" y="362" width="150" height="44" as="geometry"/></mxCell>
+        <mxCell id="svc4" value="service.impl&#10;file storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6BA87F;fontSize=11;" vertex="1" parent="1"><mxGeometry x="516" y="362" width="110" height="44" as="geometry"/></mxCell>
+        <mxCell id="svc5" value="order · cart · wallet · bargain · chat · review · credit · moderation · notification" style="text;html=1;fontSize=11;align=left;fontColor=#3F6B4F;" vertex="1" parent="1"><mxGeometry x="74" y="414" width="552" height="18" as="geometry"/></mxCell>
+
+        <mxCell id="map" value="mapper  ·  20 MyBatis interfaces&#10;All data access. Entities carry no persistence logic" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F2E8F5;strokeColor=#9B7FB0;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1"><mxGeometry x="60" y="464" width="580" height="48" as="geometry"/></mxCell>
+
+        <mxCell id="ent" value="entity  ·  22 domain classes&#10;Product · Order · Payment · BargainCampaign · BargainOffer · Review · User …" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#9E9E9E;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1"><mxGeometry x="60" y="524" width="580" height="48" as="geometry"/></mxCell>
+
+        <mxCell id="cross" value="cross-cutting:  config (10)  ·  event (2) — in-process application events, delivered after commit  ·  scheduled (1) — unpaid-order and campaign expiry  ·  exception (7)" style="text;html=1;fontSize=11;align=left;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="60" y="582" width="580" height="22" as="geometry"/></mxCell>
+
+        <mxCell id="infra" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#B0B7C3;dashed=1;" vertex="1" parent="1"><mxGeometry x="700" y="176" width="200" height="440" as="geometry"/></mxCell>
+        <mxCell id="infrat" value="Supporting containers" style="text;html=1;fontSize=13;fontStyle=1;align=left;fontColor=#5A6478;" vertex="1" parent="1"><mxGeometry x="714" y="184" width="200" height="20" as="geometry"/></mxCell>
+        <mxCell id="mysql" value="MySQL&#10;business records&#10;of record" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9B7FB0;fontSize=12;" vertex="1" parent="1"><mxGeometry x="716" y="216" width="168" height="64" as="geometry"/></mxCell>
+        <mxCell id="redis" value="Redis&#10;cache, captcha, locks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D9A05B;fontSize=12;" vertex="1" parent="1"><mxGeometry x="716" y="296" width="168" height="56" as="geometry"/></mxCell>
+        <mxCell id="es" value="Elasticsearch&#10;search index — a read model,&#10;rebuildable from MySQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6E8FC4;fontSize=12;" vertex="1" parent="1"><mxGeometry x="716" y="368" width="168" height="72" as="geometry"/></mxCell>
+        <mxCell id="minio" value="MinIO&#10;images and media" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6BA87F;fontSize=12;" vertex="1" parent="1"><mxGeometry x="716" y="456" width="168" height="56" as="geometry"/></mxCell>
+        <mxCell id="nobroker" value="Notifications:&#10;in-process events,&#10;pushed over WebSocket" style="text;html=1;fontSize=11;align=left;fontColor=#8A6D3B;" vertex="1" parent="1"><mxGeometry x="716" y="528" width="180" height="48" as="geometry"/></mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="browser" target="sec"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="sec" target="ctrl"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="ctrl" target="svc"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="svc" target="map"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9AA8C0;endArrow=block;" edge="1" parent="1" source="map" target="ent"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9B7FB0;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="map" target="mysql"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="680" y="488"/><mxPoint x="680" y="248"/></Array></mxGeometry></mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#D9A05B;endArrow=block;exitX=1;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="svc" target="redis"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="672" y="350"/><mxPoint x="672" y="324"/></Array></mxGeometry></mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#6E8FC4;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="svc" target="es"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="688" y="392"/><mxPoint x="688" y="404"/></Array></mxGeometry></mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#6BA87F;endArrow=block;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="svc" target="minio"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="680" y="434"/><mxPoint x="680" y="484"/></Array></mxGeometry></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
