@@ -111,15 +111,18 @@ controller has to know that.
 Coverage (JaCoCo, Sprint 3): `MinioFileStorageService` 98% lines / 91% branches, above the
 80% required by NFR 6.3.
 
-## Diagrams (deferred)
+## Diagrams
 
-The report template (§3.5) asks for four UML diagrams: class and sequence diagrams for the
-problem, and for the solution. This page covers the four text elements only. The diagrams are
-scheduled in Sprint 5 issue #96 (due 1 November), together with the "administrator moderates a
-report" use case:
+The diagrams the report template counts (#96), each as native `.drawio` next to its exported `.png`:
 
-- problem: class diagram of three controllers each depending on `MinioClient`, and the
-  sequence of one upload through that duplicated code;
-- solution: class diagram of the three contexts depending on `FileStorageService`, and the
-  sequence `ReviewController` → `FileStorageService.upload` → `MinioFileStorageService` →
-  `MinioClient`.
+- `diagrams/m1-file-storage/` — this design problem (§3.5), before and after the pattern:
+  `01-before-class`, `02-after-class`, `03-before-sequence`, `04-after-sequence`. The "before"
+  pair is the design without the interface, as described above: the three uploading controllers
+  each holding `MinioClient` and their own copy of the validation, naming and URL code. The
+  "after" pair is today's code; the sequence follows `ReviewController.image` through
+  `FileStorageService.upload` to `MinioClient.putObject`.
+- `diagrams/m1-moderation/` — the "administrator moderates a report" use case (§3.4), built in
+  #61: `01-analysis-class`, `02-analysis-sequence`, `03-design-class`, `04-design-sequence`.
+  The design pair follows `AdminModerationController.uphold` → `ModerationService.uphold` and its
+  mappers as they are in the code, including the row lock on the report, the
+  `checkBannable` refusal, and the audit row written in the same transaction.
