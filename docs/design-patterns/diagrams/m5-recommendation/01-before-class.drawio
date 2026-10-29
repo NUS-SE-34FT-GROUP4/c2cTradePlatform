@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram id="factory-before-class" name="Recommendation - problem class model">
+    <mxGraphModel page="1" pageWidth="1000" pageHeight="880" grid="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1" value="Recommendation - problem class model" style="text;html=1;align=left;verticalAlign=top;fontSize=27;fontFamily=Arial;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="24" width="940" height="35.1" />
+        </mxCell>
+        <mxCell id="c2" value="BEFORE: historical similarTo path at fdea6498fc4c784385ffdaaca45b3f80c1ec356c." style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="65" width="940" height="20.8" />
+        </mxCell>
+        <mxCell id="ctrl" value="&lt;b&gt;&amp;lt;&amp;lt;REST boundary&amp;gt;&amp;gt;&lt;br&gt;RecommendationController&lt;/b&gt;&lt;hr&gt;+ similar(productId, limit)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=20;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="45" y="140" width="320" height="114.0" />
+        </mxCell>
+        <mxCell id="srv" value="&lt;b&gt;&amp;lt;&amp;lt;service&amp;gt;&amp;gt;&lt;br&gt;RecommendationService&lt;/b&gt;&lt;hr&gt;+ similarTo(productId, limit)&lt;br&gt;- filter(candidates, excludeId, limit)&lt;br&gt;Category query + filtering + fallback&lt;br&gt;are selected within this class." style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=20;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="500" y="140" width="450" height="192.0" />
+        </mxCell>
+        <mxCell id="pm" value="&lt;b&gt;&amp;lt;&amp;lt;MyBatis mapper&amp;gt;&amp;gt;&lt;br&gt;ProductMapper&lt;/b&gt;&lt;hr&gt;+ selectById(id)&lt;br&gt;+ selectByCategory(category)&lt;br&gt;+ selectRecentProducts(limit)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=20;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="490" y="490" width="460" height="166.0" />
+        </mxCell>
+        <mxCell id="c3" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" source="ctrl" target="srv">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="srv" target="pm">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="725.0" y="411.0" />
+              <mxPoint x="720.0" y="411.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" value="Problem: adding another related-item algorithm changes the caller and its branches. View-history&lt;br&gt;methods and DTO conversion are outside this focused view. No factory or strategy interface exists on&lt;br&gt;this historical path." style="shape=note;html=1;whiteSpace=wrap;size=12;align=left;verticalAlign=top;spacing=10;fillColor=#FFF8DE;strokeColor=#AE994F;fontFamily=Arial;fontSize=19;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="45" y="710" width="905" height="94.10000000000001" />
+        </mxCell>
+        <mxCell id="c6" value="Historical source, not a hypothetical before-state. Algorithm choice and fallback are coupled in the service." style="text;html=1;align=left;verticalAlign=top;fontSize=14;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="831" width="940" height="18.2" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

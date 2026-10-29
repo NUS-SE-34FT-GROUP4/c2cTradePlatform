@@ -1,0 +1,72 @@
+{
+  "author": "CUI ZIJIAN",
+  "model_prepared": "2026-10-28",
+  "implementation_revision": "e73fde73b42956411c95dc7145da6eb29dec778b",
+  "before_revision": "fdea6498fc4c784385ffdaaca45b3f80c1ec356c",
+  "files": [
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/01-analysis-class.drawio",
+      "sha256": "2a481a87dea3694200a71dc955edd553e8319023fe56fc54a26aa48c95265561"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/01-analysis-class.png",
+      "sha256": "c73d2d724da8ef1fe3d3159e621c54f1265b6acd1eac2d6fa8645875362b28be"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/02-analysis-sequence.drawio",
+      "sha256": "9770a96081236eda0b9484964b2029ef987b64375479448bc00e6e09e5867a43"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/02-analysis-sequence.png",
+      "sha256": "2c33e58040a0c1e4d5e3e1121f0dade6214ea15837ce1c57991b2ca856189ea8"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/03-design-class.drawio",
+      "sha256": "f210b0e5efd11de8f276481fda0d3b048ca6624a1b2d0176ee9f94a8033928da"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/03-design-class.png",
+      "sha256": "3dd42b55346a8b77b0ba34d5e513841fba0d6fb82b6f6608dbafe9326b624cf4"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/04-design-sequence.drawio",
+      "sha256": "3e9bd3695f160dfe354797dfaedfe2e9824c6e489f935b99b31c411e750248f5"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-review/04-design-sequence.png",
+      "sha256": "29cc4383eb8c94c8ff53cf36db6331323308eb5dd5d085f45f00db7a3a5a64ae"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/01-before-class.drawio",
+      "sha256": "3a0656b49941079e8fc264743a390d566b80fda9bf960d8e83093140e62648f3"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/01-before-class.png",
+      "sha256": "8ad0dea4398aa426c1fb674002f949e81c9f4184bc0f569b5db757995da95021"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/02-after-class.drawio",
+      "sha256": "12e3275555ad832a0304da628f25f1a1b1c210676e98b496cf2470974f3d218a"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/02-after-class.png",
+      "sha256": "837f757ba9d873faf28a066cdc720a055c93f8632572d1285b90ddc48125b478"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/03-before-sequence.drawio",
+      "sha256": "d03ff054ea77157cb46fda0e68f386e5e6da659bdef92839ff8890f2675622ff"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/03-before-sequence.png",
+      "sha256": "57ff58e6f408e9fcd0b34dde9d51bc53d22648624e6360fd656497bde72a1e50"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/04-after-sequence.drawio",
+      "sha256": "c9e6d14e61ee6bbc2b65624b27a71d491c49e70bb08e71866724bb557c2f7f0d"
+    },
+    {
+      "path": "docs/design-patterns/diagrams/m5-recommendation/04-after-sequence.png",
+      "sha256": "0001b95403db9ace5ad514dfbe3125aad86450878df1f876389602cf16557a85"
+    }
+  ]
+}

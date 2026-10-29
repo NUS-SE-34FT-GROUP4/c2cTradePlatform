@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram id="factory-after-class" name="Recommendation - solution class model">
+    <mxGraphModel page="1" pageWidth="1100" pageHeight="1100" grid="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1" value="Recommendation - solution class model" style="text;html=1;align=left;verticalAlign=top;fontSize=27;fontFamily=Arial;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="24" width="1040" height="35.1" />
+        </mxCell>
+        <mxCell id="c2" value="AFTER: registry factory selects discovered Strategy components. Spring creates the instances." style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="65" width="1040" height="20.8" />
+        </mxCell>
+        <mxCell id="srv" value="&lt;b&gt;&amp;lt;&amp;lt;service&amp;gt;&amp;gt;&lt;br&gt;RecommendationService&lt;/b&gt;&lt;hr&gt;+ similarTo(id, limit, strategy)&lt;br&gt;validates product and caps limit" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="125" width="310" height="134.8" />
+        </mxCell>
+        <mxCell id="fac" value="&lt;b&gt;&amp;lt;&amp;lt;registry factory&amp;gt;&amp;gt;&lt;br&gt;RecommendationStrategyFactory&lt;/b&gt;&lt;hr&gt;- strategies: Map&amp;lt;String, RecommendationStrategy&amp;gt;&lt;br&gt;+ resolve(name): RecommendationStrategy&lt;br&gt;+ recommend(name, current, limit)&lt;br&gt;- attempt(strategy, current, limit)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="535" y="125" width="525" height="181.60000000000002" />
+        </mxCell>
+        <mxCell id="int" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;br&gt;RecommendationStrategy&lt;/b&gt;&lt;hr&gt;+ name(): String&lt;br&gt;+ recommend(current: Product, limit): List&amp;lt;Product&amp;gt;" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="470" width="450" height="134.8" />
+        </mxCell>
+        <mxCell id="cat" value="&lt;b&gt;&amp;lt;&amp;lt;Component&amp;gt;&amp;gt;&lt;br&gt;SameCategoryStrategy&lt;/b&gt;&lt;hr&gt;+ name(): String&lt;br&gt;+ recommend(current, limit)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="725" width="320" height="134.8" />
+        </mxCell>
+        <mxCell id="rec" value="&lt;b&gt;&amp;lt;&amp;lt;Component&amp;gt;&amp;gt;&lt;br&gt;MostRecentStrategy&lt;/b&gt;&lt;hr&gt;+ name(): String&lt;br&gt;+ recommend(current, limit)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="405" y="725" width="310" height="134.8" />
+        </mxCell>
+        <mxCell id="map" value="&lt;b&gt;&amp;lt;&amp;lt;MyBatis mapper&amp;gt;&amp;gt;&lt;br&gt;ProductMapper&lt;/b&gt;&lt;hr&gt;+ selectById(id)&lt;br&gt;+ selectByCategory(category)&lt;br&gt;+ selectRecentProducts(limit)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="765" y="725" width="300" height="158.2" />
+        </mxCell>
+        <mxCell id="c3" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" source="srv" target="fac">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="fac" target="int">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="797.5" y="388.3" />
+              <mxPoint x="745.0" y="388.3" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=1.0;entryX=0.8333333333333334;entryY=0.0;" source="srv" target="map">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="190" y="625" />
+              <mxPoint x="1015" y="625" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c6" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=block;endFill=0;dashed=1;exitX=0.5;exitY=0.0;entryX=0.24444444444444444;entryY=0.9999999999999996;" source="cat" target="int">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="195" y="675" />
+              <mxPoint x="630" y="675" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=block;endFill=0;dashed=1;exitX=0.5;exitY=0.0;entryX=0.5333333333333333;entryY=0.9999999999999996;" source="rec" target="int">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="560" y="690" />
+              <mxPoint x="760" y="690" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c8" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=1.0;exitY=0.6305637982195845;entryX=0.5166666666666667;entryY=1.0000000000000004;" source="cat" target="map">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="380" y="810" />
+              <mxPoint x="380" y="935" />
+              <mxPoint x="920" y="935" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c9" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=1.0;exitY=0.4999999999999998;entryX=0.0;entryY=0.5000000000000002;" source="rec" target="map">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c10" value="Shared helper RecommendationCandidates.eligible filters current / inactive / unavailable items. The factory registers injected strategy&lt;br&gt;beans by name, rejects duplicate names, and requires most-recent as the default. forUser history recommendations stay separate." style="shape=note;html=1;whiteSpace=wrap;size=12;align=left;verticalAlign=top;spacing=10;fillColor=#FFF8DE;strokeColor=#AE994F;fontFamily=Arial;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="955" width="1030" height="64.2" />
+        </mxCell>
+        <mxCell id="c11" value="Factory + Strategy | Registry-based selection, not GoF subclass-overridden Factory Method." style="text;html=1;align=left;verticalAlign=top;fontSize=14;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="1051" width="1040" height="18.2" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

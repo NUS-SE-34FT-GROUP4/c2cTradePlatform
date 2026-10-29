@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram id="review-design-class" name="Post a Review - design class model">
+    <mxGraphModel page="1" pageWidth="1000" pageHeight="1400" grid="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1" value="Post a Review - design class model" style="text;html=1;align=left;verticalAlign=top;fontSize=27;fontFamily=Arial;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="24" width="940" height="35.1" />
+        </mxCell>
+        <mxCell id="c2" value="Selected implementation classes. Dependencies are dashed; entity state and mapper access are separate." style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="65" width="940" height="20.8" />
+        </mxCell>
+        <mxCell id="ctl" value="&lt;b&gt;&amp;lt;&amp;lt;REST boundary&amp;gt;&amp;gt;&lt;br&gt;ReviewController&lt;/b&gt;&lt;hr&gt;+ create(request, auth)&lt;br&gt;+ check(orderId, auth)&lt;br&gt;+ image(file)&lt;br&gt;- userId(auth)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="125" width="305" height="181.60000000000002" />
+        </mxCell>
+        <mxCell id="req" value="&lt;b&gt;&amp;lt;&amp;lt;DTO&amp;gt;&amp;gt;&lt;br&gt;ReviewRequest&lt;/b&gt;&lt;hr&gt;orderId; productId&lt;br&gt;productRating; sellerRating&lt;br&gt;comment; reviewImages&lt;br&gt;isAnonymous" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="390" y="125" width="265" height="181.60000000000002" />
+        </mxCell>
+        <mxCell id="res" value="&lt;b&gt;&amp;lt;&amp;lt;DTO&amp;gt;&amp;gt;&lt;br&gt;ReviewResponse&lt;/b&gt;&lt;hr&gt;review and product fields&lt;br&gt;public reviewer fields&lt;br&gt;ratings; images; anonymous" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="705" y="125" width="265" height="158.2" />
+        </mxCell>
+        <mxCell id="svc" value="&lt;b&gt;&amp;lt;&amp;lt;transactional service&amp;gt;&amp;gt;&lt;br&gt;ReviewService&lt;/b&gt;&lt;hr&gt;+ createReview(buyerId, request)&lt;br&gt;+ hasReviewed(buyerId, orderId)&lt;br&gt;+ getProductReviews(productId)&lt;br&gt;- ownedOrder(); toResponse()" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="355" y="440" width="320" height="181.60000000000002" />
+        </mxCell>
+        <mxCell id="om" value="&lt;b&gt;&amp;lt;&amp;lt;MyBatis mapper&amp;gt;&amp;gt;&lt;br&gt;OrderMapper&lt;/b&gt;&lt;hr&gt;+ selectById(id): Order" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="760" width="270" height="111.4" />
+        </mxCell>
+        <mxCell id="im" value="&lt;b&gt;&amp;lt;&amp;lt;MyBatis mapper&amp;gt;&amp;gt;&lt;br&gt;OrderItemMapper&lt;/b&gt;&lt;hr&gt;+ selectByOrderId(id)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="365" y="760" width="270" height="111.4" />
+        </mxCell>
+        <mxCell id="rm" value="&lt;b&gt;&amp;lt;&amp;lt;MyBatis mapper&amp;gt;&amp;gt;&lt;br&gt;ReviewMapper&lt;/b&gt;&lt;hr&gt;+ selectByOrderId(id)&lt;br&gt;+ insert(review)&lt;br&gt;+ selectByProductId(id)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="695" y="760" width="275" height="158.2" />
+        </mxCell>
+        <mxCell id="c3" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="ctl" target="svc">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="187.5" y="373.3" />
+              <mxPoint x="515.0" y="373.3" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" source="ctl" target="req">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=1.0;exitY=0.49999999999999967;entryX=0.0;entryY=0.5;" source="svc" target="res">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c6" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="svc" target="om">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="515.0" y="690.8" />
+              <mxPoint x="170.0" y="690.8" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="svc" target="im">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="515.0" y="690.8" />
+              <mxPoint x="500.0" y="690.8" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c8" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="svc" target="rm">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="515.0" y="690.8" />
+              <mxPoint x="832.5" y="690.8" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oe" value="&lt;b&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;br&gt;Order&lt;/b&gt;&lt;hr&gt;id; buyerId; sellerId&lt;br&gt;status: String" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="1010" width="270" height="134.8" />
+        </mxCell>
+        <mxCell id="ie" value="&lt;b&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;br&gt;OrderItem&lt;/b&gt;&lt;hr&gt;orderId; productId&lt;br&gt;quantity; unitPriceSnapshot" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="365" y="1010" width="270" height="134.8" />
+        </mxCell>
+        <mxCell id="re" value="&lt;b&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;br&gt;Review&lt;/b&gt;&lt;hr&gt;orderId; productId; buyerId&lt;br&gt;sellerId; productRating&lt;br&gt;sellerRating; comment&lt;br&gt;reviewImages; isAnonymous" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=18;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="695" y="1010" width="275" height="181.60000000000002" />
+        </mxCell>
+        <mxCell id="c9" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=0.9999999999999998;entryX=0.5;entryY=0.0;" source="om" target="oe">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="170.0" y="940.7" />
+              <mxPoint x="170.0" y="940.7" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c10" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=0.9999999999999998;entryX=0.5;entryY=0.0;" source="im" target="ie">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="500.0" y="940.7" />
+              <mxPoint x="500.0" y="940.7" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c11" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;exitX=0.5;exitY=1.0000000000000004;entryX=0.5;entryY=0.0;" source="rm" target="re">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="832.5" y="964.1" />
+              <mxPoint x="832.5" y="964.1" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c12" value="S2: ReviewService owns rules and the transaction. UserMapper / ProductMapper response enrichment,&lt;br&gt;ObjectMapper JSON mapping, and HtmlSanitizer are omitted from this selected-class view. Entities retain state;&lt;br&gt;mappers perform persistence." style="shape=note;html=1;whiteSpace=wrap;size=12;align=left;verticalAlign=top;spacing=10;fillColor=#FFF8DE;strokeColor=#AE994F;fontFamily=Arial;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="1235" width="935" height="90.2" />
+        </mxCell>
+        <mxCell id="c13" value="Source: ReviewController, ReviewService, ReviewRequest/Response, Order/OrderItem/Review and MyBatis mappers." style="text;html=1;align=left;verticalAlign=top;fontSize=14;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="1351" width="940" height="18.2" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
