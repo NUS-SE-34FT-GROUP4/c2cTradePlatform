@@ -1,0 +1,434 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /scripts/volume.js
+        output: json (/results/timeseries.json)
+
+     scenarios: (100.00%) 1 scenario, 2 max VUs, 1m0s max duration (incl. graceful stop):
+              * reads: 2 looping VUs for 45s (gracefulStop: 15s)
+
+
+running (0m01.0s), 2/2 VUs, 0 complete and 0 interrupted iterations
+reads   [   2% ] 2 VUs  01.0s/45s
+
+running (0m02.0s), 2/2 VUs, 2 complete and 0 interrupted iterations
+reads   [   4% ] 2 VUs  02.0s/45s
+
+running (0m03.0s), 2/2 VUs, 4 complete and 0 interrupted iterations
+reads   [   7% ] 2 VUs  03.0s/45s
+
+running (0m04.0s), 2/2 VUs, 6 complete and 0 interrupted iterations
+reads   [   9% ] 2 VUs  04.0s/45s
+
+running (0m05.0s), 2/2 VUs, 8 complete and 0 interrupted iterations
+reads   [  11% ] 2 VUs  05.0s/45s
+
+running (0m06.0s), 2/2 VUs, 10 complete and 0 interrupted iterations
+reads   [  13% ] 2 VUs  06.0s/45s
+
+running (0m07.0s), 2/2 VUs, 12 complete and 0 interrupted iterations
+reads   [  16% ] 2 VUs  07.0s/45s
+
+running (0m08.0s), 2/2 VUs, 14 complete and 0 interrupted iterations
+reads   [  18% ] 2 VUs  08.0s/45s
+
+running (0m09.0s), 2/2 VUs, 16 complete and 0 interrupted iterations
+reads   [  20% ] 2 VUs  09.0s/45s
+
+running (0m10.0s), 2/2 VUs, 18 complete and 0 interrupted iterations
+reads   [  22% ] 2 VUs  10.0s/45s
+
+running (0m11.0s), 2/2 VUs, 20 complete and 0 interrupted iterations
+reads   [  24% ] 2 VUs  11.0s/45s
+
+running (0m12.0s), 2/2 VUs, 22 complete and 0 interrupted iterations
+reads   [  27% ] 2 VUs  12.0s/45s
+
+running (0m13.0s), 2/2 VUs, 23 complete and 0 interrupted iterations
+reads   [  29% ] 2 VUs  13.0s/45s
+
+running (0m14.0s), 2/2 VUs, 24 complete and 0 interrupted iterations
+reads   [  31% ] 2 VUs  14.0s/45s
+
+running (0m15.0s), 2/2 VUs, 26 complete and 0 interrupted iterations
+reads   [  33% ] 2 VUs  15.0s/45s
+
+running (0m16.0s), 2/2 VUs, 28 complete and 0 interrupted iterations
+reads   [  36% ] 2 VUs  16.0s/45s
+
+running (0m17.0s), 2/2 VUs, 30 complete and 0 interrupted iterations
+reads   [  38% ] 2 VUs  17.0s/45s
+
+running (0m18.0s), 2/2 VUs, 32 complete and 0 interrupted iterations
+reads   [  40% ] 2 VUs  18.0s/45s
+
+running (0m19.0s), 2/2 VUs, 34 complete and 0 interrupted iterations
+reads   [  42% ] 2 VUs  19.0s/45s
+
+running (0m20.0s), 2/2 VUs, 36 complete and 0 interrupted iterations
+reads   [  44% ] 2 VUs  20.0s/45s
+
+running (0m21.0s), 2/2 VUs, 38 complete and 0 interrupted iterations
+reads   [  47% ] 2 VUs  21.0s/45s
+
+running (0m22.0s), 2/2 VUs, 40 complete and 0 interrupted iterations
+reads   [  49% ] 2 VUs  22.0s/45s
+
+running (0m23.0s), 2/2 VUs, 42 complete and 0 interrupted iterations
+reads   [  51% ] 2 VUs  23.0s/45s
+
+running (0m24.0s), 2/2 VUs, 44 complete and 0 interrupted iterations
+reads   [  53% ] 2 VUs  24.0s/45s
+
+running (0m25.0s), 2/2 VUs, 46 complete and 0 interrupted iterations
+reads   [  56% ] 2 VUs  25.0s/45s
+
+running (0m26.0s), 2/2 VUs, 48 complete and 0 interrupted iterations
+reads   [  58% ] 2 VUs  26.0s/45s
+
+running (0m27.0s), 2/2 VUs, 50 complete and 0 interrupted iterations
+reads   [  60% ] 2 VUs  27.0s/45s
+
+running (0m28.0s), 2/2 VUs, 52 complete and 0 interrupted iterations
+reads   [  62% ] 2 VUs  28.0s/45s
+
+running (0m29.0s), 2/2 VUs, 54 complete and 0 interrupted iterations
+reads   [  64% ] 2 VUs  29.0s/45s
+
+running (0m30.0s), 2/2 VUs, 56 complete and 0 interrupted iterations
+reads   [  67% ] 2 VUs  30.0s/45s
+
+running (0m31.0s), 2/2 VUs, 58 complete and 0 interrupted iterations
+reads   [  69% ] 2 VUs  31.0s/45s
+
+running (0m32.0s), 2/2 VUs, 60 complete and 0 interrupted iterations
+reads   [  71% ] 2 VUs  32.0s/45s
+
+running (0m33.0s), 2/2 VUs, 62 complete and 0 interrupted iterations
+reads   [  73% ] 2 VUs  33.0s/45s
+
+running (0m34.0s), 2/2 VUs, 64 complete and 0 interrupted iterations
+reads   [  76% ] 2 VUs  34.0s/45s
+
+running (0m35.0s), 2/2 VUs, 66 complete and 0 interrupted iterations
+reads   [  78% ] 2 VUs  35.0s/45s
+
+running (0m36.0s), 2/2 VUs, 68 complete and 0 interrupted iterations
+reads   [  80% ] 2 VUs  36.0s/45s
+
+running (0m37.0s), 2/2 VUs, 70 complete and 0 interrupted iterations
+reads   [  82% ] 2 VUs  37.0s/45s
+
+running (0m38.0s), 2/2 VUs, 72 complete and 0 interrupted iterations
+reads   [  84% ] 2 VUs  38.0s/45s
+
+running (0m39.0s), 2/2 VUs, 74 complete and 0 interrupted iterations
+reads   [  87% ] 2 VUs  39.0s/45s
+
+running (0m40.0s), 2/2 VUs, 75 complete and 0 interrupted iterations
+reads   [  89% ] 2 VUs  40.0s/45s
+
+running (0m41.0s), 2/2 VUs, 76 complete and 0 interrupted iterations
+reads   [  91% ] 2 VUs  41.0s/45s
+
+running (0m42.0s), 2/2 VUs, 78 complete and 0 interrupted iterations
+reads   [  93% ] 2 VUs  42.0s/45s
+
+running (0m43.0s), 2/2 VUs, 80 complete and 0 interrupted iterations
+reads   [  96% ] 2 VUs  43.0s/45s
+
+running (0m44.0s), 2/2 VUs, 82 complete and 0 interrupted iterations
+reads   [  98% ] 2 VUs  44.0s/45s
+
+running (0m45.0s), 2/2 VUs, 84 complete and 0 interrupted iterations
+reads   [ 100% ] 2 VUs  45s
+{
+  "http_req_sending": {
+    "contains": "time",
+    "values": {
+      "min": 0.008583,
+      "med": 0.049167,
+      "p(95)": 0.22330224999999998,
+      "p(99)": 0.40972044999999996,
+      "max": 0.458666
+    },
+    "type": "trend"
+  },
+  "checks": {
+    "type": "rate",
+    "contains": "default",
+    "values": {
+      "rate": 1,
+      "passes": 86,
+      "fails": 0
+    }
+  },
+  "read_ms{operation:empty}": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "min": 2.378708,
+      "med": 8.6694795,
+      "p(95)": 58.54514164999997,
+      "p(99)": 97.50749113999998,
+      "max": 107.311166
+    },
+    "thresholds": {
+      "med<1000": {
+        "ok": true
+      },
+      "p(95)<2000": {
+        "ok": true
+      }
+    }
+  },
+  "http_reqs": {
+    "type": "counter",
+    "contains": "default",
+    "values": {
+      "count": 86,
+      "rate": 1.9017996426415908
+    }
+  },
+  "iteration_duration": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "p(99)": 1207.42547505,
+      "max": 1297.292292,
+      "min": 1002.61475,
+      "med": 1032.212105,
+      "p(95)": 1171.3457604999999
+    }
+  },
+  "business_errors": {
+    "type": "rate",
+    "contains": "default",
+    "values": {
+      "rate": 0,
+      "passes": 0,
+      "fails": 86
+    },
+    "thresholds": {
+      "rate<0.01": {
+        "ok": true
+      }
+    }
+  },
+  "read_ms": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "max": 291.132666,
+      "min": 2.378708,
+      "med": 29.320292000000002,
+      "p(95)": 162.4630314999999,
+      "p(99)": 199.82389629999992
+    }
+  },
+  "http_req_receiving": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "min": 0.202667,
+      "med": 1.0626039999999999,
+      "p(95)": 3.8631354999999985,
+      "p(99)": 28.090829449999998,
+      "max": 32.343875
+    }
+  },
+  "http_req_failed": {
+    "values": {
+      "rate": 0,
+      "passes": 0,
+      "fails": 86
+    },
+    "type": "rate",
+    "contains": "default"
+  },
+  "http_req_blocked": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "p(99)": 1.2269107,
+      "max": 1.24175,
+      "min": 0.002625,
+      "med": 0.013771,
+      "p(95)": 0.11293699999999995
+    }
+  },
+  "http_req_connecting": {
+    "values": {
+      "min": 0,
+      "med": 0,
+      "p(95)": 0,
+      "p(99)": 0.15977935,
+      "max": 0.168916
+    },
+    "type": "trend",
+    "contains": "time"
+  },
+  "http_req_tls_handshaking": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "max": 0,
+      "min": 0,
+      "med": 0,
+      "p(95)": 0,
+      "p(99)": 0
+    }
+  },
+  "response_chars": {
+    "type": "trend",
+    "contains": "default",
+    "values": {
+      "med": 53307.5,
+      "p(95)": 105124,
+      "p(99)": 105124,
+      "max": 105124,
+      "min": 2
+    }
+  },
+  "read_ms{operation:broad}": {
+    "contains": "time",
+    "values": {
+      "min": 17.485292,
+      "med": 34.559875500000004,
+      "p(95)": 91.62454344999999,
+      "p(99)": 110.29995424999998,
+      "max": 115.136333
+    },
+    "thresholds": {
+      "med<1000": {
+        "ok": true
+      },
+      "p(95)<2000": {
+        "ok": true
+      }
+    },
+    "type": "trend"
+  },
+  "data_received": {
+    "values": {
+      "count": 4590128,
+      "rate": 101505.85802417628
+    },
+    "type": "counter",
+    "contains": "data"
+  },
+  "read_ms{operation:list}": {
+    "values": {
+      "med": 31.969917,
+      "p(95)": 142.66,
+      "p(99)": 171.7637336,
+      "max": 179.039667,
+      "min": 13.993125
+    },
+    "thresholds": {
+      "med<1000": {
+        "ok": true
+      },
+      "p(95)<2000": {
+        "ok": true
+      }
+    },
+    "type": "trend",
+    "contains": "time"
+  },
+  "iterations": {
+    "type": "counter",
+    "contains": "default",
+    "values": {
+      "count": 86,
+      "rate": 1.9017996426415908
+    }
+  },
+  "http_req_duration": {
+    "contains": "time",
+    "values": {
+      "min": 2.378708,
+      "med": 29.320292000000002,
+      "p(95)": 162.4630314999999,
+      "p(99)": 199.82389629999992,
+      "max": 291.132666
+    },
+    "type": "trend"
+  },
+  "data_sent": {
+    "type": "counter",
+    "contains": "data",
+    "values": {
+      "rate": 181.35649848027543,
+      "count": 8201
+    }
+  },
+  "http_req_duration{expected_response:true}": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "min": 2.378708,
+      "med": 29.320292000000002,
+      "p(95)": 162.4630314999999,
+      "p(99)": 199.82389629999992,
+      "max": 291.132666
+    }
+  },
+  "vus": {
+    "type": "gauge",
+    "contains": "default",
+    "values": {
+      "value": 2,
+      "min": 2,
+      "max": 2
+    }
+  },
+  "vus_max": {
+    "type": "gauge",
+    "contains": "default",
+    "values": {
+      "value": 2,
+      "min": 2,
+      "max": 2
+    }
+  },
+  "read_ms{operation:selective}": {
+    "values": {
+      "min": 20.877084,
+      "med": 42.83825,
+      "p(95)": 183.710584,
+      "p(99)": 269.6482496,
+      "max": 291.132666
+    },
+    "thresholds": {
+      "med<1000": {
+        "ok": true
+      },
+      "p(95)<2000": {
+        "ok": true
+      }
+    },
+    "type": "trend",
+    "contains": "time"
+  },
+  "http_req_waiting": {
+    "type": "trend",
+    "contains": "time",
+    "values": {
+      "min": 2.166667,
+      "med": 27.399417,
+      "p(95)": 144.0723022499999,
+      "p(99)": 198.66045084999993,
+      "max": 289.086
+    }
+  }
+}
+
+running (0m45.2s), 0/2 VUs, 86 complete and 0 interrupted iterations
+reads ✓ [ 100% ] 2 VUs  45s

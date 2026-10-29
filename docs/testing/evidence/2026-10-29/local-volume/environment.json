@@ -1,0 +1,68 @@
+{
+  "created": "2026-10-29T04:44:22.837010+00:00",
+  "code_revision": "e73fde73b42956411c95dc7145da6eb29dec778b",
+  "os": "macOS-26.6.2-arm64-arm-64bit",
+  "machine": "arm64",
+  "docker_resources": "CPUs=10 MemoryBytes=8319504384",
+  "images": {
+    "cui-5006-volume-backend:e73fde73": {
+      "id": "sha256:71c7395cd072d1b7aa73d1eabdcb0213fba000a7ee9fa57c7cae650bdc2c2614",
+      "digests": [
+        "cui-5006-volume-backend@sha256:71c7395cd072d1b7aa73d1eabdcb0213fba000a7ee9fa57c7cae650bdc2c2614"
+      ],
+      "architecture": "arm64"
+    },
+    "mysql:8.0.36": {
+      "id": "sha256:a532724022429812ec797c285c1b540a644c15e248579c6bfdf12a8fbaab4964",
+      "digests": [
+        "mysql@sha256:a532724022429812ec797c285c1b540a644c15e248579c6bfdf12a8fbaab4964"
+      ],
+      "architecture": "arm64"
+    },
+    "redis:7.2": {
+      "id": "sha256:46f15cf64fdef63e483dcda99e74e3d51c017b1175547b6bb874152ee2391aad",
+      "digests": [
+        "redis@sha256:46f15cf64fdef63e483dcda99e74e3d51c017b1175547b6bb874152ee2391aad"
+      ],
+      "architecture": "arm64"
+    },
+    "docker.elastic.co/elasticsearch/elasticsearch:8.10.4": {
+      "id": "sha256:b2cc68c47ab95e8d3f2a60e7bceab1e45f58a22978351f3564431a1fbf6fe6ba",
+      "digests": [
+        "docker.elastic.co/elasticsearch/elasticsearch@sha256:b2cc68c47ab95e8d3f2a60e7bceab1e45f58a22978351f3564431a1fbf6fe6ba"
+      ],
+      "architecture": "arm64"
+    },
+    "ass-wp10-minio:2025-04-22": {
+      "id": "sha256:14301bc6ab2663056049bf60e980d2cf19912b5e12b415367bd1c3014b935c93",
+      "digests": [
+        "ass-wp10-minio@sha256:14301bc6ab2663056049bf60e980d2cf19912b5e12b415367bd1c3014b935c93"
+      ],
+      "architecture": "arm64"
+    },
+    "grafana/k6:2.3.0": {
+      "id": "sha256:9c2dee7f8ed74d317e4027c06a10f169b625638189de8d4555d0b3486a5aeb34",
+      "digests": [
+        "grafana/k6@sha256:9c2dee7f8ed74d317e4027c06a10f169b625638189de8d4555d0b3486a5aeb34"
+      ],
+      "architecture": "arm64"
+    }
+  },
+  "limits": {
+    "backend": {
+      "cpus": 2,
+      "memory": "1GiB"
+    },
+    "mysql": {
+      "cpus": 1,
+      "memory": "1GiB"
+    },
+    "elasticsearch": {
+      "cpus": 1,
+      "memory": "1GiB",
+      "heap": "256MiB"
+    }
+  },
+  "script_sha256": "914de09cd95fd6769e207e73cf7058b408ed82c2aad8e123c2323b82914088a8",
+  "scope": "Local native ARM64 build, synthetic catalogue, empty order/review history. Not a production capacity test. Media metadata only; image objects not uploaded."
+}

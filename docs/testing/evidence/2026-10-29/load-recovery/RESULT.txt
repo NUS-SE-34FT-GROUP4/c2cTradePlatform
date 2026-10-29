@@ -1,0 +1,19 @@
+SWE5006 gradual load and recovery test — 29 October 2026
+{'version': 'e73fde73b42956411c95dc7145da6eb29dec778b'}
+Version stable: True
+Exit code: 0
+
+Phase / operation | requests | errors | median ms | P95 ms
+baseline / all | 273 | 0 (0.000%) | 97.80 | 309.97
+baseline / list | 136 | 0 (0.000%) | 108.25 | 314.48
+baseline / search | 137 | 0 (0.000%) | 83.64 | 289.38
+pressure / all | 22087 | 0 (0.000%) | 371.25 | 1068.09
+pressure / list | 11048 | 0 (0.000%) | 386.12 | 1093.96
+pressure / search | 11039 | 0 (0.000%) | 358.62 | 1037.15
+recovery / all | 877 | 0 (0.000%) | 22.87 | 57.87
+recovery / list | 437 | 0 (0.000%) | 24.45 | 66.59
+recovery / search | 440 | 0 (0.000%) | 21.89 | 48.87
+
+New gradual read-only workload; not a rerun of the historical independent constant-VU starts. No 200-VU or volume-test claim.
+The experiment does not establish maximum sustained capacity, a failure threshold or long-duration reliability.
+Security remediation and isolated-dataset volume validation are separate activities.

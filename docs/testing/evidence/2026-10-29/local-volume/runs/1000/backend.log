@@ -1,0 +1,128 @@
+backend-1  | 
+backend-1  |   .   ____          _            __ _ _
+backend-1  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+backend-1  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+backend-1  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+backend-1  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+backend-1  |  =========|_|==============|___/=/_/_/_/
+backend-1  |  :: Spring Boot ::                (v3.2.3)
+backend-1  | 
+backend-1  | 2026-10-29 04:44:58 - Starting C2cSecTradeApplication v0.0.1-SNAPSHOT using Java 17.0.21 with PID 1 (/app/app.jar started by appuser in /app)
+backend-1  | 2026-10-29 04:44:58 - The following 1 profile is active: "docker"
+backend-1  | 2026-10-29 04:44:59 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:44:59 - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:44:59 - Finished Spring Data repository scanning in 7 ms. Found 0 Elasticsearch repository interfaces.
+backend-1  | 2026-10-29 04:44:59 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:44:59 - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:44:59 - Finished Spring Data repository scanning in 1 ms. Found 0 Reactive Elasticsearch repository interfaces.
+backend-1  | 2026-10-29 04:44:59 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:44:59 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:44:59 - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+backend-1  | 2026-10-29 04:44:59 - Tomcat initialized with port 8080 (http)
+backend-1  | 2026-10-29 04:44:59 - Starting service [Tomcat]
+backend-1  | 2026-10-29 04:44:59 - Starting Servlet engine: [Apache Tomcat/10.1.19]
+backend-1  | 2026-10-29 04:44:59 - Initializing Spring embedded WebApplicationContext
+backend-1  | 2026-10-29 04:44:59 - Root WebApplicationContext: initialization completed in 839 ms
+backend-1  | 2026-10-29 04:45:00 - Created MinIO bucket c2c-sectrade
+backend-1  | 2026-10-29 04:45:00 - Exposing 3 endpoint(s) beneath base path '/actuator'
+backend-1  | 2026-10-29 04:45:00 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@6406b84d, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5274acd1, org.springframework.security.web.context.SecurityContextHolderFilter@63c163e1, org.springframework.security.web.header.HeaderWriterFilter@360d3f47, org.springframework.web.filter.CorsFilter@5fd5d6d1, org.springframework.security.web.authentication.logout.LogoutFilter@513bec8c, sg.edu.nus.iss.c2csectrade.security.JwtAuthenticationFilter@6e517c9e, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@40ebb56, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5b2fc2c0, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5e643402, org.springframework.security.web.session.SessionManagementFilter@99af41d, org.springframework.security.web.access.ExceptionTranslationFilter@7c3ae369, org.springframework.security.web.access.intercept.AuthorizationFilter@4a65c40]
+backend-1  | 2026-10-29 04:45:00 - Tomcat started on port 8080 (http) with context path ''
+backend-1  | 2026-10-29 04:45:00 - Starting...
+backend-1  | 2026-10-29 04:45:00 - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@99948fe]]
+backend-1  | 2026-10-29 04:45:00 - Started.
+backend-1  | 2026-10-29 04:45:00 - Started C2cSecTradeApplication in 2.463 seconds (process running for 2.751)
+backend-1  | 2026-10-29 04:45:00 - HikariPool-1 - Starting...
+backend-1  | 2026-10-29 04:45:00 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4a561f7d
+backend-1  | 2026-10-29 04:45:00 - HikariPool-1 - Start completed.
+backend-1  | 2026-10-29 04:45:01 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+backend-1  | 2026-10-29 04:45:01 - Initializing Servlet 'dispatcherServlet'
+backend-1  | 2026-10-29 04:45:01 - Completed initialization in 1 ms
+backend-1  | 2026-10-29 04:45:02 - Indexed 12 catalogue listings in Elasticsearch
+backend-1  | 2026-10-29 04:45:02 - Stopping...
+backend-1  | 2026-10-29 04:45:02 - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@99948fe]]
+backend-1  | 2026-10-29 04:45:02 - Stopped.
+backend-1  | 2026-10-29 04:45:02 - HikariPool-1 - Shutdown initiated...
+backend-1  | 2026-10-29 04:45:02 - HikariPool-1 - Shutdown completed.
+backend-1  | 
+backend-1  |   .   ____          _            __ _ _
+backend-1  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+backend-1  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+backend-1  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+backend-1  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+backend-1  |  =========|_|==============|___/=/_/_/_/
+backend-1  |  :: Spring Boot ::                (v3.2.3)
+backend-1  | 
+backend-1  | 2026-10-29 04:45:03 - Starting C2cSecTradeApplication v0.0.1-SNAPSHOT using Java 17.0.21 with PID 1 (/app/app.jar started by appuser in /app)
+backend-1  | 2026-10-29 04:45:03 - The following 1 profile is active: "docker"
+backend-1  | 2026-10-29 04:45:04 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:45:04 - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:45:04 - Finished Spring Data repository scanning in 7 ms. Found 0 Elasticsearch repository interfaces.
+backend-1  | 2026-10-29 04:45:04 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:45:04 - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:45:04 - Finished Spring Data repository scanning in 1 ms. Found 0 Reactive Elasticsearch repository interfaces.
+backend-1  | 2026-10-29 04:45:04 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:45:04 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:45:04 - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+backend-1  | 2026-10-29 04:45:04 - Tomcat initialized with port 8080 (http)
+backend-1  | 2026-10-29 04:45:04 - Starting service [Tomcat]
+backend-1  | 2026-10-29 04:45:04 - Starting Servlet engine: [Apache Tomcat/10.1.19]
+backend-1  | 2026-10-29 04:45:04 - Initializing Spring embedded WebApplicationContext
+backend-1  | 2026-10-29 04:45:04 - Root WebApplicationContext: initialization completed in 1080 ms
+backend-1  | 2026-10-29 04:45:05 - Exposing 3 endpoint(s) beneath base path '/actuator'
+backend-1  | 2026-10-29 04:45:05 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7369208e, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7ba623d1, org.springframework.security.web.context.SecurityContextHolderFilter@4a977146, org.springframework.security.web.header.HeaderWriterFilter@6addfa22, org.springframework.web.filter.CorsFilter@2d5435d4, org.springframework.security.web.authentication.logout.LogoutFilter@99af41d, sg.edu.nus.iss.c2csectrade.security.JwtAuthenticationFilter@4005e485, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@402c415e, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4e322108, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6dbdbb69, org.springframework.security.web.session.SessionManagementFilter@1f229c40, org.springframework.security.web.access.ExceptionTranslationFilter@2eb9c7ad, org.springframework.security.web.access.intercept.AuthorizationFilter@28941a68]
+backend-1  | 2026-10-29 04:45:05 - Tomcat started on port 8080 (http) with context path ''
+backend-1  | 2026-10-29 04:45:05 - Starting...
+backend-1  | 2026-10-29 04:45:05 - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@9e4388d]]
+backend-1  | 2026-10-29 04:45:05 - Started.
+backend-1  | 2026-10-29 04:45:05 - Started C2cSecTradeApplication in 2.835 seconds (process running for 3.133)
+backend-1  | 2026-10-29 04:45:05 - HikariPool-1 - Starting...
+backend-1  | 2026-10-29 04:45:06 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5ae22651
+backend-1  | 2026-10-29 04:45:06 - HikariPool-1 - Start completed.
+backend-1  | 2026-10-29 04:45:06 - Indexed 100 catalogue listings in Elasticsearch
+backend-1  | 2026-10-29 04:45:06 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+backend-1  | 2026-10-29 04:45:06 - Initializing Servlet 'dispatcherServlet'
+backend-1  | 2026-10-29 04:45:06 - Completed initialization in 0 ms
+backend-1  | 2026-10-29 04:46:04 - Stopping...
+backend-1  | 2026-10-29 04:46:04 - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@9e4388d]]
+backend-1  | 2026-10-29 04:46:04 - Stopped.
+backend-1  | 2026-10-29 04:46:05 - HikariPool-1 - Shutdown initiated...
+backend-1  | 2026-10-29 04:46:05 - HikariPool-1 - Shutdown completed.
+backend-1  | 
+backend-1  |   .   ____          _            __ _ _
+backend-1  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+backend-1  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+backend-1  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+backend-1  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+backend-1  |  =========|_|==============|___/=/_/_/_/
+backend-1  |  :: Spring Boot ::                (v3.2.3)
+backend-1  | 
+backend-1  | 2026-10-29 04:46:05 - Starting C2cSecTradeApplication v0.0.1-SNAPSHOT using Java 17.0.21 with PID 1 (/app/app.jar started by appuser in /app)
+backend-1  | 2026-10-29 04:46:05 - The following 1 profile is active: "docker"
+backend-1  | 2026-10-29 04:46:06 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:46:06 - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:46:06 - Finished Spring Data repository scanning in 7 ms. Found 0 Elasticsearch repository interfaces.
+backend-1  | 2026-10-29 04:46:06 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:46:06 - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:46:06 - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
+backend-1  | 2026-10-29 04:46:06 - Multiple Spring Data modules found, entering strict repository configuration mode
+backend-1  | 2026-10-29 04:46:06 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+backend-1  | 2026-10-29 04:46:06 - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+backend-1  | 2026-10-29 04:46:06 - Tomcat initialized with port 8080 (http)
+backend-1  | 2026-10-29 04:46:06 - Starting service [Tomcat]
+backend-1  | 2026-10-29 04:46:06 - Starting Servlet engine: [Apache Tomcat/10.1.19]
+backend-1  | 2026-10-29 04:46:06 - Initializing Spring embedded WebApplicationContext
+backend-1  | 2026-10-29 04:46:06 - Root WebApplicationContext: initialization completed in 987 ms
+backend-1  | 2026-10-29 04:46:07 - Exposing 3 endpoint(s) beneath base path '/actuator'
+backend-1  | 2026-10-29 04:46:07 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@15a5cc6e, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4a65c40, org.springframework.security.web.context.SecurityContextHolderFilter@68fc1e7f, org.springframework.security.web.header.HeaderWriterFilter@67730dab, org.springframework.web.filter.CorsFilter@4fc84c92, org.springframework.security.web.authentication.logout.LogoutFilter@b859355, sg.edu.nus.iss.c2csectrade.security.JwtAuthenticationFilter@2c674d58, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@496e0f9d, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6b468710, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5f7bd970, org.springframework.security.web.session.SessionManagementFilter@5dc7881d, org.springframework.security.web.access.ExceptionTranslationFilter@12051d38, org.springframework.security.web.access.intercept.AuthorizationFilter@2396408a]
+backend-1  | 2026-10-29 04:46:08 - Tomcat started on port 8080 (http) with context path ''
+backend-1  | 2026-10-29 04:46:08 - Starting...
+backend-1  | 2026-10-29 04:46:08 - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@26bbbe9e]]
+backend-1  | 2026-10-29 04:46:08 - Started.
+backend-1  | 2026-10-29 04:46:08 - Started C2cSecTradeApplication in 2.626 seconds (process running for 2.876)
+backend-1  | 2026-10-29 04:46:08 - HikariPool-1 - Starting...
+backend-1  | 2026-10-29 04:46:08 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2b30b25f
+backend-1  | 2026-10-29 04:46:08 - HikariPool-1 - Start completed.
+backend-1  | 2026-10-29 04:46:08 - Indexed 1000 catalogue listings in Elasticsearch
+backend-1  | 2026-10-29 04:46:09 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+backend-1  | 2026-10-29 04:46:09 - Initializing Servlet 'dispatcherServlet'
+backend-1  | 2026-10-29 04:46:09 - Completed initialization in 1 ms

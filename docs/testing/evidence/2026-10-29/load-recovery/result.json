@@ -1,0 +1,143 @@
+{
+  "version_before": {
+    "version": "e73fde73b42956411c95dc7145da6eb29dec778b"
+  },
+  "version_after": {
+    "version": "e73fde73b42956411c95dc7145da6eb29dec778b"
+  },
+  "version_stable": true,
+  "exit_code": 0,
+  "started": "2026-10-29T04:12:31.622541+00:00",
+  "ended": "2026-10-29T04:18:54.477297+00:00",
+  "results": [
+    {
+      "phase": "baseline",
+      "operation": "all",
+      "requests": 273,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 97.798333,
+      "p95_ms": 309.96980859999996,
+      "max_ms": 457.223041
+    },
+    {
+      "phase": "baseline",
+      "operation": "list",
+      "requests": 136,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 108.249979,
+      "p95_ms": 314.48237525,
+      "max_ms": 457.223041
+    },
+    {
+      "phase": "baseline",
+      "operation": "search",
+      "requests": 137,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 83.635958,
+      "p95_ms": 289.37674159999995,
+      "max_ms": 354.250708
+    },
+    {
+      "phase": "pressure",
+      "operation": "all",
+      "requests": 22087,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 371.250708,
+      "p95_ms": 1068.0905214000002,
+      "max_ms": 4173.977543
+    },
+    {
+      "phase": "pressure",
+      "operation": "list",
+      "requests": 11048,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 386.11764600000004,
+      "p95_ms": 1093.9599255499998,
+      "max_ms": 4173.977543
+    },
+    {
+      "phase": "pressure",
+      "operation": "search",
+      "requests": 11039,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 358.6205,
+      "p95_ms": 1037.1532128000006,
+      "max_ms": 4149.242585
+    },
+    {
+      "phase": "recovery",
+      "operation": "all",
+      "requests": 877,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 22.8745,
+      "p95_ms": 57.8743166,
+      "max_ms": 108.900333
+    },
+    {
+      "phase": "recovery",
+      "operation": "list",
+      "requests": 437,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 24.450167,
+      "p95_ms": 66.58664939999998,
+      "max_ms": 108.900333
+    },
+    {
+      "phase": "recovery",
+      "operation": "search",
+      "requests": 440,
+      "errors": 0,
+      "error_percent": 0.0,
+      "median_ms": 21.8864585,
+      "p95_ms": 48.87090209999998,
+      "max_ms": 90.409959
+    }
+  ],
+  "thresholds": {
+    "business_errors{phase:baseline}": {
+      "rate<0.01": {
+        "ok": true
+      }
+    },
+    "business_errors{phase:pressure}": {
+      "rate<0.01": {
+        "ok": true
+      }
+    },
+    "read_ms{phase:recovery}": {
+      "med<1000": {
+        "ok": true
+      },
+      "p(95)<2000": {
+        "ok": true
+      }
+    },
+    "business_errors": {
+      "rate<0.05": {
+        "ok": true
+      }
+    },
+    "read_ms{phase:baseline}": {
+      "med<1000": {
+        "ok": true
+      },
+      "p(95)<2000": {
+        "ok": true
+      }
+    },
+    "business_errors{phase:recovery}": {
+      "rate<0.01": {
+        "ok": true
+      }
+    }
+  },
+  "note": "New gradual read-only workload; not a rerun of the historical independent constant-VU starts. No 200-VU or volume-test claim."
+}
