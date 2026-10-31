@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram id="review-analysis-class" name="Post a Review - analysis class model">
+    <mxGraphModel page="1" pageWidth="1000" pageHeight="1050" grid="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1" value="Post a Review - analysis class model" style="text;html=1;align=left;verticalAlign=top;fontSize=27;fontFamily=Arial;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="24" width="940" height="35.1" />
+        </mxCell>
+        <mxCell id="c2" value="Conceptual BCE model. Analysis objects describe responsibilities, not Java class names." style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="65" width="940" height="20.8" />
+        </mxCell>
+        <mxCell id="b" value="&lt;b&gt;&amp;lt;&amp;lt;boundary&amp;gt;&amp;gt;&lt;br&gt;ReviewForm&lt;/b&gt;&lt;hr&gt;+ capture ratings and comment&lt;br&gt;+ choose purchased item&lt;br&gt;+ show result / validation error" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=19;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="45" y="125" width="300" height="162.10000000000002" />
+        </mxCell>
+        <mxCell id="c" value="&lt;b&gt;&amp;lt;&amp;lt;control&amp;gt;&amp;gt;&lt;br&gt;PostReviewControl&lt;/b&gt;&lt;hr&gt;+ check buyer and completion&lt;br&gt;+ reject repeated review&lt;br&gt;+ validate selected item and ratings&lt;br&gt;+ record review / mask identity" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=19;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="535" y="125" width="420" height="186.8" />
+        </mxCell>
+        <mxCell id="o" value="&lt;b&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;br&gt;Order&lt;/b&gt;&lt;hr&gt;orderId; buyer; seller; status&lt;br&gt;+ isCompleted()&lt;br&gt;+ belongsTo(buyer)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=19;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="45" y="500" width="265" height="162.10000000000002" />
+        </mxCell>
+        <mxCell id="i" value="&lt;b&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;br&gt;PurchasedItem&lt;/b&gt;&lt;hr&gt;productId; orderId&lt;br&gt;+ matches(selectedProduct)" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=19;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="365" y="500" width="265" height="137.4" />
+        </mxCell>
+        <mxCell id="r" value="&lt;b&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;br&gt;Review&lt;/b&gt;&lt;hr&gt;ratings; comment; images&lt;br&gt;anonymous; buyer; seller&lt;br&gt;+ recordFor(order, item)&lt;br&gt;+ publicRepresentation()" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=19;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="685" y="500" width="270" height="186.8" />
+        </mxCell>
+        <mxCell id="c3" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" source="b" target="c">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="c" target="o">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="745.0" y="405.9" />
+              <mxPoint x="177.5" y="405.9" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="c" target="i">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="745.0" y="405.9" />
+              <mxPoint x="497.5" y="405.9" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c6" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;" source="c" target="r">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="745.0" y="405.9" />
+              <mxPoint x="820.0" y="405.9" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" value="Domain relations: one Order contains 1..* PurchasedItems. One Order has 0..1 Review. Each Review rates&lt;br&gt;exactly one purchased Product and the order seller. Buyer and Seller are roles of User. Associations use IDs in&lt;br&gt;the implemented design." style="shape=note;html=1;whiteSpace=wrap;size=12;align=left;verticalAlign=top;spacing=10;fillColor=#FFF8DE;strokeColor=#AE994F;fontFamily=Arial;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="45" y="810" width="910" height="90.2" />
+        </mxCell>
+        <mxCell id="c8" value="UC20 | Transition: S0 boundary, S1 entities, S2 control. Conceptual operations move to services/mappers." style="text;html=1;align=left;verticalAlign=top;fontSize=14;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="1001" width="940" height="18.2" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

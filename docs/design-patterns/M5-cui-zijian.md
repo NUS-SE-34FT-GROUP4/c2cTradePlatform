@@ -53,7 +53,13 @@ against the real Spring context and MySQL mappings.
 
 ## Diagrams
 
-The current Sprint 4 deliverable is this text. The before/after class and sequence diagrams,
-plus the separate “post a review” use-case analysis/design diagrams, are explicitly deferred
-to Sprint 5 issue #100. Native drawio files and PNG exports remain required there; this
-one-pager does not claim that the UML pack is complete.
+The Sprint 5 UML pack for #100 now includes all eight views with native draw.io sources
+beside their PNG exports:
+
+- [Recommendation Factory before/after class and sequence models](diagrams/m5-recommendation/README.md), for final report section 3.5.5.
+- [Post a Review analysis/design class and sequence models](diagrams/m5-review/README.md), for final report section 3.4.5, with S0-S2 traceability and the reason S3 is not applied.
+
+The current implementation snapshot is `e73fde73b42956411c95dc7145da6eb29dec778b`;
+the before snapshot is `fdea6498fc4c784385ffdaaca45b3f80c1ec356c`.
+These are the same diagrams placed in the shared final report. A
+[file manifest](diagrams/m5-uml-manifest.json) records hashes for all sixteen assets.

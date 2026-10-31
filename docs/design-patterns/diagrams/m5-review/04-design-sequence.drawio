@@ -1,0 +1,235 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram id="review-design-sequence" name="Post a Review - design sequence">
+    <mxGraphModel page="1" pageWidth="1100" pageHeight="1510" grid="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1" value="Post a Review - design sequence" style="text;html=1;align=left;verticalAlign=top;fontSize=27;fontFamily=Arial;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="24" width="1040" height="35.1" />
+        </mxCell>
+        <mxCell id="c2" value="Main submit path after optional photo upload; mapped errors and concurrent duplicate handling are explicit." style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="65" width="1040" height="20.8" />
+        </mxCell>
+        <mxCell id="l0" value="&lt;b&gt;ReviewView&lt;/b&gt;&lt;hr&gt;" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=17;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="14" y="105" width="152" height="60.0" />
+        </mxCell>
+        <mxCell id="c3" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="90" y="165.0" />
+            <mxPoint as="targetPoint" x="90" y="1310" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l1" value="&lt;b&gt;Review&lt;br&gt;Controller&lt;/b&gt;&lt;hr&gt;" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=17;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="204" y="105" width="152" height="88.0" />
+        </mxCell>
+        <mxCell id="c4" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="280" y="193.0" />
+            <mxPoint as="targetPoint" x="280" y="1310" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l2" value="&lt;b&gt;Review&lt;br&gt;Service&lt;/b&gt;&lt;hr&gt;" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=17;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="409" y="105" width="152" height="88.0" />
+        </mxCell>
+        <mxCell id="c5" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="193.0" />
+            <mxPoint as="targetPoint" x="485" y="1310" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l3" value="&lt;b&gt;MyBatis&lt;br&gt;mappers&lt;/b&gt;&lt;hr&gt;" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=17;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="649" y="105" width="152" height="88.0" />
+        </mxCell>
+        <mxCell id="c6" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="725" y="193.0" />
+            <mxPoint as="targetPoint" x="725" y="1310" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l4" value="&lt;b&gt;MySQL&lt;/b&gt;&lt;hr&gt;" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=10;fontFamily=Arial;fontSize=17;fillColor=#EAF0F6;strokeColor=#526477;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="924" y="105" width="152" height="60.0" />
+        </mxCell>
+        <mxCell id="c7" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=none;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="1000" y="165.0" />
+            <mxPoint as="targetPoint" x="1000" y="1310" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c8" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="90" y="240" />
+            <mxPoint as="targetPoint" x="280" y="240" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c9" value="1. POST /api/reviews&lt;br&gt;(ReviewRequest)" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="98" y="195" width="174" height="44.2" />
+        </mxCell>
+        <mxCell id="c10" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="280" y="285" />
+            <mxPoint as="targetPoint" x="725" y="285" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c11" value="2. UserMapper.selectByUsername(auth.name)" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="288" y="261" width="429" height="22.1" />
+        </mxCell>
+        <mxCell id="c12" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="725" y="355" />
+            <mxPoint as="targetPoint" x="280" y="355" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c13" value="buyerId" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="288" y="331" width="429" height="22.1" />
+        </mxCell>
+        <mxCell id="c14" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="280" y="425" />
+            <mxPoint as="targetPoint" x="485" y="425" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c15" value="3. createReview(buyerId,&lt;br&gt;request)" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="288" y="380" width="189" height="44.2" />
+        </mxCell>
+        <mxCell id="c16" value="transaction [createReview]" style="shape=umlFrame;html=1;whiteSpace=wrap;fillColor=none;strokeColor=#8392A3;fontFamily=Arial;fontSize=16;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="365" y="460" width="705" height="730" />
+        </mxCell>
+        <mxCell id="c17" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="530" />
+            <mxPoint as="targetPoint" x="725" y="530" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c18" value="4. OrderMapper:&lt;br&gt;selectById(orderId)" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="493" y="485" width="224" height="44.2" />
+        </mxCell>
+        <mxCell id="c19" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="600" />
+            <mxPoint as="targetPoint" x="485" y="626" />
+            <Array as="points">
+              <mxPoint x="518" y="600" />
+              <mxPoint x="518" y="626" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c20" value="5. Check owner and COMPLETED" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="529" y="576" width="549" height="22.1" />
+        </mxCell>
+        <mxCell id="c21" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="685" />
+            <mxPoint as="targetPoint" x="725" y="685" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c22" value="6. ReviewMapper:&lt;br&gt;selectByOrderId" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="493" y="640" width="224" height="44.2" />
+        </mxCell>
+        <mxCell id="c23" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="760" />
+            <mxPoint as="targetPoint" x="485" y="786" />
+            <Array as="points">
+              <mxPoint x="518" y="760" />
+              <mxPoint x="518" y="786" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c24" value="7. Validate ratings / comment / image URLs" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="529" y="736" width="549" height="22.1" />
+        </mxCell>
+        <mxCell id="c25" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="850" />
+            <mxPoint as="targetPoint" x="725" y="850" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c26" value="8. Load purchased lines;&lt;br&gt;choose product" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="493" y="805" width="224" height="44.2" />
+        </mxCell>
+        <mxCell id="c27" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="920" />
+            <mxPoint as="targetPoint" x="485" y="946" />
+            <Array as="points">
+              <mxPoint x="518" y="920" />
+              <mxPoint x="518" y="946" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c28" value="9. Build Review; sanitise and serialise images" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="529" y="896" width="549" height="22.1" />
+        </mxCell>
+        <mxCell id="c29" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="1015" />
+            <mxPoint as="targetPoint" x="725" y="1015" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c30" value="10. Insert review" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="493" y="991" width="224" height="22.1" />
+        </mxCell>
+        <mxCell id="c31" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="725" y="1075" />
+            <mxPoint as="targetPoint" x="1000" y="1075" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c32" value="INSERT; UNIQUE(order_id)" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="733" y="1051" width="259" height="22.1" />
+        </mxCell>
+        <mxCell id="c33" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="1155" />
+            <mxPoint as="targetPoint" x="725" y="1155" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c34" value="11. Read saved review;&lt;br&gt;enrich public fields" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="493" y="1110" width="224" height="44.2" />
+        </mxCell>
+        <mxCell id="c35" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="485" y="1230" />
+            <mxPoint as="targetPoint" x="280" y="1230" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c36" value="12. Public&lt;br&gt;ReviewResponse" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="288" y="1185" width="189" height="44.2" />
+        </mxCell>
+        <mxCell id="c37" value="" edge="1" parent="1" style="html=1;rounded=0;strokeColor=#526477;fontFamily=Arial;fontSize=17;endArrow=open;dashed=1;">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="280" y="1300" />
+            <mxPoint as="targetPoint" x="90" y="1300" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c38" value="13. HTTP 201&lt;br&gt;{success, data}" style="text;html=1;align=left;verticalAlign=top;fontSize=17;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="98" y="1255" width="174" height="44.2" />
+        </mxCell>
+        <mxCell id="c39" value="Failure exits: invalid input -&amp;gt; 400; invalid state or concurrent duplicate -&amp;gt; 409; wrong buyer -&amp;gt; 403. DuplicateKeyException is translated to&lt;br&gt;IllegalStateException. Runtime exceptions roll back review creation. Commit completes before the caller receives a successful return." style="shape=note;html=1;whiteSpace=wrap;size=12;align=left;verticalAlign=top;spacing=10;fillColor=#FFF8DE;strokeColor=#AE994F;fontFamily=Arial;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="35" y="1330" width="1030" height="61.6" />
+        </mxCell>
+        <mxCell id="c40" value="S0: HTTP + DTO boundary. S1: mapper I/O. S2: service transaction. S3 is not used: order state is read only." style="text;html=1;align=left;verticalAlign=top;fontSize=14;fontFamily=Arial;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="1461" width="1040" height="18.2" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
