@@ -1,0 +1,16 @@
+SWE5006 local catalogue volume test — 29 October 2026
+
+Result: all three 2-VU/45-second datasets completed with zero errors; configured median <1s/P95 <2s checks passed. Returned IDs, uniqueness and two media records/product matched all fixtures.
+Products | list P95 ms | selective P95 ms | broad P95 ms | empty P95 ms
+100 | 142.66 | 183.71 | 91.62 | 58.55
+1000 | 56.42 | 61.57 | 123.99 | 15.17
+10000 | 337.41 | 169.48 | 384.38 | 89.85
+
+Method: freshly compiled unchanged source e73fde73b42956411c95dc7145da6eb29dec778b, native ARM64. Backend 2 CPUs/1GiB; MySQL 1 CPU/1GiB; Elasticsearch 1 CPU/1GiB/256MiB heap. Dedicated compose project, local-only API port, no published database port. k6 shares the Docker host.
+Each dataset uses 20 sellers, two synthetic media URLs/product, price 1, stock 10, active status, identical description and timestamps. Selective query always returns 10 products; broad query and list return N; empty query returns zero. Three selective/broad warmup pairs precede each measured run. Initial unused demo listings were removed only inside the isolated local database.
+Requests per size: 100: 86, 1000: 86, 10000: 76. P95 samples per operation are small; repeated trials and randomized dataset order would be needed for robust performance comparisons.
+At 10,000 products the broad response is 10,527,474 bytes. Requests with page=0/1 and size=12 both returned all 10,000 IDs: this endpoint has no server-side pagination contract and ignores these parameters. This is a response-size limitation, not evidence of a bounded page.
+At 10,000 products the startup index rebuild call logged a 1,000ms timeout. The index subsequently contained all 10,000 documents and correctness checks passed. No per-request SQL-fallback warnings were observed in the retained log; per-request path tracing was not enabled. Do not equate the startup timeout with a measured request failure.
+Actual image objects were not uploaded or downloaded. Synthetic empty transaction/review history is not a large-history test. No conclusion about production 175/200-VU capacity follows from this local 2-VU experiment.
+Raw summaries, timelines, synthetic seed SQL, correctness checks, backend logs, container samples, database counters and environment image identities are retained. Local containers were stopped after testing; volumes remain for reproduction.
+The .env file contains locally generated credentials and is intentionally excluded from the evidence archive. Generate fresh local values before reproducing.

@@ -1,0 +1,135 @@
+{
+  "runs": [
+    {
+      "products": 100,
+      "requests": 86,
+      "rps": 1.9017996426415908,
+      "error_rate": 0,
+      "exit_code": 0,
+      "correctness_passed": true,
+      "thresholds_passed": true
+    },
+    {
+      "products": 1000,
+      "requests": 86,
+      "rps": 1.909703060181683,
+      "error_rate": 0,
+      "exit_code": 0,
+      "correctness_passed": true,
+      "thresholds_passed": true
+    },
+    {
+      "products": 10000,
+      "requests": 76,
+      "rps": 1.6659263095058485,
+      "error_rate": 0,
+      "exit_code": 0,
+      "correctness_passed": true,
+      "thresholds_passed": true
+    }
+  ],
+  "metrics": [
+    {
+      "products": 100,
+      "operation": "list",
+      "median_ms": 31.969917,
+      "p95_ms": 142.66,
+      "returned_items": 100,
+      "response_bytes": 95894
+    },
+    {
+      "products": 100,
+      "operation": "selective",
+      "median_ms": 42.83825,
+      "p95_ms": 183.710584,
+      "returned_items": 10,
+      "response_bytes": 10721
+    },
+    {
+      "products": 100,
+      "operation": "broad",
+      "median_ms": 34.559875500000004,
+      "p95_ms": 91.62454344999999,
+      "returned_items": 100,
+      "response_bytes": 105124
+    },
+    {
+      "products": 100,
+      "operation": "empty",
+      "median_ms": 8.6694795,
+      "p95_ms": 58.54514164999997,
+      "returned_items": 0,
+      "response_bytes": 2
+    },
+    {
+      "products": 1000,
+      "operation": "list",
+      "median_ms": 36.595125,
+      "p95_ms": 56.423667,
+      "returned_items": 1000,
+      "response_bytes": 959844
+    },
+    {
+      "products": 1000,
+      "operation": "selective",
+      "median_ms": 28.503167,
+      "p95_ms": 61.570791,
+      "returned_items": 10,
+      "response_bytes": 10741
+    },
+    {
+      "products": 1000,
+      "operation": "broad",
+      "median_ms": 70.24056250000001,
+      "p95_ms": 123.98848749999999,
+      "returned_items": 1000,
+      "response_bytes": 1050974
+    },
+    {
+      "products": 1000,
+      "operation": "empty",
+      "median_ms": 6.8628540000000005,
+      "p95_ms": 15.167612149999998,
+      "returned_items": 0,
+      "response_bytes": 2
+    },
+    {
+      "products": 10000,
+      "operation": "list",
+      "median_ms": 239.67681299999998,
+      "p95_ms": 337.41318575,
+      "returned_items": 10000,
+      "response_bytes": 9617344
+    },
+    {
+      "products": 10000,
+      "operation": "selective",
+      "median_ms": 61.416292,
+      "p95_ms": 169.4822634,
+      "returned_items": 10,
+      "response_bytes": 10761
+    },
+    {
+      "products": 10000,
+      "operation": "broad",
+      "median_ms": 267.4449175,
+      "p95_ms": 384.3844999999999,
+      "returned_items": 10000,
+      "response_bytes": 10527474
+    },
+    {
+      "products": 10000,
+      "operation": "empty",
+      "median_ms": 16.048125,
+      "p95_ms": 89.85028819999994,
+      "returned_items": 0,
+      "response_bytes": 2
+    }
+  ],
+  "resource_sample_counts": {
+    "100": 8,
+    "1000": 8,
+    "10000": 8
+  },
+  "scope": "Local ARM64 Docker, code e73fde73, 2 VUs for 45s at each size; fixed 20 sellers and two media metadata rows/product, empty order/review history. Not production throughput or maximum capacity."
+}

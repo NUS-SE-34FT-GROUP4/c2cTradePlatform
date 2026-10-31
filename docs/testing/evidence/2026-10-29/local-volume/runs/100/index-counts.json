@@ -1,0 +1,14 @@
+[
+  {
+    "health": "yellow",
+    "status": "open",
+    "index": "products",
+    "uuid": "FlE6RzlmQQyBmrQyUHc4sA",
+    "pri": "1",
+    "rep": "1",
+    "docs.count": "100",
+    "docs.deleted": "0",
+    "store.size": "226b",
+    "pri.store.size": "226b"
+  }
+]

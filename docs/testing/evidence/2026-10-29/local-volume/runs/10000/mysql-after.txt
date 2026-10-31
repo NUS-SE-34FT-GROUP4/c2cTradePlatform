@@ -1,0 +1,4 @@
+Bytes_sent	149845484
+Questions	1172
+Slow_queries	0
+Threads_connected	7
