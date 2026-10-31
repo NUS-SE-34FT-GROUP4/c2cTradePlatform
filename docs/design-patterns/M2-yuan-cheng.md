@@ -4,7 +4,7 @@
 
 **Scope:** WP2 listing search and search-index synchronisation
 
-**Code baseline:** `main` at [`672d628`](https://github.com/NUS-SE-34FT-GROUP4/c2cTradePlatform/commit/672d6281572c8044c3b24bb6d68e129da34903a9), checked 23 October 2026.
+**Code baseline:** `main` at [`4b03b5f`](https://github.com/NUS-SE-34FT-GROUP4/c2cTradePlatform/commit/4b03b5f81cdb5013b01b315340e576b153283118), checked 23 October 2026, including merged search-overhead PR #146.
 
 **Deliverables:** this explanation and four UML figures, each with editable draw.io source and a PNG preview.
 
@@ -76,7 +76,7 @@ snapshot, not to pending feature branches.
 | [`service/SearchService.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/SearchService.java), constructor and `search()` | Depends on `ProductSearchQuery`, retrieves authoritative SQL matches first, applies ES ID ordering, handles query exceptions, then converts and highlights DTOs. |
 | [`service/search/ProductSearchCriteria.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/search/ProductSearchCriteria.java) | Application record for keyword, price bounds, condition, location and categories. Normalises blank strings and parses categories. Contains no ES query type. |
 | [`ProductSearchQuery.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/search/ProductSearchQuery.java) | Read-side target interface returning `List<Long>`, not `SearchHits`. |
-| [`ElasticsearchProductSearchQuery.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/search/ElasticsearchProductSearchQuery.java), `buildQuery()` / `search()` | Builds boosted `multi_match` (`name^4`, `category^2`, `description`) and catalogue filters; requests at most 1,000 hits; extracts non-null IDs in score order. |
+| [`ElasticsearchProductSearchQuery.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/search/ElasticsearchProductSearchQuery.java), `buildQuery()` / `search()` | Builds boosted `multi_match` (`name^4`, `category^2`, `description`) and catalogue filters; requests at most 1,000 hits with `_source` limited to `id`; extracts non-null IDs in score order. Filtering and scoring still use the full indexed fields. |
 | [`ProductSearchIndex.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/search/ProductSearchIndex.java) | Write-side target using `Product`, collections and IDs. No ES mapping or index type escapes through this interface. |
 | [`ElasticsearchProductSearchIndex.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/search/ElasticsearchProductSearchIndex.java) | Ensures index mappings, maps and saves searchable products, deletes documents and rebuilds the index. Logs ES runtime failures on the supported write paths. |
 | [`ProductSearchDocument.java`](../../src/main/java/sg/edu/nus/iss/c2csectrade/service/search/ProductSearchDocument.java), `from()` | ES projection for index `products`. Converts seller ID, price to `Double`, available stock and timestamps, alongside searchable fields. MySQL remains canonical. |
@@ -87,12 +87,15 @@ snapshot, not to pending feature branches.
 
 1. `SearchService` obtains SQL matches through `ProductService` and the mapper. This query
    remains authoritative even when Elasticsearch is healthy.
-2. For a nonblank keyword, it calls `ProductSearchQuery.search(criteria)`. The concrete
-   adapter builds the ES query and translates the hits into IDs.
+2. For a nonblank keyword with at least two SQL matches, it calls
+   `ProductSearchQuery.search(criteria)`. Zero or one SQL match needs no ranking and skips
+   ES. The concrete adapter builds the ES query and translates the hits into IDs.
 3. The service reorders only the SQL matches. Extra or duplicate ES IDs cannot add products;
    SQL rows missing from ES are appended in their original SQL order.
 4. If the adapter throws a `RuntimeException`, the service retains the SQL order. Blank
-   keywords bypass ES. DTO conversion and highlighting still apply.
+   keywords also bypass ES. All paths reach `finish()`, which converts DTOs, applies
+   highlighting and logs SQL/media, ES, DTO/highlighting and total elapsed time without
+   logging the query text. The zero/one-result shortcut preserves this processing.
 5. MySQL failures and DTO-conversion failures are outside the ES fallback boundary and
    are not disguised as successful degradation.
 
@@ -152,12 +155,13 @@ where explicitly noted. Native draw.io objects remain editable, including text a
 - **Consistency has limits:** MySQL owns result membership, while a stale/missing index can
   still change ranking quality. Failed index events have no durable retry or outbox.
   Startup rebuild deletes and recreates the index, so it is not a zero-downtime reindex.
-- **No automatic performance claim:** SQL and ES are still sequential. The ES query window
-  is 1,000, while SQL-only matches are appended; the HTTP API is not paginated. Every
-  keyword request retries ES after an outage, with no circuit breaker in this code.
-- **Snapshot boundary:** at `672d628`, keyword searches with zero or one SQL match still
-  call ES and the adapter retrieves full search documents before extracting IDs. The
-  separate search-overhead PR is not treated here as merged main behaviour.
+- **No automatic performance claim:** SQL and ES remain sequential when ranking is needed.
+  The ES query window is 1,000, while SQL-only matches are appended; the HTTP API is not
+  paginated. Keyword requests with at least two SQL matches retry ES after an outage,
+  with no circuit breaker in this code.
+- **Merged optimisation boundary:** PR #146 skips ES for zero/one SQL match, limits ES
+  response `_source` to `id`, and records stage timings. These changes reduce unnecessary
+  work and expose where time is spent; this write-up does not claim a measured P95 gain.
 - **Pattern versus resilience policy:** Adapter isolates the vendor API. SQL fallback,
   membership reconciliation and after-commit coordination are additional application
   policies, not guarantees automatically provided by the pattern.
@@ -169,17 +173,17 @@ performance benchmark, deployment or fault-injection run was executed for this w
 
 | Test file | Relevant assertions |
 |---|---|
-| `service/search/ElasticsearchProductSearchQueryTest.java` | Preserves ES hit order as IDs, builds keyword boosts and filters, enforces the result window, rejects missing keywords. |
+| `service/search/ElasticsearchProductSearchQueryTest.java` | Preserves ES hit order as IDs, builds keyword boosts and filters, enforces the result window and ID-only source filter, rejects missing keywords. |
 | `service/search/ElasticsearchProductSearchIndexTest.java` | Creates mapping before save, rebuild removes stale index, deletes documents, avoids saving inactive listings, tolerates ES write outage. |
 | `service/search/ProductSearchDocumentTest.java` | Maps the canonical product into the search projection. |
 | `service/search/ProductIndexCoordinatorTest.java` | Startup rebuild, committed-product upsert, deletion of missing/delisted products and startup failure tolerance. |
-| `service/SearchServiceTest.java` | SQL membership, ES ordering/fallback/retry, blank keyword bypass, missing/extra/duplicate hits, result-window preservation, SQL/DTO failure propagation and highlighting. |
+| `service/SearchServiceTest.java` | SQL membership, ES ordering/fallback/retry, blank keyword and zero/one-match bypass, missing/extra/duplicate hits, result-window preservation, SQL/DTO failure propagation, highlighting and stage timing output. |
 | `integration/SearchParityIT.java` | Real ES outage/recovery scenario and stale/missing documents against MySQL-backed results. Reading this test is not a claim that it was rerun for these diagrams. |
 
 Implementation milestones: [`1993500`](https://github.com/NUS-SE-34FT-GROUP4/c2cTradePlatform/commit/1993500)
 introduced index synchronisation; [`a07aa75`](https://github.com/NUS-SE-34FT-GROUP4/c2cTradePlatform/commit/a07aa75)
 introduced ranked query integration. The after figures describe the later main baseline,
-including subsequent membership-parity fixes, rather than attributing every improvement
+including subsequent membership-parity fixes and PR #146, rather than attributing every improvement
 to the original Adapter change.
 
 ## 7. Short presentation explanation
